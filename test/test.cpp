@@ -9,7 +9,7 @@ void print_path(fusecpp::fusecpp_entry const& entry)
 
 void do_ls_entry(fusecpp::directory const& dir)
 {
-    for (auto& ptr : dir.get_entries())
+    for (auto& ptr : dir.entries())
         std::cout << __func__ << "(): "
             << (ptr->is_file() ? "FILE" : "DIR")
             << ": " << ptr->path().string() << std::endl;
