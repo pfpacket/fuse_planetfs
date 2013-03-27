@@ -1,0 +1,4 @@
+a.out
+fuse_pnetfs
+*.o
+main.cpp
