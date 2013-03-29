@@ -2,7 +2,6 @@
 #define _FILE_OFFSET_BITS 64
 
 #include <iostream>
-#include <string>
 #include <cstdlib>
 #include <cstring>
 #include <cstdarg>
@@ -37,19 +36,36 @@ static int pnetfs_getattr(char const *path, struct stat *stbuf)
 
 static int pnetfs_mknod(char const *path, mode_t mode, dev_t device)
 {
+    syslog(LOG_INFO, "pnetfs_mknod: creating %s mode=%o", path, mode);
+
     fusecpp::path_type p(path);
-    if (auto file_ptr = fusecpp::search_file(root, path))
+    if (fusecpp::search_file(root, path))
         return -EEXIST;
     auto dir_ptr = fusecpp::search_directory(root, p.parent_path());
     if (!dir_ptr)
         return -ENOENT;
-    syslog(LOG_INFO, "pnetfs_mknod: creating %s mode=%o", p.parent_path().c_str(), mode);
     dir_ptr->create_file(p, mode);
+    return 0;
+}
+
+static int pnetfs_mkdir(const char *path, mode_t mode)
+{
+    syslog(LOG_INFO, "pnetfs_mkdir: creating %s mode=%o dirmode=%o", path, mode, mode | S_IFDIR);
+
+    fusecpp::path_type p(path);
+    if (fusecpp::search_directory(root, p))
+        return -EEXIST;
+    auto dir_ptr = fusecpp::search_directory(root, p.parent_path());
+    if (!dir_ptr)
+        return -ENOENT;
+    dir_ptr->create_directory(p, mode | S_IFDIR);
     return 0;
 }
 
 static int pnetfs_open(char const *path, struct fuse_file_info *fi)
 {
+    syslog(LOG_INFO, "pnetfs_open: opening %s", path);
+
     auto ptr = fusecpp::search_file(root, path);
     if (!ptr)
         return -ENOENT;
@@ -59,6 +75,8 @@ static int pnetfs_open(char const *path, struct fuse_file_info *fi)
 
 static int pnetfs_read(char const *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
+    syslog(LOG_INFO, "pnetfs_read: reading %s size=%u, offset=%lld", path, size, offset);
+
     fusecpp::file *file = reinterpret_cast<fusecpp::file *>(fi->fh);
     size_t file_length = file->data().size();
     if (offset > file_length)
@@ -66,23 +84,34 @@ static int pnetfs_read(char const *path, char *buf, size_t size, off_t offset, s
     if (offset + size > file_length)
         size = file_length - offset;
     std::memcpy(buf, file->data().data() + offset, size);
-    return 0;
+    return size;
 }
 
 static int pnetfs_write(char const *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    return 0;
+    syslog(LOG_INFO, "pnetfs_write: writing %s size=%u, offset=%lld", path, size, offset);
+
+    fusecpp::file *file = reinterpret_cast<fusecpp::file *>(fi->fh);
+    try {
+        file->data().resize(offset + size);
+    } catch (std::exception& e) {
+        return -ENOSPC;
+    }
+    std::memcpy(fusecpp::get_file_data(*file) + offset, buf, size);
+    return size;
 }
 
 static int pnetfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
+    syslog(LOG_INFO, "pnetfs_readdir: reading %s buf=%p, offset=%lld", path, buf, offset);
+
     auto dir = fusecpp::search_directory(root, path);
     if (!dir)
         return -ENOENT;
     filler(buf, ".", NULL, 0);
     filler(buf, "..", NULL, 0);
     for (auto ptr : dir->entries())
-        if (filler(buf, ptr->path().c_str(), NULL, 0))
+        if (filler(buf, ptr->path().filename().c_str(), NULL, 0))
           break;
     return 0;
 }
@@ -93,6 +122,7 @@ int main(int argc, char **argv)
 {
     pnetfs_ops.getattr  = pnetfs_getattr;
     pnetfs_ops.mknod    = pnetfs_mknod;
+    pnetfs_ops.mkdir    = pnetfs_mkdir;
     pnetfs_ops.open     = pnetfs_open;
     pnetfs_ops.read     = pnetfs_read;
     pnetfs_ops.write    = pnetfs_write;

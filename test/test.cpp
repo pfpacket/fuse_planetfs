@@ -18,7 +18,7 @@ void do_ls_entry(fusecpp::directory const& dir)
 int main(int argc, char **argv)
 {
     int exit_code = EXIT_SUCCESS;
-    try {
+//    try {
 
         fusecpp::directory root{"/"};
         print_path(root);
@@ -65,9 +65,9 @@ int main(int argc, char **argv)
         // OK. Now show you the all of entries
         do_ls_entry(*sample_dir);
 
-    } catch (std::exception& e) {
+/*    } catch (std::exception& e) {
         exit_code = EXIT_FAILURE;
         std::cerr << "[-] Exception: " << e.what() << std::endl;
-    }
+    }*/
     return exit_code;
 }
