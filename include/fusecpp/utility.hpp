@@ -12,7 +12,12 @@ namespace fusecpp {
 
 
 // Get head pointer of data from file `f`
-char *get_file_data(file &f)
+char *get_file_data(file& f)
+{
+    return f.data().data();
+}
+
+char const *get_file_data(file const& f)
 {
     return f.data().data();
 }
@@ -31,7 +36,7 @@ shared_ptr<file> file_cast(directory::value_type const& ptr)
 shared_ptr<directory> directory_cast(directory::value_type const& ptr)
 {
     if (!ptr->is_directory())
-        throw std::runtime_error(get_errmsg(detail::fe_file_cast));
+        throw std::runtime_error(get_errmsg(detail::fe_dir_cast));
     return std::static_pointer_cast<directory>(ptr);
 }
 

@@ -3,3 +3,4 @@ fuse_pnetfs
 *.o
 main.cpp
 open
+test.out
