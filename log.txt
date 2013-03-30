@@ -1,0 +1,44 @@
+Mar 31 01:36:03 arch-devm33 fuse_planet[13045]: planet_mkdir: creating /eth mode=775 dirmode=40775
+Mar 31 01:36:03 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth,ptr_cnt=2
+Mar 31 01:36:03 arch-devm33 fuse_planet[13045]: planet_mkdir: creating /eth/ip mode=775 dirmode=40775
+Mar 31 01:36:03 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip,ptr_cnt=2
+Mar 31 01:36:03 arch-devm33 fuse_planet[13045]: planet_mkdir: creating /eth/ip/tcp mode=775 dirmode=40775
+Mar 31 01:36:03 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp,ptr_cnt=2
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth,ptr_cnt=2
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip,ptr_cnt=2
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp,ptr_cnt=2
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_mknod: creating /eth/ip/tcp/74.125.235.247:80 mode=100700
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp/74.125.235.247:80,ptr_cnt=2
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_open: entered, opening /eth/ip/tcp/74.125.235.247:80
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_open: connecting to host=74.125.235.247, port=80
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_open: connection established 74.125.235.247:80 fd=5 opened
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_write: entered
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_write: writing /eth/ip/tcp/74.125.235.247:80 size=71, offset=0 fd=5
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp/74.125.235.247:80,ptr_cnt=2
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_read: reading /eth/ip/tcp/74.125.235.247:80 size=4096, offset=0
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_read: received 4096 bytes
+Mar 31 01:36:05 arch-devm33 fuse_planet[13045]: planet_release: closing fd=5
+Mar 31 01:36:31 arch-devm33 fuse_planet[13045]: planet_getattr: path=/,ptr_cnt=1
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth,ptr_cnt=2
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip,ptr_cnt=2
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp,ptr_cnt=2
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp/74.125.235.247:80,ptr_cnt=2
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_open: entered, opening /eth/ip/tcp/74.125.235.247:80
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_open: connecting to host=74.125.235.247, port=80
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_open: connection established 74.125.235.247:80 fd=5 opened
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_write: entered
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_write: writing /eth/ip/tcp/74.125.235.247:80 size=71, offset=0 fd=5
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp/74.125.235.247:80,ptr_cnt=2
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_read: reading /eth/ip/tcp/74.125.235.247:80 size=4096, offset=0
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_read: received 4096 bytes
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp/74.125.235.247:80,ptr_cnt=2
+Mar 31 01:38:49 arch-devm33 fuse_planet[13045]: planet_release: closing fd=5
+Mar 31 01:42:30 arch-devm33 fuse_planet[13045]: planet_getattr: path=/,ptr_cnt=1
+Mar 31 01:42:34 arch-devm33 fuse_planet[13045]: planet_readdir: reading / buf=0xb54004e0, offset=0
+Mar 31 01:42:34 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth,ptr_cnt=2
+Mar 31 01:42:34 arch-devm33 fuse_planet[13045]: planet_readdir: reading /eth buf=0xb5400530, offset=0
+Mar 31 01:42:34 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip,ptr_cnt=2
+Mar 31 01:42:34 arch-devm33 fuse_planet[13045]: planet_readdir: reading /eth/ip buf=0xb5e00598, offset=0
+Mar 31 01:42:34 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp,ptr_cnt=2
+Mar 31 01:42:34 arch-devm33 fuse_planet[13045]: planet_readdir: reading /eth/ip/tcp buf=0xb6a01090, offset=0
+Mar 31 01:42:34 arch-devm33 fuse_planet[13045]: planet_getattr: path=/eth/ip/tcp/74.125.235.247:80,ptr_cnt=2

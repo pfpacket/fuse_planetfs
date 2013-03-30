@@ -98,25 +98,27 @@ static int planet_open(char const *path, struct fuse_file_info *fi)
 static int planet_read(char const *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
     syslog(LOG_INFO, "planet_read: reading %s size=%u, offset=%lld", path, size, offset);
-
+    
     auto psocket = get_planet_socket(fi);
-    return ::recv(psocket.socket, buf + offset, size, 0);
+    int bytes_received = ::recv(psocket.socket, buf + offset, size, MSG_WAITALL);
+    syslog(LOG_INFO, "planet_read: received %d bytes", bytes_received);
+    return bytes_received;
 }
 
 static int planet_write(char const *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
     syslog(LOG_INFO, "planet_write: entered");
-    int byte_received;
+    int bytes_transferred;
     try {
         auto psocket = get_planet_socket(fi);
         syslog(LOG_INFO, "planet_write: writing %s size=%u, offset=%lld fd=%d", path, size, offset, psocket.socket);
-        byte_received = ::send(psocket.socket, buf + offset, size, 0);
-        if (byte_received < 0)
+        bytes_transferred = ::send(psocket.socket, buf + offset, size, 0);
+        if (bytes_transferred < 0)
             throw std::runtime_error("");
     } catch (std::exception& e) {
         return -EAGAIN;
     }
-    return byte_received;
+    return bytes_transferred;
 }
 
 static int planet_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)

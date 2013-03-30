@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     printf("[*] Connecting to www.google.co.jp ...\n");
     // open system call will connect to the remote host specified in the path
     // open system call with O_CREAT will create the end point to remote host
-    fd = open("./net/eth/ip/74.125.235.247:80", O_CREAT | O_RDWR, S_IRWXU);
+    fd = open("./net/eth/ip/tcp/74.125.235.247:80", O_CREAT | O_RDWR, S_IRWXU);
     if (fd < 0) {
         perror("open");
         return EXIT_FAILURE;
