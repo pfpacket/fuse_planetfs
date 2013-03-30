@@ -1,6 +1,6 @@
 a.out
-fuse_pnetfs
+fuse_planetfs
 *.o
-main.cpp
 open
 test.out
+utils/main.cpp

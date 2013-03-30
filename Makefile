@@ -4,8 +4,8 @@ LDFLAGS    =
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
 LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse
-OBJS       = src/pnetfs.o
-TARGET     = fuse_pnetfs
+OBJS       = src/planet.o
+TARGET     = fuse_planetfs
 
 all: $(TARGET)
 rebuild:  clean all
