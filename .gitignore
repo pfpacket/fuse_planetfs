@@ -4,3 +4,4 @@ fuse_planetfs
 open
 test.out
 utils/main.cpp
+net/
