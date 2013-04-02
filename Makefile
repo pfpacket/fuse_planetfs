@@ -16,6 +16,13 @@ $(TARGET): $(OBJS)
 test.out: test/test.o
 	$(CXX) $(LDFLAGS) -o $@ test/test.o $(LIBS)
 
+mount: $(TARGET)
+	mkdir -p net/
+	./fuse_planetfs -o direct_io net/
+
+umount:
+	fusermount -u net/
+
 .cpp.o: 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 

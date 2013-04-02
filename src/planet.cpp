@@ -66,64 +66,63 @@ static int planet_mkdir(const char *path, mode_t mode)
     return 0;
 }
 
+void do_planet_open(fusecpp::path_type const& path, struct fuse_file_info& fi)
+{
+    planet_handle_t phandle;
+    if (path == "/dns")
+        phandle = handle_mgr.register_op<planet_dns_ops>();
+    else if (path.parent_path() == "/eth/ip/tcp")
+        phandle = handle_mgr.register_op<planet_tcp_client_ops>();
+    else
+        throw std::runtime_error(path.string() + " is not supported");
+    set_planet_handle_to(fi, phandle);
+    handle_mgr[phandle]->open(path, fi);
+}
+
 static int planet_open(char const *path, struct fuse_file_info *fi)
 {
-    syslog(LOG_INFO, "planet_open: entered, opening %s", path);
-
     try {
         if (!fusecpp::search_file(root, path))
             return -ENOENT;
-        fusecpp::path_type p(path);
-        std::string filename = p.filename().string();
-        auto pos = filename.find_first_of(':');
-        std::string host = filename.substr(0, pos), port = filename.substr(pos + 1);
-
-        fi->fh = open_planet_socket(path);
-        auto psocket = get_planet_socket(fi);
-
-        syslog(LOG_INFO, "planet_open: connecting to host=%s, port=%s fd=%d", host.c_str(), port.c_str(), psocket.sock);
-        struct sockaddr_in sin = {AF_INET, htons(atoi(port.c_str())), {0}, {0}};
-        inet_pton(AF_INET, host.c_str(), &sin.sin_addr);
-        if (connect(psocket.sock, reinterpret_cast<struct sockaddr *>(&sin), sizeof(sin)) < 0)
-            throw std::runtime_error(strerror(errno));
-        syslog(LOG_NOTICE, "planet_open: connection established %s:%s fd=%d opened", host.c_str(), port.c_str(), psocket.sock);
+        do_planet_open(path, *fi);
     } catch (std::exception& e) {
-        syslog(LOG_INFO, "planet_open: exception: %s", e.what());
+        syslog(LOG_INFO, "planet_open: %s: exception: %s", path, e.what());
+        handle_mgr.unregister_op(get_planet_handle_from(*fi));
         return -ECONNRESET;
     }
+    syslog(LOG_INFO, "planet_open: %s: opened handle=%d", path, get_planet_handle_from(*fi));
     return 0;
 }
 
 static int planet_read(char const *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    syslog(LOG_INFO, "planet_read: reading %s size=%u, offset=%lld", path, size, offset);
     int bytes_received;
     try {
-        auto psocket = get_planet_socket(fi);
-        bytes_received = ::recv(psocket.sock, buf, size, 0);
+        auto phandle = get_planet_handle_from(*fi);
+        syslog(LOG_INFO, "planet_read: reading %s size=%u, offset=%lld handle=%d", path, size, offset, phandle);
+        bytes_received = handle_mgr[phandle]->read(path, buf, size, offset, *fi);
         if (bytes_received < 0)
             throw std::runtime_error(strerror(errno));
         syslog(LOG_INFO, "planet_read: received %d bytes", bytes_received);
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_read: exception: %s", e.what());
-        return -EIO;
+        bytes_received = -EIO;
     }
     return bytes_received;
 }
 
 static int planet_write(char const *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    syslog(LOG_INFO, "planet_write: entered");
     int bytes_transferred;
     try {
-        auto psocket = get_planet_socket(fi);
-        syslog(LOG_INFO, "planet_write: writing %s size=%u, offset=%lld fd=%d", path, size, offset, psocket.sock);
-        bytes_transferred = ::send(psocket.sock, buf, size, 0);
+        auto phandle = get_planet_handle_from(*fi);
+        syslog(LOG_INFO, "planet_write: writing %s size=%u, offset=%lld handle=%d", path, size, offset, phandle);
+        bytes_transferred = handle_mgr[phandle]->write(path, buf, size, offset, *fi);
         if (bytes_transferred < 0)
             throw std::runtime_error(strerror(errno));
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_write: exception: %s", e.what());
-        return -EAGAIN;
+        bytes_transferred = -EAGAIN;
     }
     return bytes_transferred;
 }
@@ -145,21 +144,29 @@ static int planet_readdir(const char *path, void *buf, fuse_fill_dir_t filler, o
 
 static int planet_release(char const *path, struct fuse_file_info *fi)
 {
-    auto psocket = get_planet_socket(fi);
-    syslog(LOG_INFO, "planet_release: closing fd=%d", psocket.sock);
-    ::close(get_planet_socket(fi).sock);
-    handle_mapper.erase(get_planet_handle(fi));
-    return 0;
+    int ret;
+    planet_handle_t phandle = get_planet_handle_from(*fi);
+    try {
+        syslog(LOG_INFO, "planet_release: %s closed handle=%d", path, phandle);
+        ret = handle_mgr[phandle]->release(path, *fi);
+    } catch (...) {
+        ret = -EIO;
+    }
+    handle_mgr.unregister_op(phandle);
+    return ret;
 }
 
 void planetfs_init()
 {
+    // Create /net/eth/ip/tcp
     root.create_directory("/eth");
     if (auto dir_eth = fusecpp::search_directory(root, "/eth")) {
         dir_eth->create_directory("/eth/ip");
         if (auto dir_ip = fusecpp::search_directory(root, "/eth/ip"))
             dir_ip->create_directory("/eth/ip/tcp");
     }
+    // Create /net/dns
+    root.create_file("/dns", S_IFREG | S_IRWXU);
 }
 
 static struct fuse_operations planet_ops{};
@@ -176,5 +183,6 @@ int main(int argc, char **argv)
     planet_ops.readdir  = planet_readdir;
     planet_ops.release  = planet_release;
     openlog("fuse_planet", LOG_CONS | LOG_PID, LOG_USER);
+    syslog(LOG_INFO, "planetfs new handle version started");
     return fuse_main(argc, argv, &planet_ops, NULL);
 }

@@ -1,7 +1,7 @@
-//
-// TCP connection sample program
-//  explaining the way to use planetfs
-//
+/*
+ *  TCP connection sample program
+ *   explaining the way to use planetfs
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
