@@ -22,7 +22,7 @@ static int planet_getattr(char const *path, struct stat *stbuf)
 {
     int res = 0;
 
-    memset(stbuf, 0, sizeof(struct stat));
+    std::memset(stbuf, 0, sizeof(struct stat));
     if (auto ptr = fusecpp::search_entry(root, path)) {
         syslog(LOG_INFO, "planet_getattr: path=%s,ptr_cnt=%ld", path, ptr.use_count());
         stbuf->st_nlink = ptr.use_count();
@@ -101,8 +101,6 @@ static int planet_read(char const *path, char *buf, size_t size, off_t offset, s
         auto phandle = get_planet_handle_from(*fi);
         syslog(LOG_INFO, "planet_read: reading %s size=%u, offset=%lld handle=%d", path, size, offset, phandle);
         bytes_received = handle_mgr[phandle]->read(path, buf, size, offset, *fi);
-        if (bytes_received < 0)
-            throw std::runtime_error(strerror(errno));
         syslog(LOG_INFO, "planet_read: received %d bytes", bytes_received);
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_read: exception: %s", e.what());
@@ -118,8 +116,6 @@ static int planet_write(char const *path, const char *buf, size_t size, off_t of
         auto phandle = get_planet_handle_from(*fi);
         syslog(LOG_INFO, "planet_write: writing %s size=%u, offset=%lld handle=%d", path, size, offset, phandle);
         bytes_transferred = handle_mgr[phandle]->write(path, buf, size, offset, *fi);
-        if (bytes_transferred < 0)
-            throw std::runtime_error(strerror(errno));
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_write: exception: %s", e.what());
         bytes_transferred = -EAGAIN;

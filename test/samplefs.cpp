@@ -48,7 +48,7 @@ static int pnetfs_mknod(char const *path, mode_t mode, dev_t device)
     return 0;
 }
 
-static int pnetfs_mkdir(const char *path, mode_t mode)
+static int pnetfs_mkdir(char const *path, mode_t mode)
 {
     syslog(LOG_INFO, "pnetfs_mkdir: creating %s mode=%o dirmode=%o", path, mode, mode | S_IFDIR);
 
@@ -60,6 +60,16 @@ static int pnetfs_mkdir(const char *path, mode_t mode)
         return -ENOENT;
     dir_ptr->create_directory(p, mode | S_IFDIR);
     return 0;
+}
+
+static int pnetfs_unlink(char const *path)
+{
+    fusecpp::path_type p(path);
+    if (auto ptr = fusecpp::search_directory(root, p.parent_path())) {
+        ptr->remove_entry(path);
+        return 0;
+    }
+    return -ENOENT;
 }
 
 static int pnetfs_open(char const *path, struct fuse_file_info *fi)
@@ -123,6 +133,7 @@ int main(int argc, char **argv)
     pnetfs_ops.getattr  = pnetfs_getattr;
     pnetfs_ops.mknod    = pnetfs_mknod;
     pnetfs_ops.mkdir    = pnetfs_mkdir;
+    pnetfs_ops.unlink   = pnetfs_unlink;
     pnetfs_ops.open     = pnetfs_open;
     pnetfs_ops.read     = pnetfs_read;
     pnetfs_ops.write    = pnetfs_write;

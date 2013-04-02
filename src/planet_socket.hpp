@@ -29,6 +29,11 @@ class planet_tcp_client_ops : public planet_operations {
     std::string host_;
     std::vector<std::string> resolved_names_;
 public:
+    virtual ~planet_tcp_client_ops()
+    {
+        syslog(LOG_INFO, "planet_tcp_client_ops: dtor called fd=%d", fd_);
+    }
+
     int open(fusecpp::path_type const& path, struct fuse_file_info& fi)
     {
         fd_ = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -64,6 +69,7 @@ public:
 class planet_dns_ops : public planet_operations {
     std::string hostname_;
     std::vector<std::string> resolved_names_;
+
     int resolve(std::string const& hostname, int family)
     {
         struct addrinfo hints = {}, *result;
@@ -87,6 +93,11 @@ class planet_dns_ops : public planet_operations {
     }
 
 public:
+    virtual ~planet_dns_ops()
+    {
+        syslog(LOG_INFO, "planet_dns_ops: dtor called target=%s", hostname_.c_str());
+    }
+
     int open(fusecpp::path_type const& path, struct fuse_file_info& fi)
     {
         return 0;
@@ -108,8 +119,19 @@ public:
 
     int write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi)
     {
-        hostname_ = buf;
-        resolve(hostname_, AF_INET);
+        std::string request = buf;
+        auto pos = request.find_first_of(' ');
+        if (pos == std::string::npos)
+            return -EINVAL;
+        std::string opecode = request.substr(0, pos), hostname_ = request.substr(pos + 1);
+        syslog(LOG_INFO, "planet_dns_ops: write: opecode=%s / hostname=%s", opecode.c_str(), hostname_.c_str());
+
+        int family;
+        if (opecode == "resolve")            family = AF_UNSPEC;
+        else if (opecode == "resolve_inet")  family = AF_INET;
+        else if (opecode == "resolve_inet6") family = AF_INET6;
+        else return -EINVAL;
+        resolve(hostname_, family);
         return hostname_.length();
     }
 

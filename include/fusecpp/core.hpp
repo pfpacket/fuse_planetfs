@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <algorithm>
 #include <stdexcept>
 #include <boost/filesystem.hpp>
 
@@ -58,7 +59,7 @@ public: typedef shared_ptr<fusecpp_entry> value_type;
 private:
     mode_t mode_;
     path_type path_;
-    std::list<value_type> entries_;
+    std::vector<value_type> entries_;
 public:
     directory(path_type const& path, int mode = 0)
         : mode_(mode), path_(path) {}
@@ -89,13 +90,40 @@ public:
 
     bool create_file(path_type const& path, mode_t mode = 0)
     {
-        entries_.push_back(std::make_shared<file>(path, mode));
+        auto p = path.string();
+        if (p.empty())
+            return false;
+        if (p[0] != '/')    // relative path
+            p = this->path().string() + "/" + path.string();
+        entries_.push_back(std::make_shared<file>(p, mode));
         return true;
     }
 
     bool create_directory(path_type const& path, mode_t mode = 0)
     {
-        entries_.push_back(std::make_shared<directory>(path, mode));
+        auto p = path.string();
+        if (p.empty())
+            return false;
+        if (p[0] != '/')    // relative path
+            p = this->path().string() + "/" + path.string();
+        entries_.push_back(std::make_shared<directory>(p, mode));
+        return true;
+    }
+
+    bool remove_entry(path_type const& path)
+    {
+        auto p = path.string();
+        if (p.empty())
+            return false;
+        if (p[0] != '/')    // relative path
+            p = this->path().string() + "/" + path.string();
+        entries_.erase(
+            std::remove_if(
+                entries_.begin(), entries_.end(),
+                [&path](value_type const& ptr){ return ptr->path() == path; }
+            ),
+            entries_.end()
+        );
         return true;
     }
 };

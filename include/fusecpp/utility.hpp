@@ -77,6 +77,18 @@ shared_ptr<directory> search_directory(directory &root, path_type const& path)
 }
 
 
+/*bool recursive_create_dir(path_type const& path, mode_t mode = 0)
+{
+    directory *dir = this;
+    for (std::size_t current_pos = 1; current_pos - 1 != std::string::npos; ) {
+        auto pos = path.find_first_of('/', current_pos);
+        std::string dirname = path.substr(current_pos, pos - current_pos);
+        dir->create_directory(dirname);
+        current_pos = pos + 1;
+    }
+}*/
+
+
 }   // namespace fusecpp
 
 #endif // FUSECPP_UTILITY_HPP

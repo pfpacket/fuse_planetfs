@@ -3,9 +3,11 @@
  *   explaining the way to use planetfs
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <cstring>
+#include <cerrno>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,23 +17,21 @@ int main(int argc, char **argv)
 {
     int fd, size;
     char buffer[1024];
-    static char const *request = "resolve_inet www.google.co.jp";
+    std::string request = "resolve ";
+    if (argc < 2)
+        return EXIT_FAILURE;
 
     fd = open("./net/dns", O_RDWR, S_IRWXU);
     if (fd < 0) {
-        perror("open");
+        std::cout << "open: " << std::strerror(errno) << std::endl;
         return EXIT_FAILURE;
     }
 
-    /* 
-     * Request DNS service. format:
-     * 'resolve hostname'       - AF_UNSPEC
-     * 'resolve_inet hostname'  - AF_INET
-     * 'resolve_inet6 hostname' - AF_INET6
-     */
-    size = write(fd, request, strlen(request));
+    /* Request DNS service */
+    request += argv[1];
+    size = write(fd, request.c_str(), request.length() + 1);
     if (size < 0) {
-        perror("write");
+        std::cout << "write: " << std::strerror(errno) << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
         if (size <= 0)  // read error or EOF
             break;
         /* Display it */
-        printf("%s\n", buffer);
+        std::cout << buffer << std::endl;
     }
 
     close(fd);
