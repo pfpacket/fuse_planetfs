@@ -13,7 +13,9 @@
 #include <syslog.h>
 #include <fuse.h>
 #include <fusecpp.hpp>
-#include "planet_socket.hpp"
+#include "planet_handle.hpp"
+#include "planet_dns_op.hpp"
+#include "planet_tcp_client_op.hpp"
 
 // Root of this filesystem
 fusecpp::directory root{"/"};
