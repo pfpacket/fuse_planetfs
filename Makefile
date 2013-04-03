@@ -4,7 +4,7 @@ LDFLAGS    =
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
 LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse
-OBJS       = src/planet.o
+OBJS       = src/planetfs_main.o
 TARGET     = fuse_planetfs
 
 all: $(TARGET)
