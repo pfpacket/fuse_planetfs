@@ -11,11 +11,12 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <syslog.h>
-#include <fuse.h>
 #include <fusecpp.hpp>
-#include "planet_handle.hpp"
-#include "planet_dns_op.hpp"
-#include "planet_tcp_client_op.hpp"
+#include <planet/common.hpp>
+#include <planet/planet_handle.hpp>
+#include <planet/planet_dns_op.hpp>
+#include <planet/planet_tcp_client_op.hpp>
+#include <fuse.h>
 
 // Root of this filesystem
 fusecpp::directory root{"/"};

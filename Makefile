@@ -1,10 +1,14 @@
 CXX        = g++
-CXXFLAGS   = -Wall -std=c++0x -O0 -g
+CXXFLAGS   = -Wall -std=c++0x -O2
 LDFLAGS    =
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
 LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse
-OBJS       = src/planetfs_main.o
+OBJS       = src/planetfs_main.o \
+             src/fusecpp/common.o \
+             src/planet/planet_handle.o \
+             src/planet/planet_tcp_client_op.o \
+             src/planet/planet_dns_op.o
 TARGET     = fuse_planetfs
 
 all: $(TARGET)

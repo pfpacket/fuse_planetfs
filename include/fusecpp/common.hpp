@@ -8,6 +8,8 @@
 #endif
 
 #include <memory>
+#include <functional>
+#include <boost/filesystem/path.hpp>
 
 namespace fusecpp {
 
@@ -15,33 +17,31 @@ namespace fusecpp {
     template<typename T>
     using shared_ptr = std::shared_ptr<T>;
 
+    // fusecpp entry path type (better string class)
+    typedef boost::filesystem::path path_type;
+
     namespace detail {
 
-        static auto const null_deleter = [](void *) {};
+        extern std::function<void (void *)> const null_deleter;
 
         // fusecpp index numbers and error messages
         enum errmsg_number {fe_file_cast = 0, fe_dir_cast};
-        static char const * const errmsg[] = {
-            "invalid cast from \'fusecpp_entry\' to \'file\'",
-            "invalid cast from \'fusecpp_entry\' to \'directory\'"
-        };
+        extern char const * const errmsg[];
 
         // Generic null pointer of shared_ptr
-        static class {
+        class generic_shared_null_ptr_t {
         public:
             template<typename T>
             operator shared_ptr<T>()
             {
                 return shared_ptr<T>{};
             }
-        } shared_null_ptr;
+        };
+        extern generic_shared_null_ptr_t shared_null_ptr;
 
     }   // namespace detail
 
-    char const *get_errmsg(detail::errmsg_number num) noexcept
-    {
-        return detail::errmsg[num];
-    }
+    char const *get_errmsg(detail::errmsg_number num) noexcept;
 
 }   // namespace fusecpp
 

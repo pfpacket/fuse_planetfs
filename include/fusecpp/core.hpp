@@ -12,9 +12,6 @@
 namespace fusecpp {
 
 
-// fusecpp entry path type (better string class)
-typedef boost::filesystem::path path_type;
-
 //
 // fusecpp abstract base class
 //    for every filesystem entry

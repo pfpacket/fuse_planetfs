@@ -1,10 +1,12 @@
 #ifndef PLANET_SOCKET_HPP
 #define PLANET_SOCKET_HPP
 
+#include <map>
 #include <mutex>
 #include <memory>
 #include <cerrno>
-
+#include <planet/common.hpp>
+#include <fusecpp/common.hpp>
 
 template<typename T>
 using shared_ptr = std::shared_ptr<T>;
@@ -32,14 +34,9 @@ private:
     planet_handle_t current_;
     std::map<planet_handle_t, shared_ptr<planet_operations>> ops_;
 public:
-    planet_handle_manager(int init = 0) : current_(init)
-    {
-    }
+    planet_handle_manager(int init = 0);
 
-    shared_ptr<planet_operations> operator[](planet_handle_t index)
-    {
-        return ops_.at(index);
-    }
+    shared_ptr<planet_operations> operator[](planet_handle_t index);
 
     template<typename T>
     planet_handle_t register_op()
@@ -49,24 +46,13 @@ public:
         return ++current_;
     }
 
-    void unregister_op(planet_handle_t ph)
-    {
-        lock_guard lock(mtx_);
-        ops_.erase(ph);
-    }
+    void unregister_op(planet_handle_t ph);
 };
 
-planet_handle_manager handle_mgr;
+extern planet_handle_manager handle_mgr;
 
-planet_handle_t get_planet_handle_from(struct fuse_file_info const& fi)
-{
-    return static_cast<planet_handle_t>(fi.fh);
-}
-
-void set_planet_handle_to(struct fuse_file_info& fi, planet_handle_t ph)
-{
-    fi.fh = static_cast<decltype(fi.fh)>(ph);
-}
+planet_handle_t get_planet_handle_from(struct fuse_file_info const& fi);
+void set_planet_handle_to(struct fuse_file_info& fi, planet_handle_t ph);
 
 
 #endif  // PLANET_SOCKET_HPP
