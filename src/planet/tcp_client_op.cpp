@@ -3,7 +3,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <planet/common.hpp>
-#include <planet/planet_tcp_client_op.hpp>
+#include <planet/tcp_client_op.hpp>
 
 namespace planet {
 

@@ -14,8 +14,8 @@
 #include <fusecpp.hpp>
 #include <planet/common.hpp>
 #include <planet/planet_handle.hpp>
-#include <planet/planet_dns_op.hpp>
-#include <planet/planet_tcp_client_op.hpp>
+#include <planet/dns_op.hpp>
+#include <planet/tcp_client_op.hpp>
 #include <fuse.h>
 
 // Root of this filesystem

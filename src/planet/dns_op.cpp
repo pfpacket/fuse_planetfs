@@ -1,6 +1,6 @@
 
 #include <planet/common.hpp>
-#include <planet/planet_dns_op.hpp>
+#include <planet/dns_op.hpp>
 
 namespace planet {
 
