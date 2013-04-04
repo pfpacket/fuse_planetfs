@@ -27,28 +27,29 @@ int main(int argc, char **argv)
     if (fd < 0)
         die("open");
 
-    /* Accept a client's connection */
-    size = read(fd, client_path, sizeof (client_path));
-    if (size < 0)
-        die("read");
-    printf("accepted client path: %s\n", client_path);
+    while (1) {
+        /* Accept a client's connection */
+        size = read(fd, client_path, sizeof (client_path));
+        if (size < 0)
+            die("read");
+        printf("accepted client path: %s\n", client_path);
 
-    /* Open a connection to the client */
-    client_fd = open(client_path, O_RDWR);
-    if (client_fd < 0)
-        die("open");
+        /* Open a connection to the client */
+        client_fd = open(client_path, O_RDWR);
+        if (client_fd < 0)
+            die("open");
 
-    /* Receive the response of the remote host */
-    do {
-        size = read(client_fd, buffer, sizeof (buffer));
-        if (size < 0) {
-            perror("read");
-            break;
-        }
-        /* Display the response of the server */
-        write(STDOUT_FILENO, buffer, size);
-    } while (size != 0);
-
+        /* Receive the response of the remote host */
+        do {
+            size = read(client_fd, buffer, sizeof (buffer));
+            if (size < 0) {
+                perror("read");
+                break;
+            }
+            /* Display the response of the server */
+            write(STDOUT_FILENO, buffer, size);
+        } while (size != 0);
+    }
     close(fd);
     return EXIT_SUCCESS;
 }
