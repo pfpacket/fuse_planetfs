@@ -2,11 +2,14 @@
 #include <planet/common.hpp>
 #include <planet/planet_handle.hpp>
 
+namespace planet {
+
+
 inline planet_handle_manager::planet_handle_manager(int init) : current_(init)
 {
 }
 
-shared_ptr<planet_operations> planet_handle_manager::operator[](planet_handle_t index)
+shared_ptr<planet_operation> planet_handle_manager::operator[](planet_handle_t index)
 {
     return ops_.at(index);
 }
@@ -29,3 +32,6 @@ void set_planet_handle_to(struct fuse_file_info& fi, planet_handle_t ph)
 {
     fi.fh = static_cast<decltype(fi.fh)>(ph);
 }
+
+
+}   // namespace planet

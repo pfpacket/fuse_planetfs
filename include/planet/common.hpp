@@ -11,5 +11,6 @@
 namespace planet {
 }   // namespace planet
 
+#include <planet/exception.hpp>
 
 #endif  // PLANET_COMMON_HPP

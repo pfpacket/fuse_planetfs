@@ -2,11 +2,14 @@
 #include <planet/common.hpp>
 #include <planet/planet_dns_op.hpp>
 
-int planet_dns_ops::forward_lookup(std::string const& hostname, int family, std::vector<std::string>& store)
+namespace planet {
+
+
+int dns_op::forward_lookup(std::string const& hostname, int family, std::vector<std::string>& store)
 {
     struct addrinfo hints = {}, *result;
-    hints.ai_family = family;           // AF_INET,AF_INET6,AF_UNSPEC
-    hints.ai_socktype = SOCK_STREAM;    // Stream socke
+    hints.ai_family     = family;       // AF_INET,AF_INET6,AF_UNSPEC
+    hints.ai_socktype   = SOCK_STREAM;  // Stream socke
 
     int s = getaddrinfo(hostname.c_str(), NULL, &hints, &result);
     if (s != 0)
@@ -24,17 +27,17 @@ int planet_dns_ops::forward_lookup(std::string const& hostname, int family, std:
     return 0;
 }
 
-inline planet_dns_ops::~planet_dns_ops()
+inline dns_op::~dns_op()
 {
-    syslog(LOG_INFO, "planet_dns_ops: dtor called target=%s", hostname_.c_str());
+    syslog(LOG_INFO, "dns_op: dtor called target=%s", hostname_.c_str());
 }
 
-inline int planet_dns_ops::open(fusecpp::path_type const& path, struct fuse_file_info& fi)
+inline int dns_op::open(fusecpp::path_type const& path, struct fuse_file_info& fi)
 {
     return 0;
 }
 
-int planet_dns_ops::read(fusecpp::path_type const& path, char *buf, size_t size, off_t offset, struct fuse_file_info& fi)
+int dns_op::read(fusecpp::path_type const& path, char *buf, size_t size, off_t offset, struct fuse_file_info& fi)
 {
     if (resolved_names_.empty())
         return 0;
@@ -48,14 +51,14 @@ int planet_dns_ops::read(fusecpp::path_type const& path, char *buf, size_t size,
     return length + 1;
 }
 
-int planet_dns_ops::write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi)
+int dns_op::write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi)
 {
     std::string request = buf;
     auto pos = request.find_first_of(' ');
     if (pos == std::string::npos)
         return -EINVAL;
     std::string opecode = request.substr(0, pos), hostname_ = request.substr(pos + 1);
-    syslog(LOG_INFO, "planet_dns_ops: write: opecode=%s / hostname=%s", opecode.c_str(), hostname_.c_str());
+    syslog(LOG_INFO, "dns_op: write: opecode=%s / hostname=%s", opecode.c_str(), hostname_.c_str());
 
     int family;
     if (opecode == "resolve")            family = AF_UNSPEC;
@@ -67,7 +70,10 @@ int planet_dns_ops::write(fusecpp::path_type const& path, char const *buf, size_
     return hostname_.length();
 }
 
-inline int planet_dns_ops::release(fusecpp::path_type const& path, struct fuse_file_info& fi)
+inline int dns_op::release(fusecpp::path_type const& path, struct fuse_file_info& fi)
 {
     return 0;
 }
+
+
+}   // namespace planet

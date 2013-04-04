@@ -71,15 +71,15 @@ static int planet_mkdir(const char *path, mode_t mode)
 
 void do_planet_open(fusecpp::path_type const& path, struct fuse_file_info& fi)
 {
-    planet_handle_t phandle;
+    planet::planet_handle_t phandle;
     if (path == "/dns")
-        phandle = handle_mgr.register_op<planet_dns_ops>();
+        phandle = planet::handle_mgr.register_op<planet::dns_op>();
     else if (path.parent_path() == "/eth/ip/tcp")
-        phandle = handle_mgr.register_op<planet_tcp_client_ops>();
+        phandle = planet::handle_mgr.register_op<planet::tcp_client_op>();
     else
         throw std::runtime_error(path.string() + " is not supported");
-    set_planet_handle_to(fi, phandle);
-    handle_mgr[phandle]->open(path, fi);
+    planet::set_planet_handle_to(fi, phandle);
+    planet::handle_mgr[phandle]->open(path, fi);
 }
 
 static int planet_open(char const *path, struct fuse_file_info *fi)
@@ -90,10 +90,10 @@ static int planet_open(char const *path, struct fuse_file_info *fi)
         do_planet_open(path, *fi);
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_open: %s: exception: %s", path, e.what());
-        handle_mgr.unregister_op(get_planet_handle_from(*fi));
+        planet::handle_mgr.unregister_op(planet::get_planet_handle_from(*fi));
         return -ECONNRESET;
     }
-    syslog(LOG_INFO, "planet_open: %s: opened handle=%d", path, get_planet_handle_from(*fi));
+    syslog(LOG_INFO, "planet_open: %s: opened handle=%d", path, planet::get_planet_handle_from(*fi));
     return 0;
 }
 
@@ -101,9 +101,9 @@ static int planet_read(char const *path, char *buf, size_t size, off_t offset, s
 {
     int bytes_received;
     try {
-        auto phandle = get_planet_handle_from(*fi);
+        auto phandle = planet::get_planet_handle_from(*fi);
         syslog(LOG_INFO, "planet_read: reading %s size=%u, offset=%lld handle=%d", path, size, offset, phandle);
-        bytes_received = handle_mgr[phandle]->read(path, buf, size, offset, *fi);
+        bytes_received = planet::handle_mgr[phandle]->read(path, buf, size, offset, *fi);
         syslog(LOG_INFO, "planet_read: received %d bytes", bytes_received);
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_read: exception: %s", e.what());
@@ -116,9 +116,9 @@ static int planet_write(char const *path, const char *buf, size_t size, off_t of
 {
     int bytes_transferred;
     try {
-        auto phandle = get_planet_handle_from(*fi);
+        auto phandle = planet::get_planet_handle_from(*fi);
         syslog(LOG_INFO, "planet_write: writing %s size=%u, offset=%lld handle=%d", path, size, offset, phandle);
-        bytes_transferred = handle_mgr[phandle]->write(path, buf, size, offset, *fi);
+        bytes_transferred = planet::handle_mgr[phandle]->write(path, buf, size, offset, *fi);
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_write: exception: %s", e.what());
         bytes_transferred = -EAGAIN;
@@ -144,14 +144,14 @@ static int planet_readdir(const char *path, void *buf, fuse_fill_dir_t filler, o
 static int planet_release(char const *path, struct fuse_file_info *fi)
 {
     int ret;
-    planet_handle_t phandle = get_planet_handle_from(*fi);
+    planet::planet_handle_t phandle = planet::get_planet_handle_from(*fi);
     try {
         syslog(LOG_INFO, "planet_release: %s closed handle=%d", path, phandle);
-        ret = handle_mgr[phandle]->release(path, *fi);
+        ret = planet::handle_mgr[phandle]->release(path, *fi);
     } catch (...) {
         ret = -EIO;
     }
-    handle_mgr.unregister_op(phandle);
+    planet::handle_mgr.unregister_op(phandle);
     return ret;
 }
 

@@ -5,18 +5,20 @@
 #include <sys/socket.h>
 #include <planet/planet_handle.hpp>
 
+namespace planet {
 
-class planet_tcp_client_ops : public planet_operations {
+class tcp_client_op : public planet_operation {
     int port_, fd_;
     std::string host_;
     std::vector<std::string> resolved_names_;
 public:
-    virtual ~planet_tcp_client_ops();
+    virtual ~tcp_client_op();
     int open(fusecpp::path_type const& path, struct fuse_file_info& fi);
     int read(fusecpp::path_type const& path, char *buf, size_t size, off_t offset, struct fuse_file_info& fi);
     int write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi);
     int release(fusecpp::path_type const& path, struct fuse_file_info& fi);
 };
 
+}   // namespace planet
 
 #endif  // PLANET_TCP_CLIENT_OP_HPP
