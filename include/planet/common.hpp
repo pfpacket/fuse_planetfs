@@ -14,7 +14,16 @@
 
 // namespace for planetfs
 namespace planet {
+
+    // planet operation number
+    enum opcode {
+        dns, tcp_client, tcp_server
+    };
+
 }   // namespace planet
+
+
+
 
 #include <planet/exception.hpp>
 

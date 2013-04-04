@@ -40,18 +40,40 @@ static int planet_getattr(char const *path, struct stat *stbuf)
     return res;
 }
 
-int planet_mknod(char const *path, mode_t mode, dev_t device)
+int do_planet_mknod(fusecpp::path_type const& path, mode_t mode, dev_t, planet::opcode op)
 {
-    syslog(LOG_INFO, "planet_mknod: creating %s mode=%o", path, mode);
-
-    fusecpp::path_type p(path);
-    if (fusecpp::search_file(root, path))
-        return -EEXIST;
-    auto dir_ptr = fusecpp::search_directory(root, p.parent_path());
+    auto dir_ptr = fusecpp::search_directory(root, path.parent_path());
     if (!dir_ptr)
         return -ENOENT;
-    dir_ptr->create_file(p, mode);
+    dir_ptr->create_file(path, mode);
+    if (auto ptr = fusecpp::search_file(root, path))
+        ptr->private_data = op;
     return 0;
+}
+
+static int planet_mknod(char const *path, mode_t mode, dev_t device)
+{
+    syslog(LOG_INFO, "planet_mknod: creating %s mode=%o", path, mode);
+    int ret = 0;
+    try {
+        if (fusecpp::search_file(root, path))
+            return -EEXIST;
+        planet::opcode op;
+        fusecpp::path_type p(path);
+        if (p == "/dns")
+            op = planet::opcode::dns;
+        else if (p.parent_path() == "/eth/ip/tcp") {
+            if (p.filename().string()[0] == '*')
+                op = planet::opcode::tcp_server;
+            else
+                op = planet::opcode::tcp_client;
+        } else
+            return -EINVAL;
+        ret = do_planet_mknod(p, mode, device, op);
+    } catch (std::exception& e) {
+        ret = -EIO;
+    }
+    return ret;
 }
 
 static int planet_mkdir(char const *path, mode_t mode)
@@ -68,28 +90,28 @@ static int planet_mkdir(char const *path, mode_t mode)
     return 0;
 }
 
-void do_planet_open(fusecpp::path_type const& path, struct fuse_file_info& fi)
+void do_planet_open(fusecpp::file& file, struct fuse_file_info& fi)
 {
     planet::planet_handle_t phandle;
-    if (path == "/dns")
+    if (file.private_data == planet::opcode::dns)
         phandle = planet::handle_mgr.register_op<planet::dns_op>();
-    else if (path.parent_path() == "/eth/ip/tcp") {
-        if (path.filename().string()[0] == '*')
-            phandle = planet::handle_mgr.register_op<planet::tcp_server_op>();
-        else
-            phandle = planet::handle_mgr.register_op<planet::tcp_client_op>();
-    } else
-        throw std::runtime_error(path.string() + " is not supported");
+    else if (file.private_data == planet::opcode::tcp_client)
+        phandle = planet::handle_mgr.register_op<planet::tcp_client_op>();
+    else if (file.private_data == planet::opcode::tcp_server)
+        phandle = planet::handle_mgr.register_op<planet::tcp_server_op>();
+    else
+        throw std::runtime_error(file.path().string() + " is not supported");
     planet::set_handle_to(fi, phandle);
-    planet::handle_mgr[phandle]->open(path, fi);
+    planet::handle_mgr[phandle]->open(file.path(), fi);
 }
 
 static int planet_open(char const *path, struct fuse_file_info *fi)
 {
     try {
-        if (!fusecpp::search_file(root, path))
+        auto file_ptr = fusecpp::search_file(root, path);
+        if (!file_ptr)
             return -ENOENT;
-        do_planet_open(path, *fi);
+        do_planet_open(*file_ptr, *fi);
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_open: %s: exception: %s", path, e.what());
         planet::handle_mgr.unregister_op(planet::get_handle_from(*fi));

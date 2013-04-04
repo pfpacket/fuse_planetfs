@@ -7,7 +7,7 @@
 #include <planet/tcp_server_op.hpp>
 #include <fusecpp.hpp>
 
-extern int planet_mknod(char const *path, mode_t mode, dev_t device);
+extern int do_planet_mknod(fusecpp::path_type const&, mode_t, dev_t, planet::opcode);
 
 namespace planet {
 
@@ -20,7 +20,7 @@ tcp_server_op::~tcp_server_op()
 static int do_tcp_server_open(std::string const& host, int port)
 {
     int fd = ::socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in sin = {AF_INET, htons(port), INADDR_ANY, {0}};
+    struct sockaddr_in sin = {AF_INET, htons(port), {INADDR_ANY}, {0}};
     if (::bind(fd, reinterpret_cast<sockaddr *>(&sin), sizeof (sin)) < 0)
         throw planet::exception_errno(errno);
     if (::listen(fd, 5) < 0)
@@ -41,8 +41,6 @@ int tcp_server_op::open(fusecpp::path_type const& path, struct fuse_file_info& f
     return fd_;
 }
 
-
-
 int tcp_server_op::read(fusecpp::path_type const& path, char *buf, size_t size, off_t offset, struct fuse_file_info& fi)
 {
     sockaddr_in client;
@@ -53,7 +51,7 @@ int tcp_server_op::read(fusecpp::path_type const& path, char *buf, size_t size, 
     std::string new_client_path = "/eth/ip/tcp/";
     new_client_path += inet_ntoa(client.sin_addr);
     new_client_path += (":" + std::to_string(ntohs(client.sin_port)));
-    mknod(new_client_path.c_str(), S_IFREG | S_IRWXU, 0);
+    do_planet_mknod(new_client_path.c_str(), S_IFREG | S_IRWXU, 0, opcode::tcp_server);
     return 0;
 }
 

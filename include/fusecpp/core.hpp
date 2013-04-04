@@ -37,6 +37,7 @@ private:
     path_type path_;
     std::vector<char> data_;
 public:
+    int private_data;
     file(path_type const& path, mode_t mode) : mode_(mode), path_(path) {}
     bool is_file() const noexcept override { return true; }
     bool is_directory() const noexcept override { return false; }
