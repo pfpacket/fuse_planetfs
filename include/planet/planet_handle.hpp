@@ -4,6 +4,7 @@
 #include <map>
 #include <mutex>
 #include <memory>
+#include <utility>
 #include <cerrno>
 #include <planet/common.hpp>
 #include <fusecpp/common.hpp>
@@ -35,16 +36,22 @@ private:
     typedef std::lock_guard<decltype(mtx_)> lock_guard;
     planet_handle_t current_;
     std::map<planet_handle_t, shared_ptr<planet_operation>> ops_;
+
 public:
     planet_handle_manager(int init = 0);
 
     shared_ptr<planet_operation> operator[](planet_handle_t index);
 
-    template<typename T>
-    planet_handle_t register_op()
+    template<typename OpsType, typename... Types>
+    planet_handle_t register_op(Types&&... args)
     {
         lock_guard lock(mtx_);
-        ops_.insert(std::make_pair(current_ + 1, std::make_shared<T>()));
+        ops_.insert(
+            std::make_pair(
+                current_ + 1,
+                std::make_shared<OpsType>(std::forward<Types>(args)...)
+            )
+        );
         return ++current_;
     }
 
@@ -53,9 +60,9 @@ public:
 
 extern planet_handle_manager handle_mgr;
 
-planet_handle_t get_planet_handle_from(struct fuse_file_info const& fi);
+planet_handle_t get_handle_from(struct fuse_file_info const& fi);
 
-void set_planet_handle_to(struct fuse_file_info& fi, planet_handle_t ph);
+void set_handle_to(struct fuse_file_info& fi, planet_handle_t ph);
 
 }   // namespace planet
 

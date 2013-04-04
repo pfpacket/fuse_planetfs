@@ -23,12 +23,12 @@ void planet_handle_manager::unregister_op(planet_handle_t ph)
 // Global planet handle manager
 planet_handle_manager handle_mgr;
 
-planet_handle_t get_planet_handle_from(struct fuse_file_info const& fi)
+planet_handle_t get_handle_from(struct fuse_file_info const& fi)
 {
     return static_cast<planet_handle_t>(fi.fh);
 }
 
-void set_planet_handle_to(struct fuse_file_info& fi, planet_handle_t ph)
+void set_handle_to(struct fuse_file_info& fi, planet_handle_t ph)
 {
     fi.fh = static_cast<decltype(fi.fh)>(ph);
 }

@@ -78,7 +78,7 @@ void do_planet_open(fusecpp::path_type const& path, struct fuse_file_info& fi)
         phandle = planet::handle_mgr.register_op<planet::tcp_client_op>();
     else
         throw std::runtime_error(path.string() + " is not supported");
-    planet::set_planet_handle_to(fi, phandle);
+    planet::set_handle_to(fi, phandle);
     planet::handle_mgr[phandle]->open(path, fi);
 }
 
@@ -90,10 +90,10 @@ static int planet_open(char const *path, struct fuse_file_info *fi)
         do_planet_open(path, *fi);
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_open: %s: exception: %s", path, e.what());
-        planet::handle_mgr.unregister_op(planet::get_planet_handle_from(*fi));
+        planet::handle_mgr.unregister_op(planet::get_handle_from(*fi));
         return -ECONNRESET;
     }
-    syslog(LOG_INFO, "planet_open: %s: opened handle=%d", path, planet::get_planet_handle_from(*fi));
+    syslog(LOG_INFO, "planet_open: %s: opened handle=%d", path, planet::get_handle_from(*fi));
     return 0;
 }
 
@@ -101,7 +101,7 @@ static int planet_read(char const *path, char *buf, size_t size, off_t offset, s
 {
     int bytes_received;
     try {
-        auto phandle = planet::get_planet_handle_from(*fi);
+        auto phandle = planet::get_handle_from(*fi);
         syslog(LOG_INFO, "planet_read: reading %s size=%u, offset=%lld handle=%d", path, size, offset, phandle);
         bytes_received = planet::handle_mgr[phandle]->read(path, buf, size, offset, *fi);
         syslog(LOG_INFO, "planet_read: received %d bytes", bytes_received);
@@ -116,7 +116,7 @@ static int planet_write(char const *path, const char *buf, size_t size, off_t of
 {
     int bytes_transferred;
     try {
-        auto phandle = planet::get_planet_handle_from(*fi);
+        auto phandle = planet::get_handle_from(*fi);
         syslog(LOG_INFO, "planet_write: writing %s size=%u, offset=%lld handle=%d", path, size, offset, phandle);
         bytes_transferred = planet::handle_mgr[phandle]->write(path, buf, size, offset, *fi);
     } catch (std::exception& e) {
@@ -144,7 +144,7 @@ static int planet_readdir(const char *path, void *buf, fuse_fill_dir_t filler, o
 static int planet_release(char const *path, struct fuse_file_info *fi)
 {
     int ret;
-    planet::planet_handle_t phandle = planet::get_planet_handle_from(*fi);
+    planet::planet_handle_t phandle = planet::get_handle_from(*fi);
     try {
         syslog(LOG_INFO, "planet_release: %s closed handle=%d", path, phandle);
         ret = planet::handle_mgr[phandle]->release(path, *fi);
@@ -182,6 +182,5 @@ int main(int argc, char **argv)
     planet_ops.readdir  = planet_readdir;
     planet_ops.release  = planet_release;
     openlog("fuse_planet", LOG_CONS | LOG_PID, LOG_USER);
-    syslog(LOG_INFO, "planetfs new handle version started");
     return fuse_main(argc, argv, &planet_ops, NULL);
 }

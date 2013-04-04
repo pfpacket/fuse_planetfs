@@ -27,7 +27,7 @@ int dns_op::forward_lookup(std::string const& hostname, int family, std::vector<
     return 0;
 }
 
-inline dns_op::~dns_op()
+dns_op::~dns_op()
 {
     syslog(LOG_INFO, "dns_op: dtor called target=%s", hostname_.c_str());
 }

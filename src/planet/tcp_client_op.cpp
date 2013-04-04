@@ -8,7 +8,7 @@
 namespace planet {
 
 
-inline tcp_client_op::~tcp_client_op()
+tcp_client_op::~tcp_client_op()
 {
     syslog(LOG_INFO, "tcp_client_op: dtor called fd=%d", fd_);
 }
