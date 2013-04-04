@@ -1,8 +1,13 @@
 #ifndef PLANET_COMMON_HPP
 #define PLANET_COMMON_HPP
 
-#define FUSE_USE_VERSION 26
-#define _FILE_OFFSET_BITS 64
+#ifndef FUSE_USE_VERSION
+    #define FUSE_USE_VERSION 26
+#endif
+
+#ifndef _FILE_OFFSET_BITS
+    #define _FILE_OFFSET_BITS 64
+#endif
 
 #include <fuse/fuse.h>
 #include <syslog.h>

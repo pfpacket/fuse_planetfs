@@ -3,21 +3,29 @@
 
 #include <cerrno>
 #include <string>
+#include <cstring>
 #include <stdexcept>
 
 namespace planet {
 
-class exception_errno : std::runtime_error {
+class exception_errno : std::exception {
 public:
-    exception_errno(int err, std::string const& msg)
-        : std::runtime_error(msg), errno_(err)
+    exception_errno(int err) : errno_(err)
     {
     }
+
+    virtual ~exception_errno() = default;
 
     int get_errno() const
     {
         return errno_;
     }
+
+    char const *what() const noexcept
+    {
+        return std::strerror(errno_);
+    }
+
 private:
     int errno_;
 };

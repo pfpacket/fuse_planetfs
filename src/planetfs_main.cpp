@@ -2,10 +2,8 @@
 #define _FILE_OFFSET_BITS 64
 
 #include <iostream>
-#include <map>
 #include <cstdlib>
 #include <cstring>
-#include <cstdarg>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/socket.h>
@@ -16,6 +14,7 @@
 #include <planet/planet_handle.hpp>
 #include <planet/dns_op.hpp>
 #include <planet/tcp_client_op.hpp>
+#include <planet/tcp_server_op.hpp>
 #include <fuse.h>
 
 // Root of this filesystem
@@ -41,7 +40,7 @@ static int planet_getattr(char const *path, struct stat *stbuf)
     return res;
 }
 
-static int planet_mknod(char const *path, mode_t mode, dev_t device)
+int planet_mknod(char const *path, mode_t mode, dev_t device)
 {
     syslog(LOG_INFO, "planet_mknod: creating %s mode=%o", path, mode);
 
@@ -74,9 +73,12 @@ void do_planet_open(fusecpp::path_type const& path, struct fuse_file_info& fi)
     planet::planet_handle_t phandle;
     if (path == "/dns")
         phandle = planet::handle_mgr.register_op<planet::dns_op>();
-    else if (path.parent_path() == "/eth/ip/tcp")
-        phandle = planet::handle_mgr.register_op<planet::tcp_client_op>();
-    else
+    else if (path.parent_path() == "/eth/ip/tcp") {
+        if (path.filename().string()[0] == '*')
+            phandle = planet::handle_mgr.register_op<planet::tcp_server_op>();
+        else
+            phandle = planet::handle_mgr.register_op<planet::tcp_client_op>();
+    } else
         throw std::runtime_error(path.string() + " is not supported");
     planet::set_handle_to(fi, phandle);
     planet::handle_mgr[phandle]->open(path, fi);

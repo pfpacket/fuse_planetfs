@@ -24,7 +24,7 @@ int tcp_client_op::open(fusecpp::path_type const& path, struct fuse_file_info& f
     struct sockaddr_in sin = {AF_INET, htons(port_), {0}, {0}};
     inet_pton(AF_INET, host_.c_str(), &sin.sin_addr);
     if (connect(fd_, reinterpret_cast<struct sockaddr *>(&sin), sizeof(sin)) < 0)
-        throw -errno;
+        throw planet::exception_errno(errno);
     syslog(LOG_NOTICE, "tcp_client_op::open: connection established %s:%d fd=%d opened", host_.c_str(), port_, fd_);
     return fd_;
 }

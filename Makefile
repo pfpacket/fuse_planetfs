@@ -6,8 +6,10 @@ INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
 LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse
 OBJS       = src/planetfs_main.o \
              src/fusecpp/common.o \
+             src/fusecpp/utility.o \
              src/planet/planet_handle.o \
              src/planet/tcp_client_op.o \
+             src/planet/tcp_server_op.o \
              src/planet/dns_op.o
 TARGET     = fuse_planetfs
 
