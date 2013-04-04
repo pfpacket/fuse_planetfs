@@ -55,7 +55,7 @@ static int planet_mknod(char const *path, mode_t mode, dev_t device)
     return 0;
 }
 
-static int planet_mkdir(const char *path, mode_t mode)
+static int planet_mkdir(char const *path, mode_t mode)
 {
     syslog(LOG_INFO, "planet_mkdir: creating %s mode=%o dirmode=%o", path, mode, mode | S_IFDIR);
 
@@ -126,7 +126,7 @@ static int planet_write(char const *path, const char *buf, size_t size, off_t of
     return bytes_transferred;
 }
 
-static int planet_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
+static int planet_readdir(char const *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
     syslog(LOG_INFO, "planet_readdir: reading %s buf=%p, offset=%lld", path, buf, offset);
 
