@@ -7,9 +7,10 @@
 #include <planet/tcp_server_op.hpp>
 #include <fusecpp.hpp>
 
-extern int do_planet_mknod(fusecpp::path_type const&, mode_t, dev_t, planet::opcode);
+extern int do_planet_mknod(fusecpp::path_type const&,
+    mode_t, dev_t, planet::opcode, std::function<void (fusecpp::file&)>);
 
-namespace planet {
+ namespace planet {
 
 
 tcp_server_op::~tcp_server_op()
@@ -51,8 +52,19 @@ int tcp_server_op::read(fusecpp::path_type const& path, char *buf, size_t size, 
     std::string new_client_path = "/eth/ip/tcp/";
     new_client_path += inet_ntoa(client.sin_addr);
     new_client_path += (":" + std::to_string(ntohs(client.sin_port)));
-    do_planet_mknod(new_client_path.c_str(), S_IFREG | S_IRWXU, 0, opcode::tcp_server);
-    return 0;
+    if (size <= new_client_path.length())
+        throw planet::exception_errno(EOVERFLOW);
+    do_planet_mknod(new_client_path.c_str(), S_IFREG | S_IRWXU, 0, opcode::tcp_accepted_client,
+        [client_fd](fusecpp::file& f) {
+            f.data().reserve(sizeof (int));
+            *reinterpret_cast<int *>(fusecpp::get_file_data(f)) = client_fd;
+        }
+    );
+    // "./net" is a dirty quick hack (what should I do ?)
+    std::string userspace_path = "./net" + new_client_path;
+    std::copy(userspace_path.begin(), userspace_path.end(), buf);
+    buf[userspace_path.length()] = '\0';
+    return userspace_path.length() + 1;
 }
 
 inline int tcp_server_op::write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi)

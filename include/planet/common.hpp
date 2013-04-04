@@ -17,7 +17,10 @@ namespace planet {
 
     // planet operation number
     enum opcode {
-        dns, tcp_client, tcp_server
+        dns,
+        tcp_client,
+        tcp_server,
+        tcp_accepted_client
     };
 
 }   // namespace planet

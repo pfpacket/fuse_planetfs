@@ -2,6 +2,7 @@
 #define _FILE_OFFSET_BITS 64
 
 #include <iostream>
+#include <functional>
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
@@ -15,6 +16,7 @@
 #include <planet/dns_op.hpp>
 #include <planet/tcp_client_op.hpp>
 #include <planet/tcp_server_op.hpp>
+#include <planet/tcp_accepted_client_op.hpp>
 #include <fuse.h>
 
 // Root of this filesystem
@@ -40,14 +42,17 @@ static int planet_getattr(char const *path, struct stat *stbuf)
     return res;
 }
 
-int do_planet_mknod(fusecpp::path_type const& path, mode_t mode, dev_t, planet::opcode op)
+int do_planet_mknod(fusecpp::path_type const& path, mode_t mode, dev_t, planet::opcode op,
+        std::function<void (fusecpp::file&)> modifier = [](fusecpp::file&){})
 {
     auto dir_ptr = fusecpp::search_directory(root, path.parent_path());
     if (!dir_ptr)
         return -ENOENT;
     dir_ptr->create_file(path, mode);
-    if (auto ptr = fusecpp::search_file(root, path))
+    if (auto ptr = fusecpp::search_file(root, path)) {
         ptr->private_data = op;
+        modifier(*ptr);
+    }
     return 0;
 }
 
@@ -99,6 +104,8 @@ void do_planet_open(fusecpp::file& file, struct fuse_file_info& fi)
         phandle = planet::handle_mgr.register_op<planet::tcp_client_op>();
     else if (file.private_data == planet::opcode::tcp_server)
         phandle = planet::handle_mgr.register_op<planet::tcp_server_op>();
+    else if (file.private_data == planet::opcode::tcp_accepted_client)
+        phandle = planet::handle_mgr.register_op<planet::tcp_accepted_client_op>(file.path(), root);
     else
         throw std::runtime_error(file.path().string() + " is not supported");
     planet::set_handle_to(fi, phandle);

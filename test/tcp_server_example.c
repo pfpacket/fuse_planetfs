@@ -31,6 +31,7 @@ int main(int argc, char **argv)
     size = read(fd, client_path, sizeof (client_path));
     if (size < 0)
         die("read");
+    printf("accepted client path: %s\n", client_path);
 
     /* Open a connection to the client */
     client_fd = open(client_path, O_RDWR);
