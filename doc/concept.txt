@@ -1,0 +1,39 @@
+
+== The basic concept of planetfs ==
+ On TCP communications, a remote host can be said as `an endpoint`
+because TCP is connection-needed protocol.
+So we have to express `an endpoint` somehow. We express it as a file.
+Under the /net directory (also in planetfs filesystem) files express an endpoint.
+So processes can communicate with other hosts by opening the endpoint files.
+
+ - TCP client -
+ Now let's think about a TCP client program. It will try to connect a remote host.
+As said above, under plnetfs, remote hosts (endpoints) are expressed as files.
+So a client program which tries to connect to a remote host just opens an endpoint file.
+
+    int remote_host_fd = open("/net/eth/ip/tcp/192.168.1.1:80", O_CREAT | O_RDWR, S_IRWXU);
+
+Then to send data to an endpoint or receive data from it just write or read `remote_host_fd`.
+That's simple.
+
+ - TCP server -
+ TCP servers are similar to TCP clinets. They are same at the point of their protocol, TCP.
+First we have to create out endpoint to allow client programs to connect to us.
+To do it we open a server endpoint file.
+
+    int server_fd = open("/net/eth/ip/tcp/*:80", O_CREAT | O_RDWR, S_IRWXU);
+
+The above code shows you how we can establish our server endpoint.
+Then we have to accept the client programs which try to connect to us.
+
+    int size = read(server_fd, client_path, sizeof (client_path));
+
+The `read` operations to the server endpoint (actually its opened fd) cause client programs
+to accept them. And the second argument of `read`, client_path will be filled with a path to 
+an accepted client endpoint. So the next thing to do is opening it to establish a connection between
+it and us.
+
+    int client_fd = open(client_path, O_CREAT | O_RDWR, S_IRWXU);
+
+Then it is same as TCP client to send or receive data from and to the client.
+
