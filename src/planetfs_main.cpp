@@ -17,6 +17,7 @@
 #include <planet/tcp_client_op.hpp>
 #include <planet/tcp_server_op.hpp>
 #include <planet/tcp_accepted_client_op.hpp>
+#include <planet/packet_socket_op.hpp>
 #include <fuse.h>
 
 // Root of this filesystem
@@ -106,6 +107,8 @@ void do_planet_open(fusecpp::file& file, struct fuse_file_info& fi)
         phandle = planet::handle_mgr.register_op<planet::tcp_server_op>();
     else if (file.private_data == planet::opcode::tcp_accepted_client)
         phandle = planet::handle_mgr.register_op<planet::tcp_accepted_client_op>(file.path(), root);
+    else if (file.private_data == planet::opcode::packet_socket)
+        phandle = planet::handle_mgr.register_op<planet::packet_socket_op>();
     else
         throw std::runtime_error(file.path().string() + " is not supported");
     planet::set_handle_to(fi, phandle);
@@ -195,8 +198,9 @@ void planetfs_init()
         if (auto dir_ip = fusecpp::search_directory(root, "/eth/ip"))
             dir_ip->create_directory("/eth/ip/tcp");
     }
-    // Create /net/dns
-    root.create_file("/dns", S_IFREG | S_IRWXU);
+    do_planet_mknod("/dns", S_IFREG | S_IRWXU, 0, planet::opcode::dns);
+    do_planet_mknod("/eth/eth0", S_IFREG | S_IRWXU, 0, planet::opcode::packet_socket);
+    do_planet_mknod("/eth/wlan0", S_IFREG | S_IRWXU, 0, planet::opcode::packet_socket);
 }
 
 static struct fuse_operations planet_ops{};

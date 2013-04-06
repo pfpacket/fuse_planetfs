@@ -11,6 +11,7 @@ OBJS       = src/planetfs_main.o \
              src/planet/tcp_client_op.o \
              src/planet/tcp_server_op.o \
              src/planet/tcp_accepted_client_op.o \
+             src/planet/packet_socket_op.o \
              src/planet/dns_op.o
 TARGET     = fuse_planetfs
 

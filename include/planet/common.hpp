@@ -20,7 +20,8 @@ namespace planet {
         dns,
         tcp_client,
         tcp_server,
-        tcp_accepted_client
+        tcp_accepted_client,
+        packet_socket
     };
 
 }   // namespace planet
