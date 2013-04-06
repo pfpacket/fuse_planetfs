@@ -13,20 +13,18 @@
 #include <netinet/ether.h>
 #include <fcntl.h>
 
-void dump_packet(void const *packet, int size)
+void print_ethernet_header(struct ether_header const *eth)
 {
-    struct ether_header const *eth = packet;
-    printf(" Destination : %s\n", ether_ntoa((struct ether_adder const *)eth->ether_dhost));
-    printf("    Source   : %s\n", ether_ntoa((struct ether_adder const *)eth->ether_shost));
-    printf("     Type    : %x\n", eth->ether_type);
+    printf("%17s >> ", ether_ntoa((struct ether_addr *)eth->ether_shost));
+    printf("%17s ", ether_ntoa((struct ether_addr *)eth->ether_dhost));
+    printf("type=%x\n", ntohs(eth->ether_type));
 }
 
 int main(int argc, char **argv)
 {
     int fd, size;
     char buffer[65535];
-    /* /net/eth/system  - global interface. Receive all of packets */
-    /* /net/eth/eth0    - Receive packets from eth0 */
+    /* /net/eth/eth0 - Receive packets from eth0 */
     fd = open("./net/eth/wlan0", O_RDWR);
     if (fd < 0) {
         perror("open");
@@ -41,7 +39,7 @@ int main(int argc, char **argv)
             break;
         }
         /* Display ethernet header */
-        dump_packet(buffer, size);
+        print_ethernet_header((struct ether_header *)buffer);
     } while (size != 0);
 
     close(fd);
