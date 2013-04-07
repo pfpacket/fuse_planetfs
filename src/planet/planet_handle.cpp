@@ -22,6 +22,7 @@ void planet_handle_manager::unregister_op(planet_handle_t ph)
 
 // Global planet handle manager
 planet_handle_manager handle_mgr;
+planet_path_manager path_mgr;
 
 planet_handle_t get_handle_from(struct fuse_file_info const& fi)
 {
