@@ -44,5 +44,11 @@ inline int tcp_client_op::release(fusecpp::path_type const& path, struct fuse_fi
     return ::close(fd_);
 }
 
+bool tcp_client_op::is_matching_path(fusecpp::path_type const& path)
+{
+    return (path.parent_path() == "/eth/ip/tcp"
+            && path.filename().string()[0] != '*');
+}
+
 
 }   // namespace planet

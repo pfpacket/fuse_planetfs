@@ -28,5 +28,9 @@ inline int tcp_accepted_client_op::release(fusecpp::path_type const& path, struc
     return ::close(fd_);
 }
 
+// bool tcp_accepted_client_op::is_matching_path(fusecpp::path_type const& path)
+// {
+// }
+
 
 }   // namespace planet
