@@ -122,6 +122,10 @@ static int planet_open(char const *path, struct fuse_file_info *fi)
         if (!file_ptr)
             return -ENOENT;
         do_planet_open(*file_ptr, *fi);
+    } catch (planet::exception_errno& e) {
+        syslog(LOG_INFO, "planet_open: %s: exception: %s", path, e.what());
+        planet::handle_mgr.unregister_op(planet::get_handle_from(*fi));
+        return -e.get_errno();
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_open: %s: exception: %s", path, e.what());
         planet::handle_mgr.unregister_op(planet::get_handle_from(*fi));

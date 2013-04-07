@@ -10,7 +10,7 @@
 extern int do_planet_mknod(fusecpp::path_type const&,
     mode_t, dev_t, planet::opcode, std::function<void (fusecpp::file&)>);
 
- namespace planet {
+namespace planet {
 
 
 tcp_server_op::~tcp_server_op()
@@ -79,4 +79,3 @@ inline int tcp_server_op::release(fusecpp::path_type const& path, struct fuse_fi
 
 
 }   // namespace planet
-
