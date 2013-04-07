@@ -2,6 +2,7 @@
 #define PLANET_SOCKET_HPP
 
 #include <map>
+#include <deque>
 #include <mutex>
 #include <memory>
 #include <utility>
@@ -58,7 +59,37 @@ public:
     void unregister_op(planet_handle_t ph);
 };
 
+class planet_path_manager {
+public:
+    typedef std::function<bool(fusecpp::path_type const&)> comp_func_t;
+    typedef std::tuple<opcode, comp_func_t> value_type;
+
+    void register_op(opcode op, comp_func_t comp)
+    {
+        registry_.emplace_back(op, comp);
+    }
+
+    void unregister_op(opcode op)
+    {
+        auto it = std::remove_if(registry_.begin(), registry_.end(),
+            [op](value_type const& v) { return std::get<0>(v) == op; });
+        registry_.erase(it, registry_.end());
+    }
+
+    opcode find_path_op(fusecpp::path_type const& path)
+    {
+        auto it = std::find_if(registry_.begin(), registry_.end(),
+            [path](value_type const& v) { return std::get<1>(v)(path); });
+        if (it == registry_.end())
+            throw planet::exception_errno(-EBADR);
+        return std::get<0>(*it);
+    }
+private:
+    std::deque<value_type> registry_;
+};
+
 extern planet_handle_manager handle_mgr;
+extern planet_path_manager path_mgr;
 
 planet_handle_t get_handle_from(struct fuse_file_info const& fi);
 

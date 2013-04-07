@@ -75,5 +75,10 @@ inline int dns_op::release(fusecpp::path_type const& path, struct fuse_file_info
     return 0;
 }
 
+bool dns_op::is_matching_path(fusecpp::path_type const& path)
+{
+    return path == "/dns";
+}
+
 
 }   // namespace planet

@@ -59,5 +59,10 @@ int packet_socket_op::release(fusecpp::path_type const& path, struct fuse_file_i
     return close(fd_);
 }
 
+bool packet_socket_op::is_matching_path(fusecpp::path_type const& path)
+{
+    return path.parent_path() == "/eth";
+}
+
 
 }   // namespace planet

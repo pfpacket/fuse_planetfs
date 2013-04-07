@@ -64,18 +64,10 @@ static int planet_mknod(char const *path, mode_t mode, dev_t device)
     try {
         if (fusecpp::search_file(root, path))
             return -EEXIST;
-        planet::opcode op;
-        fusecpp::path_type p(path);
-        if (p == "/dns")
-            op = planet::opcode::dns;
-        else if (p.parent_path() == "/eth/ip/tcp") {
-            if (p.filename().string()[0] == '*')
-                op = planet::opcode::tcp_server;
-            else
-                op = planet::opcode::tcp_client;
-        } else
-            return -EINVAL;
-        ret = do_planet_mknod(p, mode, device, op);
+        planet::opcode op = planet::path_mgr.find_path_op(path);
+        ret = do_planet_mknod(path, mode, device, op);
+    } catch (planet::exception_errno& e) {
+        ret = e.get_errno();
     } catch (std::exception& e) {
         ret = -EIO;
     }
@@ -195,7 +187,7 @@ static int planet_release(char const *path, struct fuse_file_info *fi)
 
 void planetfs_init()
 {
-    // Create /net/eth/ip/tcp
+    // Create initial directory structure
     root.create_directory("/eth");
     if (auto dir_eth = fusecpp::search_directory(root, "/eth")) {
         dir_eth->create_directory("/eth/ip");
@@ -205,6 +197,13 @@ void planetfs_init()
     do_planet_mknod("/dns", S_IFREG | S_IRWXU, 0, planet::opcode::dns);
     do_planet_mknod("/eth/eth0", S_IFREG | S_IRWXU, 0, planet::opcode::packet_socket);
     do_planet_mknod("/eth/wlan0", S_IFREG | S_IRWXU, 0, planet::opcode::packet_socket);
+
+    // Register planet operations
+    planet::path_mgr.register_op(planet::opcode::dns, planet::dns_op::is_matching_path);
+    planet::path_mgr.register_op(planet::opcode::tcp_client, planet::tcp_client_op::is_matching_path);
+    planet::path_mgr.register_op(planet::opcode::tcp_server, planet::tcp_server_op::is_matching_path);
+    //planet::path_mgr.register_op(planet::opcode::tcp_accepted_client, planet::tcp_accepted_client_op::is_matching_path);
+    planet::path_mgr.register_op(planet::opcode::packet_socket, planet::packet_socket_op::is_matching_path);
 }
 
 static struct fuse_operations planet_ops{};
