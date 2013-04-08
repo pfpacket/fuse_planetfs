@@ -49,6 +49,7 @@ int main(int argc, char **argv)
             /* Display the response of the server */
             write(STDOUT_FILENO, buffer, size);
         } while (size != 0);
+        close(client_fd);
     }
     close(fd);
     return EXIT_SUCCESS;
