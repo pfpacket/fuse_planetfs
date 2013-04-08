@@ -53,7 +53,7 @@ int dns_op::read(fusecpp::path_type const& path, char *buf, size_t size, off_t o
 
 int dns_op::write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi)
 {
-    std::string request = buf;
+    std::string request(buf, size);
     auto pos = request.find_first_of(' ');
     if (pos == std::string::npos)
         return -EINVAL;
@@ -67,7 +67,7 @@ int dns_op::write(fusecpp::path_type const& path, char const *buf, size_t size, 
     else return -EINVAL;
     resolved_names_.clear();
     forward_lookup(hostname_, family, resolved_names_);
-    return hostname_.length();
+    return request.length();
 }
 
 inline int dns_op::release(fusecpp::path_type const& path, struct fuse_file_info& fi)
