@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <net/ethernet.h>
 #include <netinet/ether.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 
 void print_ethernet_header(struct ether_header const *eth)

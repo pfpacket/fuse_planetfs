@@ -21,8 +21,8 @@ rebuild:  clean all
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
-test.out: test/test.o
-	$(CXX) $(LDFLAGS) -o $@ test/test.o $(LIBS)
+examples:
+	$(MAKE) -C example/
 
 mount: $(TARGET)
 	mkdir -p net/
@@ -36,3 +36,4 @@ umount:
 
 clean:
 	rm -f $(TARGET) $(OBJS) test.out test/test.o
+	$(MAKE) -C example/ clean
