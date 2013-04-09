@@ -11,7 +11,7 @@ int dns_op::forward_lookup(std::string const& hostname, int family, std::vector<
     hints.ai_family     = family;       // AF_INET,AF_INET6,AF_UNSPEC
     hints.ai_socktype   = SOCK_STREAM;  // Stream socke
 
-    int s = getaddrinfo(hostname.c_str(), NULL, &hints, &result);
+    int s = getaddrinfo(hostname.c_str(), nullptr, &hints, &result);
     if (s != 0)
         return s;
     std::vector<char> buf(1024, 0);

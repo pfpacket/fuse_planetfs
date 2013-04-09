@@ -163,10 +163,10 @@ static int planet_readdir(char const *path, void *buf, fuse_fill_dir_t filler, o
     auto dir = fusecpp::search_directory(root, path);
     if (!dir)
         return -ENOENT;
-    filler(buf, ".", NULL, 0);
-    filler(buf, "..", NULL, 0);
+    filler(buf, ".", nullptr, 0);
+    filler(buf, "..", nullptr, 0);
     for (auto ptr : dir->entries())
-        if (filler(buf, ptr->path().filename().c_str(), NULL, 0))
+        if (filler(buf, ptr->path().filename().c_str(), nullptr, 0))
             break;
     return 0;
 }
@@ -220,5 +220,5 @@ int main(int argc, char **argv)
     planet_ops.readdir  = planet_readdir;
     planet_ops.release  = planet_release;
     openlog("fuse_planet", LOG_CONS | LOG_PID, LOG_USER);
-    return fuse_main(argc, argv, &planet_ops, NULL);
+    return fuse_main(argc, argv, &planet_ops, nullptr);
 }
