@@ -16,7 +16,7 @@ public:
 
     virtual ~exception_errno() = default;
 
-    int get_errno() const
+    int get_errno() const noexcept
     {
         return errno_;
     }
