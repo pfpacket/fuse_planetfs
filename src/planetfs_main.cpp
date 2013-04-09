@@ -67,7 +67,7 @@ static int planet_mknod(char const *path, mode_t mode, dev_t device)
         planet::opcode op = planet::path_mgr.find_path_op(path);
         ret = do_planet_mknod(path, mode, device, op);
     } catch (planet::exception_errno& e) {
-        ret = e.get_errno();
+        ret = -e.get_errno();
     } catch (std::exception& e) {
         ret = -EIO;
     }
