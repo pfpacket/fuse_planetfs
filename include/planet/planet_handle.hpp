@@ -81,7 +81,7 @@ public:
         auto it = std::find_if(registry_.begin(), registry_.end(),
             [path](value_type const& v) { return std::get<1>(v)(path); });
         if (it == registry_.end())
-            throw planet::exception_errno(-EBADR);
+            throw planet::exception_errno(EBADR);
         return std::get<0>(*it);
     }
 private:
