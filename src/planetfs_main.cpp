@@ -121,7 +121,7 @@ static int planet_open(char const *path, struct fuse_file_info *fi)
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_open: %s: exception: %s", path, e.what());
         planet::handle_mgr.unregister_op(planet::get_handle_from(*fi));
-        return -ECONNRESET;
+        return -EIO;
     }
     syslog(LOG_INFO, "planet_open: %s: opened handle=%d", path, planet::get_handle_from(*fi));
     return 0;
@@ -151,7 +151,7 @@ static int planet_write(char const *path, const char *buf, size_t size, off_t of
         bytes_transferred = planet::handle_mgr[phandle]->write(path, buf, size, offset, *fi);
     } catch (std::exception& e) {
         syslog(LOG_INFO, "planet_write: exception: %s", e.what());
-        bytes_transferred = -EAGAIN;
+        bytes_transferred = -EIO;
     }
     return bytes_transferred;
 }
