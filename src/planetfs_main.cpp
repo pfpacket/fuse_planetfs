@@ -31,9 +31,9 @@ static int planet_getattr(char const *path, struct stat *stbuf)
     if (auto ptr = fusecpp::search_entry(root, path)) {
         syslog(LOG_INFO, "planet_getattr: path=%s,ptr_cnt=%ld", path, ptr.use_count());
         stbuf->st_nlink = ptr.use_count();
-        if (ptr->is_directory()) {
+        if (ptr->is_directory())
             stbuf->st_mode = S_IFDIR | 0755;
-        } else if (ptr->is_file()) {
+        else if (ptr->is_file()) {
             auto file_ptr = fusecpp::file_cast(ptr);
             stbuf->st_mode = file_ptr->get_mode();
             stbuf->st_size = file_ptr->data().size();

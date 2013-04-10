@@ -27,25 +27,63 @@ public:
     virtual path_type const& path() const = 0;
 };
 
+// inode structure
+struct st_inode {
+    int inumber;
+    mode_t mode;
+    time_t atime, mtime, ctime;
+};
 
 //
 // fusecpp file
 //
 class file : public fusecpp_entry {
 private:
-    mode_t mode_;
+    st_inode inode_;
     path_type path_;
     std::vector<char> data_;
 public:
     int private_data;
-    file(path_type const& path, mode_t mode) : mode_(mode), path_(path) {}
-    bool is_file() const noexcept override { return true; }
-    bool is_directory() const noexcept override { return false; }
-    mode_t get_mode() const { return mode_; }
-    void set_mode(mode_t mode) { mode_ = mode; }
-    path_type const& path() const { return path_; }
-    auto data() -> decltype(data_)& { return data_; }
-    auto data() const -> decltype(data_) const& { return data_; }
+    file(path_type const& path, mode_t mode) : path_(path)
+    {
+        inode_.mode = mode;
+
+    }
+
+    bool is_file() const noexcept override
+    {
+        return true;
+    }
+
+    bool is_directory() const noexcept override
+    {
+        return false;
+    }
+
+    mode_t get_mode() const
+    {
+        return inode_.mode;
+    }
+
+    void set_mode(mode_t mode)
+    {
+        inode_.mode = mode;
+    }
+
+    path_type const& path() const
+    {
+        return path_;
+    }
+
+    auto data() -> decltype(data_)&
+    {
+        return data_;
+    }
+
+    auto data() const -> decltype(data_) const&
+    {
+        return data_;
+    }
 };
 
 
@@ -60,13 +98,38 @@ private:
     std::vector<value_type> entries_;
 public:
     directory(path_type const& path, int mode = 0)
-        : mode_(mode), path_(path) {}
-    virtual ~directory() noexcept {}
-    bool is_file() const noexcept override { return false; }
-    bool is_directory() const noexcept override { return true; }
-    path_type const& path() const { return path_; }
-    auto entries() -> decltype(entries_)& { return entries_; }
-    auto entries() const -> decltype(entries_) const& { return entries_; }
+        : mode_(mode), path_(path)
+    {
+    }
+
+    virtual ~directory() noexcept
+    {
+    }
+
+    bool is_file() const noexcept override
+    {
+        return false;
+    }
+
+    bool is_directory() const noexcept override
+    {
+        return true;
+    }
+
+    path_type const& path() const
+    {
+        return path_;
+    }
+
+    auto entries() -> decltype(entries_)&
+    {
+        return entries_;
+    }
+
+    auto entries() const -> decltype(entries_) const&
+    {
+        return entries_;
+    }
 
     // This is only for root directory
     shared_ptr<directory> get_this_ptr()
