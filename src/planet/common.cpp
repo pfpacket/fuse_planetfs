@@ -1,7 +1,7 @@
 
-#include <fusecpp/common.hpp>
+#include <planet/common.hpp>
 
-namespace fusecpp {
+namespace planet {
 
     namespace detail {
         
@@ -21,4 +21,5 @@ namespace fusecpp {
         return detail::errmsg[num];
     }
 
-}   // namespace fusecpp
+}   // namespace planet
+
