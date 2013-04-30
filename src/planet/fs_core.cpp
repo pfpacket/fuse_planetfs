@@ -17,8 +17,7 @@ namespace planet {
             stbuf.st_size  = fs_ent->size();
             ::syslog(LOG_INFO, "core_file_system::getattr: path=%s size=%llu mode=%o nlink=%d",
                 path.string().c_str(), stbuf.st_size, stbuf.st_mode, stbuf.st_nlink);
-        }
-        else
+        } else
             throw exception_errno(ENOENT);
         return 0;
     }
@@ -30,8 +29,7 @@ namespace planet {
             new_inode.dev  = device;
             new_inode.mode = mode;
             parent_dir->add_entry<file_entry>(path.filename().string(), path_mgr_[path], new_inode);
-        }
-        else
+        } else
             throw exception_errno(ENOENT);
         return 0;
     }
@@ -52,24 +50,20 @@ namespace planet {
             new_inode.mode = mode;
             ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path.string().c_str(), mode);
             parent_dir->add_entry<dentry>(path.filename().string(), new_inode);
-        }
-        else
+        } else
             throw exception_errno(ENOENT);
         return 0;
     }
 
-    int core_file_system::readdir(path_type const& path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info& fi)
+    std::vector<std::string> core_file_system::readdir(path_type const& path)
     {
+        std::vector<std::string> store;
         if (auto dir_ent = directory_cast(get_entry_of(path))) {
-            filler(buf, ".", nullptr, 0);
-            filler(buf, "..", nullptr, 0);
             for (auto entry : dir_ent->entries())
-                if (filler(buf, entry->name().c_str(), nullptr, 0))
-                    break;
-        }
-        else
+                store.push_back(entry->name());
+        } else
             throw exception_errno(ENOENT);
-        return 0;
+        return store;
     }
 
     handle_t core_file_system::open(path_type const& path)
@@ -83,8 +77,7 @@ namespace planet {
             std::get<1>(op_tuple)->open(
                 std::get<0>(op_tuple), path
             );
-        }
-        else
+        } else
             throw exception_errno(ENOENT);
         return new_handle;
     }

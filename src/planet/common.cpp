@@ -12,7 +12,7 @@ namespace planet {
             "invalid cast from \'fusecpp_entry\' to \'directory\'"
         };
 
-        generic_shared_null_ptr_t shared_null_ptr;
+        generic_shared_null_ptr_t const shared_null_ptr;
 
     }   // namespace detail
 

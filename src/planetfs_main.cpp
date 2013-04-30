@@ -44,7 +44,7 @@ static int planet_mknod(char const *path, mode_t mode, dev_t device)
     ::syslog(LOG_INFO, "%s: path=%s mode=%o %lld", __func__, path, mode, device);
     int ret = 0;
     try {
-        ret = fs_root.mknod(path, 755 | S_IFREG, device);
+        ret = fs_root.mknod(path, mode, device);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -127,7 +127,11 @@ static int planet_readdir(char const *path, void *buf, fuse_fill_dir_t filler, o
     ::syslog(LOG_INFO, "%s: path=%s buf=%p offset=%llu", __func__, path, buf, offset);
     int ret = 0;
     try {
-        ret = fs_root.readdir(path, buf, filler, offset, *fi);
+        filler(buf, ".", nullptr, 0);
+        filler(buf, "..", nullptr, 0);
+        for (auto const& entry_name : fs_root.readdir(path))
+            if (filler(buf, entry_name.c_str(), nullptr, 0))
+                break;
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();

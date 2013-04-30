@@ -275,7 +275,7 @@ public:
 
     int mkdir(path_type const& path, mode_t mode);
 
-    int readdir(path_type const& path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info& fi);
+    std::vector<std::string> readdir(path_type const& path);
 
     handle_t open(path_type const& path);
 

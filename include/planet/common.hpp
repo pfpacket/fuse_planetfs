@@ -38,16 +38,6 @@ namespace planet {
         directory
     };
 
-    // planet operation number
-    enum opcode {
-        default_op,
-        dns,
-        tcp_client,
-        tcp_server,
-        tcp_accepted_client,
-        packet_socket
-    };
-
     namespace detail {
 
         extern std::function<void (void *)> const null_deleter;
@@ -59,13 +49,17 @@ namespace planet {
         // generic null pointer of shared_ptr
         class generic_shared_null_ptr_t {
         public:
+            generic_shared_null_ptr_t()
+            {
+            }
+
             template<typename T>
-            operator shared_ptr<T>()
+            operator shared_ptr<T>() const
             {
                 return shared_ptr<T>{};
             }
         };
-        extern generic_shared_null_ptr_t shared_null_ptr;
+        extern generic_shared_null_ptr_t const shared_null_ptr;
 
     }   // namespace detail
 
