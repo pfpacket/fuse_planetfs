@@ -10,6 +10,7 @@
 #include <memory>
 #include <algorithm>
 #include <stdexcept>
+#include <typeindex>
 #include <boost/filesystem.hpp>
 #include <sys/stat.h>
 
@@ -62,17 +63,18 @@ class file_entry : public fs_entry,
   public std::enable_shared_from_this<file_entry> {
     typedef char value_type;
     typedef std::vector<value_type> buffer_type;
+    typedef default_file_op default_op_type;
 
     std::string name_;
-    opcode op_;
+    std::type_index op_type_index_ = typeid(default_op_type);
     st_inode inode_;
     std::vector<value_type> data_;
 
     friend class planet_operation;
 
 public:
-    file_entry(string_type const& name, opcode op, st_inode const& sti)
-        : name_(name), op_(op), inode_(sti)
+    file_entry(string_type const& name, std::type_index ti, st_inode const& sti)
+        : name_(name), op_type_index_(ti), inode_(sti)
     {
     }
 
@@ -106,9 +108,9 @@ public:
         return data_.data();
     }
 
-    opcode get_op() const
+    std::type_index get_op() const
     {
-        return op_;
+        return op_type_index_;
     }
 };
 
@@ -190,9 +192,79 @@ public:
     }
 };
 
+class path_manager {
+public:
+    typedef std::type_index index_type;
+    typedef std::function<bool (path_type const&)> functor_type;
+    typedef std::map<index_type, functor_type> map_type;
+
+    template<typename OpType>
+    void add_new_type()
+    {
+        path2type_.insert(
+            std::make_pair(index_type(typeid(OpType)), OpType::is_matching_path)
+        );
+    }
+
+    index_type matching_type(path_type const& path) const
+    {
+        auto it = std::find_if(path2type_.begin(), path2type_.end(), [&path]
+            (std::pair<index_type, functor_type> const& pair) {
+                return pair.second(path);
+            });
+        if (it == path2type_.end())
+            throw std::runtime_error("No matching type found for " + path.string());
+        return it->first;
+    }
+
+    index_type operator[](path_type const& path) const
+    {
+        return matching_type(path);
+    }
+
+private:
+    map_type path2type_;
+};
+
+class operation_manager {
+public:
+    typedef std::type_index index_type;
+    typedef shared_ptr<planet_operation> op_type;
+    typedef std::map<index_type, op_type> map_type;
+
+    template<typename OpType, typename ...Types>
+    void add_new_op(Types&& ...args)
+    {
+        type2op_.insert(
+            std::make_pair(index_type(typeid(OpType)),
+                std::make_shared<OpType>(std::forward<Types>(args)...)
+            )
+        );
+    }
+
+    op_type matching_op(index_type const& typeindex) const
+    {
+        return type2op_.at(typeindex);
+    }
+
+    op_type operator[](index_type const& typeindex) const
+    {
+        return matching_op(typeindex);
+    }
+
+private:
+    map_type type2op_;
+};
+
 class core_file_system {
 public:
-    core_file_system() = default;
+    core_file_system()
+    {
+        st_inode new_inode;
+        new_inode.mode = S_IRWXU | S_IFDIR;
+        root = std::make_shared<dentry>("/", new_inode);
+    }
+
     ~core_file_system() = default;
 
     int getattr(path_type const& path, struct stat& stbuf) const;
@@ -212,12 +284,14 @@ public:
     template<typename OperationType, typename ...Types>
     void install_op(Types&& ...args)
     {
-        auto installer
-            = [] { return std::make_shared<OperationType>(); };
+        path_mgr_.add_new_type<OperationType>();
+        ops_mgr_.add_new_op<OperationType>(std::forward<Types>(args)...);
     }
 
 private:
-    shared_ptr<dentry> root = std::make_shared<dentry>("/");
+    path_manager        path_mgr_;
+    operation_manager   ops_mgr_;
+    shared_ptr<dentry> root = detail::shared_null_ptr;
     
     shared_ptr<fs_entry> get_entry_of__(shared_ptr<dentry> root, path_type const& path) const;
 };

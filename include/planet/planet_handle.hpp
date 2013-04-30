@@ -36,16 +36,13 @@ public:
     }
 
     template<typename ...Types>
-    handle_t register_op(shared_ptr<file_entry> fp, opcode op, Types&& ...args)
+    handle_t register_op(shared_ptr<file_entry> fp, shared_ptr<planet_operation> op)
     {
-        shared_ptr<planet_operation> op_ptr{};
-        if (op == opcode::default_op)
-            op_ptr = std::make_shared<default_file_op>(std::forward<Types>(args)...);
         lock_guard lock(mtx_);
         ops_.insert(
             std::make_pair(
                 current_ + 1,
-                std::make_tuple(fp, op_ptr)
+                std::make_tuple(fp, op)
             )
         );
         return ++current_;

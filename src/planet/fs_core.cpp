@@ -9,7 +9,7 @@ namespace planet {
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
         if (auto fs_ent = get_entry_of(path)) {
-            stbuf.st_nlink = fs_ent.use_count();
+            stbuf.st_nlink = fs_ent.use_count() - 1;
             stbuf.st_atime = fs_ent->inode().atime;
             stbuf.st_mtime = fs_ent->inode().mtime;
             stbuf.st_ctime = fs_ent->inode().ctime;
@@ -29,7 +29,7 @@ namespace planet {
             st_inode new_inode;
             new_inode.dev  = device;
             new_inode.mode = mode;
-            parent_dir->add_entry<file_entry>(path.filename().string(), opcode::default_op, new_inode);
+            parent_dir->add_entry<file_entry>(path.filename().string(), path_mgr_[path], new_inode);
         }
         else
             throw exception_errno(ENOENT);
@@ -50,6 +50,7 @@ namespace planet {
         if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
             st_inode new_inode;
             new_inode.mode = mode;
+            ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path.string().c_str(), mode);
             parent_dir->add_entry<dentry>(path.filename().string(), new_inode);
         }
         else
@@ -77,8 +78,7 @@ namespace planet {
         if (auto fentry = file_cast(get_entry_of(path))) {
             if (fentry->type() != file_type::regular_file)
                 throw exception_errno(EISDIR);
-            // TODO: need fix
-            new_handle = handle_mgr.register_op(fentry, fentry->get_op());
+            new_handle = handle_mgr.register_op(fentry, ops_mgr_[fentry->get_op()]->new_instance());
             auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
             std::get<1>(op_tuple)->open(
                 std::get<0>(op_tuple), path

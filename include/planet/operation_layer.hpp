@@ -18,12 +18,16 @@ namespace planet {
 
     int write(handle_t handle, char const *buf, size_t size, off_t offset)
     {
-        return 0;
+        auto& op_tuple = handle_mgr.get_operation_entry(handle);
+        return std::get<1>(op_tuple)->write(
+            std::get<0>(op_tuple), buf, size, offset
+        );
     }
 
     int close(handle_t handle)
     {
-        return 0;
+        auto& op_tuple = handle_mgr.get_operation_entry(handle);
+        return std::get<1>(op_tuple)->release(std::get<0>(op_tuple));
     }
 
 

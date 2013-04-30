@@ -11,6 +11,11 @@ namespace planet {
         return file.data_;
     }
 
+    shared_ptr<planet_operation> default_file_op::new_instance() const
+    {
+        return std::make_shared<default_file_op>();
+    }
+
     int default_file_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
     {
         return 0;

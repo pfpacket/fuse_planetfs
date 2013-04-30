@@ -44,7 +44,7 @@ static int planet_mknod(char const *path, mode_t mode, dev_t device)
     ::syslog(LOG_INFO, "%s: path=%s mode=%o %lld", __func__, path, mode, device);
     int ret = 0;
     try {
-        ret = fs_root.mknod(path, mode, device);
+        ret = fs_root.mknod(path, 755 | S_IFREG, device);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -60,7 +60,7 @@ static int planet_mkdir(char const *path, mode_t mode)
     ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path, mode);
     int ret = 0;
     try {
-        ret = fs_root.mkdir(path, mode | S_IFDIR);
+        ret = fs_root.mkdir(path, 0755 | S_IFDIR);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -158,8 +158,7 @@ static int planet_release(char const *path, struct fuse_file_info *fi)
 // Install certain file operations
 void planet_install_file_operations()
 {
-    //fs_root.install_op<planet::dns_op>();
-    //fs_root.install_op<planet::packet_socket_op>();
+    fs_root.install_op<planet::default_file_op>();
 }
 
 // Create initial filesystem structure
