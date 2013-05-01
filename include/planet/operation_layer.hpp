@@ -27,7 +27,9 @@ namespace planet {
     int close(handle_t handle)
     {
         auto& op_tuple = handle_mgr.get_operation_entry(handle);
-        return std::get<1>(op_tuple)->release(std::get<0>(op_tuple));
+        int ret = std::get<1>(op_tuple)->release(std::get<0>(op_tuple));
+        handle_mgr.unregister_op(handle);
+        return ret;
     }
 
 
