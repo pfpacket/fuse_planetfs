@@ -2,6 +2,7 @@
 #include <planet/common.hpp>
 #include <planet/basic_operation.hpp>
 #include <planet/planet_handle.hpp>
+#include <fuse/fuse.h>
 
 namespace planet {
 

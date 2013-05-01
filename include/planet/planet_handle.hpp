@@ -10,6 +10,8 @@
 #include <cerrno>
 #include <planet/basic_operation.hpp>
 
+struct fuse_file_info;
+
 namespace planet {
 
 
@@ -52,6 +54,7 @@ public:
 };
 
 extern planet_handle_manager handle_mgr;
+
 
 handle_t get_handle_from(struct fuse_file_info const& fi);
 

@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include <typeindex>
-#include <boost/filesystem.hpp>
 #include <sys/stat.h>
 
 namespace planet {
@@ -66,14 +65,14 @@ class file_entry : public fs_entry,
     typedef default_file_op default_op_type;
 
     std::string name_;
-    std::type_index op_type_index_ = typeid(default_op_type);
+    op_type_code op_type_index_ = typeid(default_op_type);
     st_inode inode_;
     std::vector<value_type> data_;
 
     friend class planet_operation;
 
 public:
-    file_entry(string_type const& name, std::type_index ti, st_inode const& sti)
+    file_entry(string_type const& name, op_type_code ti, st_inode const& sti)
         : name_(name), op_type_index_(ti), inode_(sti)
     {
     }
@@ -108,7 +107,7 @@ public:
         return data_.data();
     }
 
-    std::type_index get_op() const
+    op_type_code get_op() const
     {
         return op_type_index_;
     }
@@ -194,7 +193,7 @@ public:
 
 class path_manager {
 public:
-    typedef std::type_index index_type;
+    typedef op_type_code index_type;
     typedef std::function<bool (path_type const&)> functor_type;
     typedef std::map<index_type, functor_type> map_type;
 
@@ -228,7 +227,7 @@ private:
 
 class operation_manager {
 public:
-    typedef std::type_index index_type;
+    typedef op_type_code index_type;
     typedef shared_ptr<planet_operation> op_type;
     typedef std::map<index_type, op_type> map_type;
 

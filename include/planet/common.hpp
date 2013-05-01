@@ -2,18 +2,18 @@
 #define PLANET_COMMON_HPP
 
 #ifndef FUSE_USE_VERSION
-    #define FUSE_USE_VERSION 26
+#   define FUSE_USE_VERSION 26
 #endif
 
 #ifndef _FILE_OFFSET_BITS
-    #define _FILE_OFFSET_BITS 64
+#   define _FILE_OFFSET_BITS 64
 #endif
 
 #include <memory>
 #include <functional>
+#include <typeindex>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
-#include <fuse/fuse.h>
 
 // namespace for planetfs
 namespace planet {
@@ -27,6 +27,8 @@ namespace planet {
     
     // entry path type (better string class)
     typedef boost::filesystem::path path_type;
+
+    typedef std::type_index op_type_code;
 
     template<typename T>
     using optional = boost::optional<T>;
