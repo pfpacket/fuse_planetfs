@@ -166,7 +166,7 @@ void planet_install_file_operations()
 }
 
 // Create initial filesystem structure
-void planet_init_fs_structure()
+void planet_create_initial_fs_structure()
 {
     fs_root.mkdir("/eth",       S_IFDIR | S_IRWXU);
     fs_root.mkdir("/ip",        S_IFDIR | S_IRWXU);
@@ -180,16 +180,23 @@ static struct fuse_operations planet_ops{};
 
 int main(int argc, char **argv)
 {
-    planet_install_file_operations();
-    planet_init_fs_structure();
-    planet_ops.getattr  = planet_getattr;
-    planet_ops.mknod    = planet_mknod;
-    planet_ops.mkdir    = planet_mkdir;
-    planet_ops.open     = planet_open;
-    planet_ops.read     = planet_read;
-    planet_ops.write    = planet_write;
-    planet_ops.readdir  = planet_readdir;
-    planet_ops.release  = planet_release;
-    openlog("fuse_planet", LOG_CONS | LOG_PID, LOG_USER);
-    return fuse_main(argc, argv, &planet_ops, nullptr);
+    int exit_code = EXIT_SUCCESS;
+    try {
+        openlog("fuse_planet", LOG_CONS | LOG_PID, LOG_USER);
+        planet_install_file_operations();
+        planet_create_initial_fs_structure();
+        planet_ops.getattr  = planet_getattr;
+        planet_ops.mknod    = planet_mknod;
+        planet_ops.mkdir    = planet_mkdir;
+        planet_ops.open     = planet_open;
+        planet_ops.read     = planet_read;
+        planet_ops.write    = planet_write;
+        planet_ops.readdir  = planet_readdir;
+        planet_ops.release  = planet_release;
+        exit_code = fuse_main(argc, argv, &planet_ops, nullptr);
+    } catch (std::exception& e) {
+        ::syslog(LOG_ERR, "fatal error occurred: %s", e.what());
+        exit_code = EXIT_FAILURE;
+    }
+    return exit_code;
 }

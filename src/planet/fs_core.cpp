@@ -10,9 +10,9 @@ namespace planet {
     {
         if (auto fs_ent = get_entry_of(path)) {
             stbuf.st_nlink = fs_ent.use_count() - 1;
-            stbuf.st_atime = fs_ent->inode().atime;
-            stbuf.st_mtime = fs_ent->inode().mtime;
-            stbuf.st_ctime = fs_ent->inode().ctime;
+            stbuf.st_atime = st_inode::to_time_t(fs_ent->inode().atime);
+            stbuf.st_mtime = st_inode::to_time_t(fs_ent->inode().mtime);
+            stbuf.st_ctime = st_inode::to_time_t(fs_ent->inode().ctime);
             stbuf.st_mode  = fs_ent->inode().mode;
             stbuf.st_size  = fs_ent->size();
             ::syslog(LOG_INFO, "core_file_system::getattr: path=%s size=%llu mode=%o nlink=%d",

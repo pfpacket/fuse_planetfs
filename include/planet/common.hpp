@@ -28,6 +28,7 @@ namespace planet {
     // entry path type (better string class)
     typedef boost::filesystem::path path_type;
 
+    // Operation index code
     typedef std::type_index op_type_code;
 
     template<typename T>

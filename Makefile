@@ -11,6 +11,7 @@ OBJS       = src/planetfs_main.o \
              src/planet/planet_handle.o \
              src/planet/basic_operation.o
 TARGET     = fuse_planetfs
+MNTDIR     = ./net
 
 all: $(TARGET)
 rebuild:  clean all
@@ -22,11 +23,15 @@ examples:
 	$(MAKE) -C example/
 
 mount: $(TARGET)
-	mkdir -p net/
-	./fuse_planetfs -o direct_io net/
+	mkdir -p $(MNTDIR)
+	./$(TARGET) -o direct_io $(MNTDIR)
+
+debug_mount:
+	mkdir -p $(MNTDIR)
+	./$(TARGET) -d -f -s -o direct_io $(MNTDIR)
 
 umount:
-	fusermount -u net/
+	fusermount -u $(MNTDIR)
 
 .cpp.o: 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@

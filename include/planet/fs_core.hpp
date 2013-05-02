@@ -6,8 +6,7 @@
 #include <planet/planet_handle.hpp>
 #include <vector>
 #include <deque>
-#include <string>
-#include <memory>
+#include <chrono>
 #include <algorithm>
 #include <stdexcept>
 #include <typeindex>
@@ -21,21 +20,27 @@ class st_inode {
 public:
     dev_t dev = 0;
     mode_t mode = 0;
-    time_t atime = std::time(nullptr),
-           mtime = std::time(nullptr),
-           ctime = std::time(nullptr);
+    std::chrono::system_clock::time_point
+        atime = std::chrono::steady_clock::now(),
+        mtime = std::chrono::steady_clock::now(),
+        ctime = std::chrono::steady_clock::now();
 
-    time_t get_last_access_time() const
+    decltype(atime) last_access_time() const
     {
         return atime;
     }
-    time_t get_last_modified_time() const
+    decltype(mtime) last_modified_time() const
     {
         return mtime;
     }
-    time_t get_last_status_changed() const
+    decltype(ctime) last_stat_changed_time() const
     {
         return ctime;
+    }
+    template<typename Clock, typename Duration>
+    static std::time_t to_time_t(std::chrono::time_point<Clock, Duration> const& t)
+    {
+        return Clock::to_time_t(t);
     }
 };
 
