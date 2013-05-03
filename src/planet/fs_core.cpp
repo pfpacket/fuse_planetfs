@@ -9,14 +9,12 @@ namespace planet {
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
         if (auto fs_ent = get_entry_of(path)) {
-            stbuf.st_nlink = fs_ent.use_count() - 1;
+            stbuf.st_nlink = fs_ent.use_count();
             stbuf.st_atime = st_inode::to_time_t(fs_ent->inode().atime);
             stbuf.st_mtime = st_inode::to_time_t(fs_ent->inode().mtime);
             stbuf.st_ctime = st_inode::to_time_t(fs_ent->inode().ctime);
             stbuf.st_mode  = fs_ent->inode().mode;
             stbuf.st_size  = fs_ent->size();
-            ::syslog(LOG_INFO, "core_file_system::getattr: path=%s size=%llu mode=%o nlink=%d",
-                path.string().c_str(), stbuf.st_size, stbuf.st_mode, stbuf.st_nlink);
         } else
             throw exception_errno(ENOENT);
         return 0;
@@ -48,7 +46,6 @@ namespace planet {
         if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
             st_inode new_inode;
             new_inode.mode = mode;
-            ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path.string().c_str(), mode);
             parent_dir->add_entry<dentry>(path.filename().string(), new_inode);
         } else
             throw exception_errno(ENOENT);

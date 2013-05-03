@@ -9,7 +9,10 @@ OBJS       = src/planetfs_main.o \
              src/planet/fs_core.o \
              src/planet/utils.o \
              src/planet/planet_handle.o \
-             src/planet/basic_operation.o
+             src/planet/basic_operation.o \
+             src/planet/dns_op.o \
+             src/planet/tcp_client_op.o \
+             src/planet/packet_socket_op.o
 TARGET     = fuse_planetfs
 MNTDIR     = ./net
 
@@ -26,7 +29,7 @@ mount: $(TARGET)
 	mkdir -p $(MNTDIR)
 	./$(TARGET) -o direct_io $(MNTDIR)
 
-debug_mount:
+debug_mount: $(TARGET)
 	mkdir -p $(MNTDIR)
 	./$(TARGET) -d -f -s -o direct_io $(MNTDIR)
 

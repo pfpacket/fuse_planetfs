@@ -200,12 +200,12 @@ class path_manager {
 public:
     typedef op_type_code index_type;
     typedef std::function<bool (path_type const&)> functor_type;
-    typedef std::map<index_type, functor_type> map_type;
+    typedef std::vector<std::pair<index_type, functor_type>> mapper_type;
 
     template<typename OpType>
     void add_new_type()
     {
-        path2type_.insert(
+        path2type_.push_back(
             std::make_pair(index_type(typeid(OpType)), OpType::is_matching_path)
         );
     }
@@ -227,7 +227,7 @@ public:
     }
 
 private:
-    map_type path2type_;
+    mapper_type path2type_;
 };
 
 class operation_manager {

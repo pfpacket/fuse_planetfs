@@ -32,7 +32,7 @@ namespace planet {
     int default_file_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         if (file_ent->size() < size + offset)
-            size = file_ent->size() - offset;
+            data_vector(*file_ent).resize(size + offset, 0);
         std::copy_n(buf, size, this->data_vector(*file_ent).begin() + offset);
         return size;
     }

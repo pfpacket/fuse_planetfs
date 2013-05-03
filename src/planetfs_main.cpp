@@ -13,8 +13,11 @@
 #include <arpa/inet.h>
 #include <planet/common.hpp>
 #include <planet/fs_core.hpp>
-#include <planet/planet_handle.hpp>
 #include <planet/operation_layer.hpp>
+#include <planet/planet_handle.hpp>
+#include <planet/dns_op.hpp>
+#include <planet/tcp_client_op.hpp>
+#include <planet/packet_socket_op.hpp>
 #include <syslog.h>
 
 #define LOG_EXCEPTION_MSG(e) \
@@ -28,7 +31,10 @@ static int planet_getattr(char const *path, struct stat *stbuf)
     ::syslog(LOG_INFO, "%s: path=%s stbuf=%p", __func__, path, stbuf);
     int ret = 0;
     try {
+        std::memset(stbuf, 0, sizeof (struct stat));
         fs_root.getattr(path, *stbuf);
+        ::syslog(LOG_INFO, "getattr: path=%s size=%llu mode=%o nlink=%d",
+            path, stbuf->st_size, stbuf->st_mode, stbuf->st_nlink);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -71,6 +77,21 @@ static int planet_mkdir(char const *path, mode_t mode)
     return ret;
 }
 
+static int planet_chmod(char const *path, mode_t mode)
+{
+    return 0;
+}
+
+static int planet_chown(char const *path, uid_t uid, gid_t gid)
+{
+    return 0;
+}
+
+static int planet_utimens(char const* path, struct timespec const tv[2])
+{
+    return 0;
+}
+
 static int planet_open(char const *path, struct fuse_file_info *fi)
 {
     ::syslog(LOG_INFO, "%s: path=%s fi=%p", __func__, path, fi);
@@ -78,6 +99,7 @@ static int planet_open(char const *path, struct fuse_file_info *fi)
     try {
         planet::handle_t ph = fs_root.open(path);
         planet::set_handle_to(*fi, ph);
+        ::syslog(LOG_INFO, "%s: handle=%d", __func__, ph);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -95,6 +117,7 @@ static int planet_read(char const *path, char *buf, size_t size, off_t offset, s
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
         bytes_received = planet::read(ph, buf, size, offset);
+        ::syslog(LOG_INFO, "%s: handle=%d bytes_received=%d", __func__, ph, bytes_received);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         bytes_received = -e.get_errno();
@@ -112,6 +135,7 @@ static int planet_write(char const *path, const char *buf, size_t size, off_t of
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
         bytes_transferred = planet::write(ph, buf, size, offset);
+        ::syslog(LOG_INFO, "%s: handle=%d bytes_transferred=%d", __func__, ph, bytes_transferred);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         bytes_transferred = -e.get_errno();
@@ -148,6 +172,7 @@ static int planet_release(char const *path, struct fuse_file_info *fi)
     int ret = 0;
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
+        ::syslog(LOG_INFO, "%s: handle=%d", __func__, ph);
         ret = planet::close(ph);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
@@ -162,6 +187,9 @@ static int planet_release(char const *path, struct fuse_file_info *fi)
 // Install certain file operations
 void planet_install_file_operations()
 {
+    fs_root.install_op<planet::dns_op>();
+    fs_root.install_op<planet::tcp_client_op>();
+    fs_root.install_op<planet::packet_socket_op>();
     fs_root.install_op<planet::default_file_op>();
 }
 
@@ -183,17 +211,22 @@ int main(int argc, char **argv)
     int exit_code = EXIT_SUCCESS;
     try {
         openlog("fuse_planet", LOG_CONS | LOG_PID, LOG_USER);
+        ::syslog(LOG_INFO, "fuse_planetfs daemon started");
         planet_install_file_operations();
         planet_create_initial_fs_structure();
         planet_ops.getattr  = planet_getattr;
         planet_ops.mknod    = planet_mknod;
         planet_ops.mkdir    = planet_mkdir;
+        planet_ops.chmod    = planet_chmod;
+        planet_ops.chown    = planet_chown;
+        planet_ops.utimens  = planet_utimens;
         planet_ops.open     = planet_open;
         planet_ops.read     = planet_read;
         planet_ops.write    = planet_write;
         planet_ops.readdir  = planet_readdir;
         planet_ops.release  = planet_release;
         exit_code = fuse_main(argc, argv, &planet_ops, nullptr);
+        ::syslog(LOG_INFO, "fuse_planetfs daemon finished");
     } catch (std::exception& e) {
         ::syslog(LOG_ERR, "fatal error occurred: %s", e.what());
         exit_code = EXIT_FAILURE;

@@ -27,7 +27,7 @@ public:
 
 
 //
-// Note: All of planetfs operation must inherite planet_operation
+// Note: All of planetfs operation must inherit planet_operation
 //       and implement static function named `is_matching_path()`
 //       which returns true if the given path is for the operation
 //
@@ -35,6 +35,7 @@ public:
 class default_file_op final : public planet_operation {
 public:
     ~default_file_op() = default;
+
     shared_ptr<planet_operation> new_instance() const;
     int open(shared_ptr<file_entry> file_ent, path_type const& path) override;
     int read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset) override;
