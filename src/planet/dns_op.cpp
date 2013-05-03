@@ -14,17 +14,24 @@ namespace planet {
         return std::make_shared<dns_op>();
     }
 
+    template<typename T, typename D>
+    std::unique_ptr<T, D> make_unique_ptr(T *p, D d) noexcept
+    {
+        return std::unique_ptr<T, D>(p, std::forward<D>(d));
+    }
+
     int dns_op::forward_lookup(std::string const& hostname, int family, std::vector<std::string>& store)
     {
-        struct addrinfo hints = {}, *result;
+        struct addrinfo hints = {}, *res;
         hints.ai_family     = family;       // AF_INET,AF_INET6,AF_UNSPEC
         hints.ai_socktype   = SOCK_STREAM;  // Stream socke
 
-        int s = getaddrinfo(hostname.c_str(), nullptr, &hints, &result);
+        int s = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
         if (s != 0)
             return s;
+        auto result = make_unique_ptr(res, [](struct addrinfo *ptr){ freeaddrinfo(ptr); });
         std::vector<char> buf(1024, 0);
-        for (struct addrinfo *ai = result; ai; ai = ai->ai_next) {
+        for (struct addrinfo *ai = result.get(); ai; ai = ai->ai_next) {
             if (ai->ai_family == AF_INET)
                 inet_ntop(ai->ai_family, &((struct sockaddr_in *)ai->ai_addr)->sin_addr, buf.data(), buf.size());
             else if (ai->ai_family == AF_INET6)
@@ -32,7 +39,6 @@ namespace planet {
             store.emplace_back(buf.data());
             std::fill(buf.begin(), buf.end(), 0);
         }
-        freeaddrinfo(result);
         return 0;
     }
 
