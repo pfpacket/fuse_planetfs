@@ -17,11 +17,12 @@
 #include <planet/planet_handle.hpp>
 #include <planet/dns_op.hpp>
 #include <planet/tcp_client_op.hpp>
+#include <planet/tcp_server_op.hpp>
 #include <planet/packet_socket_op.hpp>
 #include <syslog.h>
 
 #define LOG_EXCEPTION_MSG(e) \
-    ::syslog(LOG_INFO, "%s: %s", __func__, e.what());
+    ::syslog(LOG_ERR, "%s: %s", __func__, (e).what());
 
 // Core filesystem object
 planet::core_file_system fs_root(S_IRWXU);
@@ -210,6 +211,7 @@ void planet_install_file_operations()
 {
     fs_root.install_op<planet::dns_op>();
     fs_root.install_op<planet::tcp_client_op>();
+    fs_root.install_op<planet::tcp_server_op>(fs_root);
     fs_root.install_op<planet::packet_socket_op>();
     fs_root.install_op<planet::default_file_op>();
 }

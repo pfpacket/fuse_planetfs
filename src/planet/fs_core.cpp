@@ -22,11 +22,16 @@ namespace planet {
 
     int core_file_system::mknod(path_type const& path, mode_t mode, dev_t device)
     {
+        return mknod(path, mode, device, path_mgr_[path]);
+    }
+
+    int core_file_system::mknod(path_type const& path, mode_t mode, dev_t device, op_type_code op_code)
+    {
         if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
             st_inode new_inode;
             new_inode.dev  = device;
             new_inode.mode = mode;
-            parent_dir->add_entry<file_entry>(path.filename().string(), path_mgr_[path], new_inode);
+            parent_dir->add_entry<file_entry>(path.filename().string(), op_code, new_inode);
         } else
             throw exception_errno(ENOENT);
         return 0;
@@ -52,7 +57,7 @@ namespace planet {
         return 0;
     }
 
-    std::vector<std::string> core_file_system::readdir(path_type const& path)
+    std::vector<std::string> core_file_system::readdir(path_type const& path) const
     {
         std::vector<std::string> store;
         if (auto dir_ent = directory_cast(get_entry_of(path))) {
