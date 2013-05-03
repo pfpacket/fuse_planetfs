@@ -1,0 +1,38 @@
+#
+#
+#              README
+#          fuse_planetfs
+#
+
+ fuse_planetfs is a filesystem which provides
+file abstraction of network and network transparency.
+
+INSTALL:
+    Just run:
+        $ make
+    or to specify Boost directory:
+        $ make BOOST_ROOT="path_to_boost"
+
+DEPENDENCIES AND REQUIREMENTS:
+    Compilation time:
+        Boost C++ libraries
+    Runtime:
+        Boost C++ libraries
+        Root or CAP_NET_RAW capability
+         (for packet sockets)
+
+RUN:
+    To mount ./net directory run:
+        $ make mount
+    and if you want to specify mount point:
+        $ make mount MNTDIR="path_to_dir"
+    To run planetfs in the foreground and see the debug messages:
+        $ make debug_mount
+    And run following to unmount planetfs:
+        $ make umount MNTDIR="path_to_mount_point"
+    (Note): Packet socket functionality requires root or
+    CAP_NET_RAW capability.
+
+API:
+    See example/ directory for example programs.
+    Most functionalities are provided through files.

@@ -1,36 +1,44 @@
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <planet/common.hpp>
+#include <planet/fs_core.hpp>
 #include <planet/tcp_accepted_client_op.hpp>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 namespace planet {
 
 
-int tcp_accepted_client_op::open(fusecpp::path_type const& path, struct fuse_file_info& fi)
-{
-    return 0;
-}
+    shared_ptr<planet_operation> tcp_accepted_client_op::new_instance() const
+    {
+        return std::make_shared<tcp_accepted_client_op>();
+    }
 
-inline int tcp_accepted_client_op::read(fusecpp::path_type const& path, char *buf, size_t size, off_t offset, struct fuse_file_info& fi)
-{
-    return ::recv(fd_, buf, size, 0);
-}
+    int tcp_accepted_client_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
+    {
+        // Get already opened file descriptor from vector
+        fd_ = *reinterpret_cast<int *>(data_vector(*file_ent).data());
+        return 0;
+    }
 
-inline int tcp_accepted_client_op::write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi)
-{
-    return ::send(fd_, buf, size, 0);
-}
+    int tcp_accepted_client_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
+    {
+        return ::recv(fd_, buf, size, 0);
+    }
 
-inline int tcp_accepted_client_op::release(fusecpp::path_type const& path, struct fuse_file_info& fi)
-{
-    return ::close(fd_);
-}
+    int tcp_accepted_client_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
+    {
+        return ::send(fd_, buf, size, 0);
+    }
 
-// bool tcp_accepted_client_op::is_matching_path(fusecpp::path_type const& path)
-// {
-// }
+    int tcp_accepted_client_op::release(shared_ptr<file_entry> file_ent)
+    {
+        return ::close(fd_);
+    }
+
+    bool tcp_accepted_client_op::is_matching_path(path_type const& path)
+    {
+        return false;
+    }
 
 
 }   // namespace planet

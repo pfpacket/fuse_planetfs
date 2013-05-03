@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     char client_path[1024] = {0}, buffer[65535] = {0};
 
     /* Establish a server waiting on port 10000 */
-    fd = open("./net/eth/ip/tcp/*:10000", O_CREAT | O_RDWR, S_IRWXU);
+    fd = open("./net/tcp/*!10000", O_CREAT | O_RDWR, S_IRWXU);
     if (fd < 0)
         die("open");
 

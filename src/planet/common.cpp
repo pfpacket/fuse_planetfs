@@ -1,10 +1,10 @@
 
-#include <fusecpp/common.hpp>
+#include <planet/common.hpp>
 
-namespace fusecpp {
+namespace planet {
 
     namespace detail {
-        
+
         std::function<void (void *)> const null_deleter = [](void *) {};
 
         char const * const errmsg[] = {
@@ -12,7 +12,7 @@ namespace fusecpp {
             "invalid cast from \'fusecpp_entry\' to \'directory\'"
         };
 
-        generic_shared_null_ptr_t shared_null_ptr;
+        generic_shared_null_ptr_t const shared_null_ptr;
 
     }   // namespace detail
 
@@ -21,4 +21,5 @@ namespace fusecpp {
         return detail::errmsg[num];
     }
 
-}   // namespace fusecpp
+}   // namespace planet
+

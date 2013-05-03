@@ -1,25 +1,32 @@
-#ifndef PLANET_PACKET_SOCKET_OP_HPP
-#define PLANET_PACKET_SOCKET_OP_HPP
+#ifndef PLANET_PACKET_SOCKET_HPP
+#define PLANET_PACKET_SOCKET_HPP
 
-#include <boost/filesystem/path.hpp>
 #include <planet/common.hpp>
-#include <planet/planet_handle.hpp>
+#include <planet/basic_operation.hpp>
+#include <planet/fs_core.hpp>
 
 namespace planet {
 
+
 class packet_socket_op : public planet_operation {
+private:
     int fd_;
 
-public:
-    virtual ~packet_socket_op() = default;
-    int open(fusecpp::path_type const& path, struct fuse_file_info& fi);
-    int read(fusecpp::path_type const& path, char *buf, size_t size, off_t offset, struct fuse_file_info& fi);
-    int write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi);
-    int release(fusecpp::path_type const& path, struct fuse_file_info& fi);
+    static void bind_to_interface(int fd, std::string const& ifname, int protocol);
+    static int do_packet_socket_open(int sock_type, int protocol, std::string const& ifname);
 
-    static bool is_matching_path(fusecpp::path_type const&);
+public:
+    ~packet_socket_op() = default;
+
+    shared_ptr<planet_operation> new_instance() const;
+    int open(shared_ptr<file_entry> file_ent, path_type const& path) override;
+    int read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset) override;
+    int write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset) override;
+    int release(shared_ptr<file_entry> file_ent) override;
+    static bool is_matching_path(path_type const&);
 };
+
 
 }   // namespace planet
 
-#endif  // PLANET_PACKET_SOCKET_OP_HPP
+#endif  // PLANET_PACKET_SOCKET_HPP

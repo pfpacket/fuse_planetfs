@@ -1,27 +1,33 @@
 #ifndef PLANET_DNS_OP_HPP
 #define PLANET_DNS_OP_HPP
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <planet/planet_handle.hpp>
+#include <planet/common.hpp>
+#include <planet/basic_operation.hpp>
+#include <planet/fs_core.hpp>
 
 namespace planet {
 
+
 class dns_op : public planet_operation {
+private:
     std::string hostname_;
     std::vector<std::string> resolved_names_;
 
-    static int forward_lookup(std::string const& hostname, int family, std::vector<std::string>& store);
-public:
-    virtual ~dns_op();
-    int open(fusecpp::path_type const& path, struct fuse_file_info& fi);
-    int read(fusecpp::path_type const& path, char *buf, size_t size, off_t offset, struct fuse_file_info& fi);
-    int write(fusecpp::path_type const& path, char const *buf, size_t size, off_t offset, struct fuse_file_info& fi);
-    int release(fusecpp::path_type const& path, struct fuse_file_info& fi);
+    static int forward_lookup(
+        string_type const& hostname, int family, std::vector<string_type>& store
+    );
 
-    static bool is_matching_path(fusecpp::path_type const&);
+public:
+    dns_op() = default;
+
+    shared_ptr<planet_operation> new_instance() const;
+    int open(shared_ptr<file_entry> file_ent, path_type const& path) override;
+    int read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset) override;
+    int write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset) override;
+    int release(shared_ptr<file_entry> file_ent) override;
+    static bool is_matching_path(path_type const&);
 };
+
 
 }   // namespace planet
 

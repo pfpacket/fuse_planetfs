@@ -3,7 +3,7 @@ CFLAGS     = -Wall -O2
 TARGETS    = dns_example \
 			 tcp_client_example \
 			 tcp_server_example \
-			 packet_recv_example.o
+			 packet_recv_example
 
 all: $(TARGETS)
 
