@@ -24,7 +24,7 @@ namespace planet {
 
     // planet string type
     typedef std::string string_type;
-    
+
     // entry path type (better string class)
     typedef boost::filesystem::path path_type;
 

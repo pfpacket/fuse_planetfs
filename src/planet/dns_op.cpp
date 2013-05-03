@@ -78,7 +78,7 @@ namespace planet {
     {
         return 0;
     }
-    
+
     bool dns_op::is_matching_path(path_type const& path)
     {
         return path == "/dns";
