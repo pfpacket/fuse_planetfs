@@ -262,10 +262,10 @@ private:
 
 class core_file_system {
 public:
-    core_file_system()
+    core_file_system(mode_t root_mode)
     {
         st_inode new_inode;
-        new_inode.mode = S_IRWXU | S_IFDIR;
+        new_inode.mode = root_mode | S_IFDIR;
         root = std::make_shared<dentry>("/", new_inode);
     }
 

@@ -24,7 +24,7 @@
     ::syslog(LOG_INFO, "%s: %s", __func__, e.what());
 
 // Core filesystem object
-planet::core_file_system fs_root;
+planet::core_file_system fs_root(S_IRWXU);
 
 static int planet_getattr(char const *path, struct stat *stbuf)
 {
