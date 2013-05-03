@@ -41,4 +41,4 @@ umount:
 
 clean:
 	rm -f $(TARGET) $(OBJS)
-#	$(MAKE) -C example/ clean
+	$(MAKE) -C example/ clean
