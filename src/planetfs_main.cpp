@@ -89,7 +89,28 @@ static int planet_chown(char const *path, uid_t uid, gid_t gid)
 
 static int planet_utimens(char const* path, struct timespec const tv[2])
 {
-    return 0;
+    int ret = 0;
+    try {
+        namespace ch = std::chrono;
+        if (auto entry = fs_root.get_entry_of(path)) {
+            ch::nanoseconds nano_access(tv[0].tv_nsec), nano_mod(tv[1].tv_nsec);
+            ch::seconds sec_access(tv[0].tv_nsec), sec_mod(tv[1].tv_nsec);
+            planet::st_inode new_inode = entry->inode();
+            new_inode.atime = decltype(new_inode.atime)
+                (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_access + sec_access));
+            new_inode.mtime = decltype(new_inode.atime)
+                (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_mod + sec_mod));
+            entry->inode(new_inode);
+        } else
+            throw planet::exception_errno(ENOENT);
+    } catch (planet::exception_errno& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.get_errno();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
 }
 
 static int planet_open(char const *path, struct fuse_file_info *fi)

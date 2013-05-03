@@ -59,6 +59,7 @@ public:
     virtual size_t size() const noexcept = 0;
     // Inode of this entry
     virtual st_inode const& inode() const = 0;
+    virtual void inode(st_inode const&) = 0;
 };
 
 class planet_operation;
@@ -100,6 +101,11 @@ public:
     st_inode const& inode() const
     {
         return inode_;
+    }
+
+    void inode(st_inode const& inode)
+    {
+        inode_ = inode;
     }
 
     decltype(data_) const& data_buffer() const
@@ -157,6 +163,11 @@ public:
     st_inode const& inode() const
     {
         return inode_;
+    }
+
+    void inode(st_inode const& inode)
+    {
+        inode_ = inode;
     }
 
     decltype(entries_) const& entries() const
