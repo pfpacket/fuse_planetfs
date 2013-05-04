@@ -16,7 +16,14 @@ private:
     static int do_packet_socket_open(int sock_type, int protocol, std::string const& ifname);
 
 public:
-    ~packet_socket_op() = default;
+    packet_socket_op()
+    {
+        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
+    }
+    ~packet_socket_op() noexcept
+    {
+        ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
+    }
 
     shared_ptr<planet_operation> new_instance() const;
     int open(shared_ptr<file_entry> file_ent, path_type const& path) override;

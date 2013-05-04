@@ -14,6 +14,7 @@
 #include <typeindex>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
+#include <syslog.h>
 
 // namespace for planetfs
 namespace planet {

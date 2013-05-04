@@ -21,6 +21,11 @@ public:
 
     tcp_server_op(core_file_system& fs_root) : fs_root_(fs_root)
     {
+        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
+    }
+    ~tcp_server_op() noexcept
+    {
+        ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
 
     shared_ptr<planet_operation> new_instance() const;

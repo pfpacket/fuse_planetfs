@@ -46,6 +46,7 @@ namespace planet {
         if (path.parent_path() == "/ip")
             socket_type = SOCK_DGRAM;
         fd_ = do_packet_socket_open(socket_type, protocol, path.filename().string());
+        ::syslog(LOG_NOTICE, "%s: created packet socket fd=%d", __PRETTY_FUNCTION__, fd_);
         return 0;
     }
 

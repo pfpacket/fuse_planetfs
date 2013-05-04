@@ -18,7 +18,15 @@ private:
 public:
     static char const host_port_delimiter = '!';
 
-    tcp_client_op() = default;
+    //tcp_client_op() = default;
+    tcp_client_op()
+    {
+        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
+    }
+    ~tcp_client_op() noexcept
+    {
+        ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
+    }
 
     shared_ptr<planet_operation> new_instance() const;
     int open(shared_ptr<file_entry> file_ent, path_type const& path) override;

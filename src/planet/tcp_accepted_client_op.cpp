@@ -17,6 +17,7 @@ namespace planet {
     {
         // Get already opened file descriptor from vector
         fd_ = *reinterpret_cast<int *>(data_vector(*file_ent).data());
+        ::syslog(LOG_NOTICE, "%s: found tcp socket fd=%d", __PRETTY_FUNCTION__, fd_);
         return 0;
     }
 

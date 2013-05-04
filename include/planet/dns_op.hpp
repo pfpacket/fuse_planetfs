@@ -18,7 +18,15 @@ private:
     );
 
 public:
-    dns_op() = default;
+    //dns_op() = default;
+    dns_op()
+    {
+        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
+    }
+    ~dns_op() noexcept
+    {
+        ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
+    }
 
     shared_ptr<planet_operation> new_instance() const;
     int open(shared_ptr<file_entry> file_ent, path_type const& path) override;
