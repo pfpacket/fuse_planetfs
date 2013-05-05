@@ -95,7 +95,7 @@ static int planet_utimens(char const* path, struct timespec const tv[2])
         namespace ch = std::chrono;
         if (auto entry = fs_root.get_entry_of(path)) {
             ch::nanoseconds nano_access(tv[0].tv_nsec), nano_mod(tv[1].tv_nsec);
-            ch::seconds sec_access(tv[0].tv_nsec), sec_mod(tv[1].tv_nsec);
+            ch::seconds sec_access(tv[0].tv_sec), sec_mod(tv[1].tv_sec);
             planet::st_inode new_inode = entry->inode();
             new_inode.atime = decltype(new_inode.atime)
                 (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_access + sec_access));
