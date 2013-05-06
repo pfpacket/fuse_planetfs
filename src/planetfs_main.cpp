@@ -88,6 +88,11 @@ static int planet_chown(char const *path, uid_t uid, gid_t gid)
     return 0;
 }
 
+static int planet_truncate(char const *path, off_t offset)
+{
+    return 0;
+}
+
 static int planet_utimens(char const* path, struct timespec const tv[2])
 {
     int ret = 0;
@@ -242,6 +247,7 @@ int main(int argc, char **argv)
         planet_ops.mkdir    = planet_mkdir;
         planet_ops.chmod    = planet_chmod;
         planet_ops.chown    = planet_chown;
+        planet_ops.truncate = planet_truncate;
         planet_ops.utimens  = planet_utimens;
         planet_ops.open     = planet_open;
         planet_ops.read     = planet_read;
