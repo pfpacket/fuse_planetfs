@@ -211,13 +211,27 @@ class path_manager {
 public:
     typedef op_type_code index_type;
     typedef std::function<bool (path_type const&)> functor_type;
-    typedef std::vector<std::pair<index_type, functor_type>> mapper_type;
+    typedef std::pair<index_type, functor_type> value_type;
+    typedef std::vector<value_type> mapper_type;
 
     template<typename OpType>
     void add_new_type()
     {
         path2type_.push_back(
             std::make_pair(index_type(typeid(OpType)), OpType::is_matching_path)
+        );
+    }
+
+    template<typename OpType>
+    void remove_type()
+    {
+        path2type_.erase(
+            std::remove_if(
+                path2type_.begin(), path2type_.end(),[]
+                (value_type const& pair) {
+                    return pair.first == typeid(OpType);
+                }
+            ), path2type_.end()
         );
     }
 
@@ -254,6 +268,17 @@ public:
             std::make_pair(index_type(typeid(OpType)),
                 std::make_shared<OpType>(std::forward<Types>(args)...)
             )
+        );
+    }
+
+    template<typename OpType>
+    void remove_op()
+    {
+        type2op_.erase(
+            std::remove(
+                type2op_.begin(), type2op_.end(), typeid(OpType)
+            ),
+            type2op_.end()
         );
     }
 
