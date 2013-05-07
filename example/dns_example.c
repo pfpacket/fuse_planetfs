@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     char buffer[1024];
     static char const *request = "resolve_inet www.google.co.jp";
 
-    fd = open("./net/dns", O_RDWR, S_IRWXU);
+    fd = open("./net/dns", O_RDWR);
     if (fd < 0) {
         perror("open");
         return EXIT_FAILURE;

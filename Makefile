@@ -17,6 +17,8 @@ OBJS       = src/planetfs_main.o \
              src/planet/packet_socket_op.o
 TARGET     = fuse_planetfs
 MNTDIR     = ./net
+MNTOPT     = -o direct_io -o atomic_o_trunc -o intr
+MNTDBGOPT  = $(MNTOPT) -d -f -s
 
 all: $(TARGET)
 rebuild:  clean all
@@ -29,11 +31,11 @@ examples:
 
 mount: $(TARGET)
 	mkdir -p $(MNTDIR)
-	./$(TARGET) -o direct_io $(MNTDIR)
+	./$(TARGET) $(MNTOPT) $(MNTDIR)
 
 debug_mount: $(TARGET)
 	mkdir -p $(MNTDIR)
-	./$(TARGET) -d -f -s -o direct_io $(MNTDIR)
+	./$(TARGET) $(MNTDBGOPT) $(MNTDIR)
 
 umount:
 	fusermount -u $(MNTDIR)
