@@ -21,9 +21,9 @@ public:
     dev_t dev = 0;
     mode_t mode = 0;
     std::chrono::system_clock::time_point
-        atime = std::chrono::steady_clock::now(),
-        mtime = std::chrono::steady_clock::now(),
-        ctime = std::chrono::steady_clock::now();
+        atime = std::chrono::system_clock::now(),
+        mtime = std::chrono::system_clock::now(),
+        ctime = std::chrono::system_clock::now();
 
     decltype(atime) last_access_time() const
     {
