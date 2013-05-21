@@ -23,6 +23,9 @@ public:
     virtual int read(shared_ptr<file_entry>, char *buf, size_t size, off_t offset) = 0;
     virtual int write(shared_ptr<file_entry>, char const *buf, size_t size, off_t offset) = 0;
     virtual int release(shared_ptr<file_entry>) = 0;
+
+    virtual int mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t) = 0;
+    virtual int rmnod(shared_ptr<file_entry>, path_type const&) = 0;
 };
 
 
@@ -41,6 +44,8 @@ public:
     int read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset) override;
     int release(shared_ptr<file_entry> file_ent) override;
+    int mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t) override;
+    int rmnod(shared_ptr<file_entry>, path_type const&) override;
     static bool is_matching_path(path_type const&)
     {
         return true;

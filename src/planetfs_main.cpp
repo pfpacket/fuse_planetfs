@@ -15,10 +15,10 @@
 #include <planet/fs_core.hpp>
 #include <planet/operation_layer.hpp>
 #include <planet/planet_handle.hpp>
-#include <planet/dns_op.hpp>
+//#include <planet/dns_op.hpp>
 #include <planet/tcp_client_op.hpp>
 #include <planet/tcp_server_op.hpp>
-#include <planet/packet_socket_op.hpp>
+//#include <planet/packet_socket_op.hpp>
 #include <syslog.h>
 
 #define LOG_EXCEPTION_MSG(e) \
@@ -52,6 +52,22 @@ static int planet_mknod(char const *path, mode_t mode, dev_t device)
     int ret = 0;
     try {
         ret = fs_root.mknod(path, mode, device);
+    } catch (planet::exception_errno& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.get_errno();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
+}
+
+static int planet_unlink(char const *path)
+{
+    ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
+    int ret = 0;
+    try {
+        ret = fs_root.unlink(path);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -214,22 +230,22 @@ static int planet_release(char const *path, struct fuse_file_info *fi)
 // Install certain file operations
 void planet_install_file_operations()
 {
-    fs_root.install_op<planet::dns_op>();
+//    fs_root.install_op<planet::dns_op>();
     fs_root.install_op<planet::tcp_client_op>();
     fs_root.install_op<planet::tcp_server_op>(fs_root);
-    fs_root.install_op<planet::packet_socket_op>();
-    fs_root.install_op<planet::default_file_op>();
+//    fs_root.install_op<planet::packet_socket_op>();
+//    fs_root.install_op<planet::default_file_op>();
 }
 
 // Create initial filesystem structure
 void planet_create_initial_fs_structure()
 {
-    fs_root.mkdir("/eth",       S_IFDIR | S_IRWXU);
-    fs_root.mkdir("/ip",        S_IFDIR | S_IRWXU);
+//    fs_root.mkdir("/eth",       S_IFDIR | S_IRWXU);
+//    fs_root.mkdir("/ip",        S_IFDIR | S_IRWXU);
     fs_root.mkdir("/tcp",       S_IFDIR | S_IRWXU);
-    fs_root.mknod("/dns",       S_IFREG | S_IRWXU, 0);
-    fs_root.mknod("/eth/eth0",  S_IFREG | S_IRWXU, 0);
-    fs_root.mknod("/eth/wlan0", S_IFREG | S_IRWXU, 0);
+//    fs_root.mknod("/dns",       S_IFREG | S_IRWXU, 0);
+//    fs_root.mknod("/eth/eth0",  S_IFREG | S_IRWXU, 0);
+//    fs_root.mknod("/eth/wlan0", S_IFREG | S_IRWXU, 0);
 }
 
 static struct fuse_operations planet_ops{};
@@ -244,6 +260,7 @@ int main(int argc, char **argv)
         planet_create_initial_fs_structure();
         planet_ops.getattr  = planet_getattr;
         planet_ops.mknod    = planet_mknod;
+        planet_ops.unlink   = planet_unlink;
         planet_ops.mkdir    = planet_mkdir;
         planet_ops.chmod    = planet_chmod;
         planet_ops.chown    = planet_chown;

@@ -10,19 +10,20 @@ namespace planet {
 
 class tcp_server_op : public planet_operation {
 private:
-    int port_, fd_;
-    std::string host_;
+    int server_fd_, client_fd_;
     core_file_system& fs_root_;
 
-    static int do_tcp_server_open(std::string const& host, int port);
+    static int establish_server(std::string const& host, int port);
 
 public:
     static char const host_port_delimiter = '!';
 
-    tcp_server_op(core_file_system& fs_root) : fs_root_(fs_root)
+    tcp_server_op(core_file_system& fs_root)
+        : fs_root_(fs_root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
+
     ~tcp_server_op() noexcept
     {
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
@@ -33,6 +34,10 @@ public:
     int read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset) override;
     int release(shared_ptr<file_entry> file_ent) override;
+
+    int mknod(shared_ptr<file_entry>, path_type const& path, mode_t, dev_t) override;
+    int rmnod(shared_ptr<file_entry>, path_type const&) override;
+
     static bool is_matching_path(path_type const&);
 };
 

@@ -32,6 +32,13 @@ namespace planet {
             new_inode.dev  = device;
             new_inode.mode = mode;
             parent_dir->add_entry<file_entry>(path.filename().string(), op_code, new_inode);
+            try {
+                auto fentry = file_cast(get_entry_of(path));
+                ops_mgr_[fentry->get_op()]->mknod(fentry, path, mode, device);
+            } catch (...) {
+                parent_dir->remove_entry(path.filename().string());
+                throw;
+            }
         } else
             throw exception_errno(ENOENT);
         return 0;
@@ -39,9 +46,11 @@ namespace planet {
 
     int core_file_system::unlink(path_type const& path)
     {
-        if (auto parent_dir = directory_cast(get_entry_of(path.parent_path())))
+        if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
+            auto fentry = file_cast(get_entry_of(path));
+            ops_mgr_[fentry->get_op()]->rmnod(fentry, path);
             parent_dir->remove_entry(path.filename().string());
-        else
+        } else
             throw exception_errno(ENOENT);
         return 0;
     }
@@ -71,14 +80,18 @@ namespace planet {
     handle_t core_file_system::open(path_type const& path)
     {
         handle_t new_handle;
-        if (auto fentry = file_cast(get_entry_of(path))) {
-            if (fentry->type() != file_type::regular_file)
+        if (auto entry = get_entry_of(path)) {
+            if (entry->type() != file_type::regular_file)
                 throw exception_errno(EISDIR);
+            auto fentry = file_cast(entry);
             new_handle = handle_mgr.register_op(fentry, ops_mgr_[fentry->get_op()]->new_instance());
-            auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
-            std::get<1>(op_tuple)->open(
-                std::get<0>(op_tuple), path
-            );
+            try {
+                auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
+                std::get<1>(op_tuple)->open(std::get<0>(op_tuple), path);
+            } catch (...) {
+                handle_mgr.unregister_op(new_handle);
+                throw;
+            }
         } else
             throw exception_errno(ENOENT);
         return new_handle;
