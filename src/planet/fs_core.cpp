@@ -30,7 +30,7 @@ namespace planet {
         if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
             st_inode new_inode;
             new_inode.dev  = device;
-            new_inode.mode = mode;
+            new_inode.mode = mode | S_IFREG;
             parent_dir->add_entry<file_entry>(path.filename().string(), op_code, new_inode);
             try {
                 auto fentry = file_cast(get_entry_of(path));
@@ -59,7 +59,7 @@ namespace planet {
     {
         if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
             st_inode new_inode;
-            new_inode.mode = mode;
+            new_inode.mode = mode | S_IFDIR;
             parent_dir->add_entry<dentry>(path.filename().string(), new_inode);
         } else
             throw exception_errno(ENOENT);

@@ -46,7 +46,8 @@ namespace planet {
         if (path.parent_path() == "/ip")
             socket_type = SOCK_DGRAM;
         fd_ = do_packet_socket_open(socket_type, protocol, path.filename().string());
-        ::syslog(LOG_NOTICE, "%s: created packet socket fd=%d", __PRETTY_FUNCTION__, fd_);
+        ::syslog(LOG_NOTICE, "%s: created packet socket fd=%d interface=%s"
+            , __PRETTY_FUNCTION__, fd_, path.filename().string().c_str());
         return 0;
     }
 
@@ -63,6 +64,16 @@ namespace planet {
     int packet_socket_op::release(shared_ptr<file_entry> file_ent)
     {
         return close(fd_);
+    }
+
+    int packet_socket_op::mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t)
+    {
+        return 0;
+    }
+
+    int packet_socket_op::rmnod(shared_ptr<file_entry>, path_type const&)
+    {
+        return 0;
     }
 
     bool packet_socket_op::is_matching_path(path_type const& path)

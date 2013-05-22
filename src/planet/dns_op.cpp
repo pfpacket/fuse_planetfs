@@ -85,6 +85,16 @@ namespace planet {
         return 0;
     }
 
+    int dns_op::mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t)
+    {
+        return 0;
+    }
+
+    int dns_op::rmnod(shared_ptr<file_entry>, path_type const&)
+    {
+        return 0;
+    }
+
     bool dns_op::is_matching_path(path_type const& path)
     {
         return path == "/dns";
