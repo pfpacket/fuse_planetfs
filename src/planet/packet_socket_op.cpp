@@ -24,7 +24,9 @@ namespace planet {
         sll.sll_family      = AF_PACKET;
         sll.sll_halen       = IFHWADDRLEN;
         sll.sll_protocol    = protocol;
-        sll.sll_ifindex       = if_nametoindex(ifname.c_str());
+        sll.sll_ifindex     = if_nametoindex(ifname.c_str());
+        if (!sll.sll_ifindex)
+            throw planet::exception_errno(errno);
         if (::bind(fd, reinterpret_cast<sockaddr *>(&sll), sizeof (sll)) < 0)
             throw planet::exception_errno(errno);
     }
@@ -46,7 +48,7 @@ namespace planet {
         if (path.parent_path() == "/ip")
             socket_type = SOCK_DGRAM;
         fd_ = do_packet_socket_open(socket_type, protocol, path.filename().string());
-        ::syslog(LOG_NOTICE, "%s: created packet socket fd=%d interface=%s"
+        ::syslog(LOG_NOTICE, "%s: opened fd=%d ifname=%s"
             , __PRETTY_FUNCTION__, fd_, path.filename().string().c_str());
         return 0;
     }
