@@ -33,6 +33,12 @@ namespace planet {
         return *reinterpret_cast<Type *>(buffer.data());
     }
 
+    template<typename T, typename D>
+    std::unique_ptr<T, D> make_unique_ptr(T *p, D d) noexcept
+    {
+        return std::unique_ptr<T, D>(p, std::forward<D>(d));
+    }
+
 
 }   // namespace planet
 

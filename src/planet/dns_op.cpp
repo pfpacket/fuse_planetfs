@@ -1,6 +1,7 @@
 
 #include <planet/common.hpp>
 #include <planet/dns_op.hpp>
+#include <planet/utils.hpp>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -12,12 +13,6 @@ namespace planet {
     shared_ptr<planet_operation> dns_op::new_instance() const
     {
         return std::make_shared<dns_op>();
-    }
-
-    template<typename T, typename D>
-    std::unique_ptr<T, D> make_unique_ptr(T *p, D d) noexcept
-    {
-        return std::unique_ptr<T, D>(p, std::forward<D>(d));
     }
 
     int dns_op::forward_lookup(std::string const& hostname, int family, std::vector<std::string>& store)
