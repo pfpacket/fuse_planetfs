@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     int fd, size;
     char buffer[65535];
     /* /net/eth/eth0 - Receive packets from eth0 */
-    fd = open("./net/eth/wlan0", O_RDWR);
+    fd = open("/net/eth/wlan0", O_RDWR);
     if (fd < 0) {
         perror("open");
         return EXIT_FAILURE;

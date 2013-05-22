@@ -22,7 +22,7 @@ DEPENDENCIES AND REQUIREMENTS:
          (for packet sockets)
 
 RUN:
-    To mount ./net directory run:
+    To mount /net directory run:
         $ make mount
     and if you want to specify mount point:
         $ make mount MNTDIR="path_to_dir"

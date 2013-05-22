@@ -9,12 +9,15 @@ OBJS       = src/planet/common.o \
              src/planet/utils.o \
              src/planet/planet_handle.o \
              src/planet/basic_operation.o \
+             src/planet/dns_op.o \
              src/planet/tcp_client_op.o \
              src/planet/tcp_server_op.o \
+             src/planet/packet_socket_op.o \
              src/planetfs_main.o
 TARGET     = fuse_planetfs
-MNTDIR     = ./net
-MNTOPT     = -o direct_io -o atomic_o_trunc -o intr
+MNTDIR     = /net
+MNTOPT     = -o direct_io -o atomic_o_trunc \
+             -o intr -o allow_other
 MNTDBGOPT  = $(MNTOPT) -d -f -s
 
 all: $(TARGET)
@@ -36,6 +39,8 @@ debug_mount: $(TARGET)
 
 umount:
 	fusermount -u $(MNTDIR)
+
+remount: umount mount
 
 .cpp.o: 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
