@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
     while (1) {
         /* Accept a client's connection */
-        client_fd = open("./net/tcp/*!10000", O_RDWR);
+        client_fd = open("/net/tcp/*!10000", O_RDWR);
         if (client_fd < 0)
             die("read");
         printf("accepted client\n");
@@ -45,5 +45,6 @@ int main(int argc, char **argv)
         close(client_fd);
     }
     close(server_fd);
+    remove("/net/tcp/*!10000");
     return EXIT_SUCCESS;
 }
