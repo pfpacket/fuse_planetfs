@@ -12,6 +12,7 @@
 #include <net/ethernet.h>
 #include <netinet/ether.h>
 #include <arpa/inet.h>
+#include <limits.h>
 #include <fcntl.h>
 
 void print_ethernet_header(struct ether_header const *eth)
@@ -24,9 +25,16 @@ void print_ethernet_header(struct ether_header const *eth)
 int main(int argc, char **argv)
 {
     int fd, size;
-    char buffer[65535];
+    char path[PATH_MAX] = "/net/eth/", buffer[65535];
+
+    if (argc < 2) {
+        printf("Usage: %s INTERFACE_NAME\n", argv[0]);
+        return 1;
+    }
+
     /* /net/eth/eth0 - Receive packets from eth0 */
-    fd = open("./net/eth/wlan0", O_RDWR);
+    strcat(path, argv[1]);
+    fd = open(path, O_RDWR);
     if (fd < 0) {
         perror("open");
         return EXIT_FAILURE;

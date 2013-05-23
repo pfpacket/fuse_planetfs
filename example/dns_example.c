@@ -14,10 +14,15 @@
 int main(int argc, char **argv)
 {
     int fd, size;
-    char buffer[1024];
-    static char const *request = "resolve_inet www.google.co.jp";
+    char buffer[1024],
+         request[1024] = "resolve_inet ";
 
-    fd = open("./net/dns", O_RDWR);
+    if (argc < 2) {
+        printf("Usage: %s HOSTNAME\n", argv[0]);
+        return 1;
+    }
+
+    fd = open("/net/dns", O_RDWR);
     if (fd < 0) {
         perror("open");
         return EXIT_FAILURE;
@@ -29,6 +34,7 @@ int main(int argc, char **argv)
      * 'resolve_inet hostname'  - AF_INET
      * 'resolve_inet6 hostname' - AF_INET6
      */
+    strcat(request, argv[1]);
     size = write(fd, request, strlen(request));
     if (size < 0) {
         perror("write");

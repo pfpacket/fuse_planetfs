@@ -332,7 +332,7 @@ public:
 private:
     path_manager        path_mgr_;
     operation_manager   ops_mgr_;
-    shared_ptr<dentry> root = detail::shared_null_ptr;
+    shared_ptr<dentry>  root = detail::shared_null_ptr;
 
     shared_ptr<fs_entry> get_entry_of__(shared_ptr<dentry> root, path_type const& path) const;
 };

@@ -16,6 +16,29 @@ namespace planet {
     //          : Also shared_ptr may throw exceptions
     shared_ptr<dentry> directory_cast(shared_ptr<fs_entry> entry);
 
+    template<typename Type, typename VecType>
+    void store_data_to_vector(std::vector<VecType>& buffer, Type const& data)
+    {
+        buffer.reserve(sizeof (Type));
+        *reinterpret_cast<Type *>(buffer.data()) = data;
+    }
+
+    template<typename Type, typename VecType>
+    Type& get_data_from_vector(std::vector<VecType>& buffer)
+    {
+        if (buffer.capacity() < sizeof (Type))
+            throw std::out_of_range(
+                "get_data_from_vector(): buffer.capacity() < sizeof (Type)"
+            );
+        return *reinterpret_cast<Type *>(buffer.data());
+    }
+
+    template<typename T, typename D>
+    std::unique_ptr<T, D> make_unique_ptr(T *p, D d) noexcept
+    {
+        return std::unique_ptr<T, D>(p, std::forward<D>(d));
+    }
+
 
 }   // namespace planet
 

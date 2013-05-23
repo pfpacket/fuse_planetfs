@@ -10,8 +10,7 @@ namespace planet {
 
 class tcp_client_op : public planet_operation {
 private:
-    int port_, fd_;
-    std::string host_;
+    int fd_;
 
     static int connect_to(std::string const& host, int port);
 
@@ -33,6 +32,8 @@ public:
     int read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset) override;
     int release(shared_ptr<file_entry> file_ent) override;
+    int mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t) override;
+    int rmnod(shared_ptr<file_entry>, path_type const&) override;
     static bool is_matching_path(path_type const&);
 };
 

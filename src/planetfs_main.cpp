@@ -62,12 +62,28 @@ static int planet_mknod(char const *path, mode_t mode, dev_t device)
     return ret;
 }
 
+static int planet_unlink(char const *path)
+{
+    ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
+    int ret = 0;
+    try {
+        ret = fs_root.unlink(path);
+    } catch (planet::exception_errno& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.get_errno();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
+}
+
 static int planet_mkdir(char const *path, mode_t mode)
 {
     ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path, mode);
     int ret = 0;
     try {
-        ret = fs_root.mkdir(path, 0755 | S_IFDIR);
+        ret = fs_root.mkdir(path, 0755);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -224,12 +240,15 @@ void planet_install_file_operations()
 // Create initial filesystem structure
 void planet_create_initial_fs_structure()
 {
-    fs_root.mkdir("/eth",       S_IFDIR | S_IRWXU);
-    fs_root.mkdir("/ip",        S_IFDIR | S_IRWXU);
-    fs_root.mkdir("/tcp",       S_IFDIR | S_IRWXU);
-    fs_root.mknod("/dns",       S_IFREG | S_IRWXU, 0);
-    fs_root.mknod("/eth/eth0",  S_IFREG | S_IRWXU, 0);
-    fs_root.mknod("/eth/wlan0", S_IFREG | S_IRWXU, 0);
+    fs_root.mkdir("/ip",            S_IRWXU);
+    fs_root.mkdir("/tcp",           S_IRWXU);
+    fs_root.mkdir("/eth",           S_IRWXU);
+    fs_root.mknod("/eth/lo",        S_IRUSR | S_IWUSR, 0);
+    fs_root.mknod("/eth/eth0",      S_IRUSR | S_IWUSR, 0);
+    fs_root.mknod("/eth/wlan0",     S_IRUSR | S_IWUSR, 0);
+    fs_root.mknod("/eth/enp6s0",    S_IRUSR | S_IWUSR, 0);
+    fs_root.mknod("/eth/wlp3s0",    S_IRUSR | S_IWUSR, 0);
+    fs_root.mknod("/dns",           S_IRUSR | S_IWUSR, 0);
 }
 
 static struct fuse_operations planet_ops{};
@@ -244,6 +263,7 @@ int main(int argc, char **argv)
         planet_create_initial_fs_structure();
         planet_ops.getattr  = planet_getattr;
         planet_ops.mknod    = planet_mknod;
+        planet_ops.unlink   = planet_unlink;
         planet_ops.mkdir    = planet_mkdir;
         planet_ops.chmod    = planet_chmod;
         planet_ops.chown    = planet_chown;

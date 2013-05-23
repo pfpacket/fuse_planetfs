@@ -42,5 +42,14 @@ namespace planet {
         return 0;
     }
 
+    int default_file_op::mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t)
+    {
+        return 0;
+    }
+
+    int default_file_op::rmnod(shared_ptr<file_entry>, path_type const&)
+    {
+        return 0;
+    }
 
 }   // namespace planet
