@@ -7,3 +7,7 @@ utils/main.cpp
 net/
 TODO
 mount.planetfs
+example/dns_example
+example/packet_recv_example
+example/tcp_client_example
+example/tcp_server_example
