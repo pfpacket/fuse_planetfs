@@ -315,6 +315,7 @@ public:
     int unlink(path_type const& path);
 
     int mkdir(path_type const& path, mode_t mode);
+    int rmdir(path_type const& path);
 
     std::vector<std::string> readdir(path_type const& path) const;
 

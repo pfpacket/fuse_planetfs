@@ -55,6 +55,7 @@ int main(int argc, char **argv)
         planet_ops.mknod    = planet_mknod;
         planet_ops.unlink   = planet_unlink;
         planet_ops.mkdir    = planet_mkdir;
+        planet_ops.rmdir    = planet_rmdir;
         planet_ops.chmod    = planet_chmod;
         planet_ops.chown    = planet_chown;
         planet_ops.truncate = planet_truncate;

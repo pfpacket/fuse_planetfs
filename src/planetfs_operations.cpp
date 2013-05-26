@@ -78,6 +78,11 @@ int planet_mkdir(char const *path, mode_t mode)
     return ret;
 }
 
+int planet_rmdir(char const *path)
+{
+    return -EPERM;
+}
+
 int planet_chmod(char const *path, mode_t mode)
 {
     return 0;

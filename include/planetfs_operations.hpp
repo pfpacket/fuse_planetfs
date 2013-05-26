@@ -14,6 +14,7 @@ extern int planet_getattr(char const *, struct stat *);
 extern int planet_mknod(char const *, mode_t, dev_t);
 extern int planet_unlink(char const *);
 extern int planet_mkdir(char const *, mode_t);
+extern int planet_rmdir(char const *);
 extern int planet_chmod(char const *, mode_t);
 extern int planet_chown(char const *, uid_t, gid_t);
 extern int planet_truncate(char const *, off_t);

@@ -74,7 +74,7 @@ namespace planet {
 
     int packet_socket_op::rmnod(shared_ptr<file_entry>, path_type const&)
     {
-        return 0;
+        return -EPERM;
     }
 
     bool packet_socket_op::is_matching_path(path_type const& path)

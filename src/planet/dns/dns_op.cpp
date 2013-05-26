@@ -95,7 +95,7 @@ namespace planet {
 
     int dns_op::rmnod(shared_ptr<file_entry>, path_type const&)
     {
-        return 0;
+        return -EPERM;
     }
 
     bool dns_op::is_matching_path(path_type const& path)

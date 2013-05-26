@@ -46,13 +46,16 @@ namespace planet {
 
     int core_file_system::unlink(path_type const& path)
     {
+        int ret = 0;
         if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
             auto fentry = file_cast(get_entry_of(path));
-            ops_mgr_[fentry->get_op()]->rmnod(fentry, path);
+            ret = ops_mgr_[fentry->get_op()]->rmnod(fentry, path);
+            if (ret < 0)
+                return ret;
             parent_dir->remove_entry(path.filename().string());
         } else
             throw exception_errno(ENOENT);
-        return 0;
+        return ret;
     }
 
     int core_file_system::mkdir(path_type const& path, mode_t mode)
@@ -62,6 +65,15 @@ namespace planet {
             new_inode.mode = mode | S_IFDIR;
             parent_dir->add_entry<dentry>(path.filename().string(), new_inode);
         } else
+            throw exception_errno(ENOENT);
+        return 0;
+    }
+
+    int core_file_system::rmdir(path_type const& path)
+    {
+        if (auto parent_dir = directory_cast(get_entry_of(path.parent_path())))
+            parent_dir->remove_entry(path.filename().string());
+        else
             throw exception_errno(ENOENT);
         return 0;
     }
