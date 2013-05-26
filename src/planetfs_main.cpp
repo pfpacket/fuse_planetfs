@@ -9,10 +9,10 @@
 #include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
-#include <planet/dns_op.hpp>
-#include <planet/tcp_client_op.hpp>
-#include <planet/tcp_server_op.hpp>
-#include <planet/packet_socket_op.hpp>
+#include <planet/dns/dns_op.hpp>
+#include <planet/tcp/client_op.hpp>
+#include <planet/tcp/server_op.hpp>
+#include <planet/eth/packet_socket_op.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
 

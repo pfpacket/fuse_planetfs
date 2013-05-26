@@ -1,6 +1,6 @@
 
 #include <planet/common.hpp>
-#include <planet/dns_op.hpp>
+#include <planet/dns/dns_op.hpp>
 #include <planet/utils.hpp>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -9,6 +9,14 @@
 
 namespace planet {
 
+
+//    dns_op::dns_op(core_file_system& fs_root)
+//    {
+//        if (!fs_root.get_entry_of("/dns/clone")) {
+//            fs_root.install_op<dns_clone_op>(fs_root);
+//            fs_root.mknod("/dns/clone", S_IWUSR | S_IRUSR, 0, );
+//        }
+//    }
 
     shared_ptr<planet_operation> dns_op::new_instance() const
     {

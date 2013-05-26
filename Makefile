@@ -9,10 +9,10 @@ OBJS       = src/planet/common.o \
              src/planet/utils.o \
              src/planet/planet_handle.o \
              src/planet/basic_operation.o \
-             src/planet/dns_op.o \
-             src/planet/tcp_client_op.o \
-             src/planet/tcp_server_op.o \
-             src/planet/packet_socket_op.o \
+             src/planet/dns/dns_op.o \
+             src/planet/tcp/client_op.o \
+             src/planet/tcp/server_op.o \
+             src/planet/eth/packet_socket_op.o \
              src/planetfs_operations.o \
              src/planetfs_main.o
 TARGET     = mount.planetfs

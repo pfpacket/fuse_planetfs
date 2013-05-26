@@ -1,6 +1,6 @@
 
 #include <planet/common.hpp>
-#include <planet/packet_socket_op.hpp>
+#include <planet/eth/packet_socket_op.hpp>
 #include <sys/socket.h>
 #include <netpacket/packet.h>
 #include <net/if.h>
@@ -8,7 +8,6 @@
 #include <netinet/ether.h>
 #include <netinet/if_ether.h>
 #include <arpa/inet.h>
-#include <planet/packet_socket_op.hpp>
 
 namespace planet {
 
