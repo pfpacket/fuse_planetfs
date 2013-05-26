@@ -20,11 +20,10 @@ void die(char const *prefix)
 int main(int argc, char **argv)
 {
     char buffer[65535];
-    int server_fd, client_fd, size;
+    int client_fd, size;
 
     /* Establish a server waiting on port 10000 */
-    server_fd = open("/net/tcp/*!10000", O_CREAT | O_RDWR, S_IRWXU);
-    if (server_fd < 0)
+    if (mknod("/net/tcp/*!10000", S_IFREG | S_IRWXU, 0) < 0)
         die("open");
 
     while (1) {
@@ -32,7 +31,6 @@ int main(int argc, char **argv)
         client_fd = open("/net/tcp/*!10000", O_RDWR);
         if (client_fd < 0)
             die("read");
-        printf("accepted client\n");
 
         /* Receive the response of the remote host */
         do {
@@ -44,7 +42,6 @@ int main(int argc, char **argv)
         } while (size != 0);
         close(client_fd);
     }
-    close(server_fd);
     remove("/net/tcp/*!10000");
     return EXIT_SUCCESS;
 }
