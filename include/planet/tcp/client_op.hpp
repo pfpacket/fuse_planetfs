@@ -2,27 +2,29 @@
 #define PLANET_TCP_CLIENT_OP_HPP
 
 #include <planet/common.hpp>
+#include <planet/tcp/common.hpp>
 #include <planet/basic_operation.hpp>
 #include <planet/fs_core.hpp>
 
 namespace planet {
+namespace net {
+namespace tcp {
 
 
-class tcp_client_op : public planet_operation {
+class client_op : public planet_operation {
 private:
     int fd_;
 
     static int connect_to(std::string const& host, int port);
 
 public:
-    static char const host_port_delimiter = '!';
 
-    //tcp_client_op() = default;
-    tcp_client_op()
+    //client_op() = default;
+    client_op()
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
-    ~tcp_client_op() noexcept
+    ~client_op() noexcept
     {
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
@@ -38,6 +40,8 @@ public:
 };
 
 
+}   // namespace tcp
+}   // namespace net
 }   // namespace planet
 
-#endif  //PLANET_TCP_CLIENT_OP_HPP
+#endif  // PLANET_TCP_CLIENT_OP_HPP

@@ -12,7 +12,7 @@
 #include <planet/dns/dns_op.hpp>
 #include <planet/tcp/client_op.hpp>
 #include <planet/tcp/server_op.hpp>
-#include <planet/eth/packet_socket_op.hpp>
+#include <planet/eth/raw_op.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
 
@@ -20,10 +20,10 @@
 // Install certain file operations
 void planet_install_file_operations()
 {
-    fs_root.install_op<planet::dns_op>();
-    fs_root.install_op<planet::tcp_client_op>();
-    fs_root.install_op<planet::tcp_server_op>(fs_root);
-    fs_root.install_op<planet::packet_socket_op>();
+    fs_root.install_op<planet::net::dns::dns_op>();
+    fs_root.install_op<planet::net::tcp::client_op>();
+    fs_root.install_op<planet::net::tcp::server_op>(fs_root);
+    fs_root.install_op<planet::net::eth::raw_op>();
     fs_root.install_op<planet::default_file_op>();
 }
 

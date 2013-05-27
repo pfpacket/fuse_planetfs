@@ -12,7 +12,7 @@ OBJS       = src/planet/common.o \
              src/planet/dns/dns_op.o \
              src/planet/tcp/client_op.o \
              src/planet/tcp/server_op.o \
-             src/planet/eth/packet_socket_op.o \
+             src/planet/eth/raw_op.o \
              src/planetfs_operations.o \
              src/planetfs_main.o
 TARGET     = mount.planetfs

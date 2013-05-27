@@ -10,14 +10,16 @@
 #include <syslog.h>
 
 namespace planet {
+namespace net {
+namespace tcp {
 
 
-    shared_ptr<planet_operation> tcp_client_op::new_instance() const
+    shared_ptr<planet_operation> client_op::new_instance() const
     {
-        return std::make_shared<tcp_client_op>();
+        return std::make_shared<client_op>();
     }
 
-    int tcp_client_op::connect_to(std::string const& host, int port)
+    int client_op::connect_to(std::string const& host, int port)
     {
         int fd = ::socket(AF_INET, SOCK_STREAM, 0);
         if (fd < 0)
@@ -29,52 +31,54 @@ namespace planet {
         return fd;
     }
 
-    int tcp_client_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
+    int client_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
     {
         fd_ = get_data_from_vector<int>(data_vector(*file_ent));
         return 0;
     }
 
-    int tcp_client_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
+    int client_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
     {
         return ::recv(fd_, buf, size, 0);
     }
 
-    int tcp_client_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
+    int client_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         return ::send(fd_, buf, size, 0);
     }
 
-    int tcp_client_op::release(shared_ptr<file_entry> file_ent)
+    int client_op::release(shared_ptr<file_entry> file_ent)
     {
         return 0;
     }
 
-    int tcp_client_op::mknod(shared_ptr<file_entry> file_ent, path_type const& path, mode_t, dev_t)
+    int client_op::mknod(shared_ptr<file_entry> file_ent, path_type const& path, mode_t, dev_t)
     {
         auto filename = path.filename().string();
         auto pos = filename.find_first_of(host_port_delimiter);
         string_type host = filename.substr(0, pos);
         int port = atoi(filename.substr(pos + 1).c_str());
-        syslog(LOG_INFO, "tcp_client_op::mknod: connecting to host=%s, port=%d", host.c_str(), port);
+        syslog(LOG_INFO, "client_op::mknod: connecting to host=%s, port=%d", host.c_str(), port);
         int fd = connect_to(host, port);
-        syslog(LOG_NOTICE, "tcp_client_op::mknod: connection established %s:%d fd=%d opened", host.c_str(), port, fd);
+        syslog(LOG_NOTICE, "client_op::mknod: connection established %s:%d fd=%d opened", host.c_str(), port, fd);
         store_data_to_vector(data_vector(*file_ent), fd);
         return 0;
     }
 
-    int tcp_client_op::rmnod(shared_ptr<file_entry> file_ent, path_type const&)
+    int client_op::rmnod(shared_ptr<file_entry> file_ent, path_type const&)
     {
         return ::close(
             get_data_from_vector<int>(data_vector(*file_ent))
         );
     }
 
-    bool tcp_client_op::is_matching_path(path_type const& path)
+    bool client_op::is_matching_path(path_type const& path)
     {
         return (path.parent_path() == "/tcp"
                 && path.filename().string()[0] != '*');
     }
 
 
+}   // namespace tcp
+}   // namespace net
 }   // namespace planet

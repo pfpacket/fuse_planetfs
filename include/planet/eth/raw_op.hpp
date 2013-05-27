@@ -1,26 +1,28 @@
-#ifndef PLANET_PACKET_SOCKET_HPP
-#define PLANET_PACKET_SOCKET_HPP
+#ifndef PLANET_ETH_RAW_OP_HPP 
+#define PLANET_ETH_RAW_OP_HPP 
 
 #include <planet/common.hpp>
 #include <planet/basic_operation.hpp>
 #include <planet/fs_core.hpp>
 
 namespace planet {
+namespace net {
+namespace eth {
 
 
-class packet_socket_op : public planet_operation {
+class raw_op : public planet_operation {
 private:
     int fd_;
 
     static void bind_to_interface(int fd, std::string const& ifname, int protocol);
-    static int do_packet_socket_open(int sock_type, int protocol, std::string const& ifname);
+    static int do_raw_open(int sock_type, int protocol, std::string const& ifname);
 
 public:
-    packet_socket_op()
+    raw_op()
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
-    ~packet_socket_op() noexcept
+    ~raw_op() noexcept
     {
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
@@ -36,6 +38,8 @@ public:
 };
 
 
+}   // namespace eth
+}   // namespace net
 }   // namespace planet
 
-#endif  // PLANET_PACKET_SOCKET_HPP
+#endif  // PLANET_ETH_RAW_OP_HPP 

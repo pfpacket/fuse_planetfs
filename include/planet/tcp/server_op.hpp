@@ -2,13 +2,16 @@
 #define PLANET_TCP_SERVER_OP_HPP
 
 #include <planet/common.hpp>
+#include <planet/tcp/common.hpp>
 #include <planet/basic_operation.hpp>
 #include <planet/fs_core.hpp>
 
 namespace planet {
+namespace net {
+namespace tcp {
 
 
-class tcp_server_op : public planet_operation {
+class server_op : public planet_operation {
 private:
     int server_fd_, client_fd_;
     core_file_system& fs_root_;
@@ -16,15 +19,14 @@ private:
     static int establish_server(std::string const& host, int port);
 
 public:
-    static char const host_port_delimiter = '!';
 
-    tcp_server_op(core_file_system& fs_root)
+    server_op(core_file_system& fs_root)
         : fs_root_(fs_root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
 
-    ~tcp_server_op() noexcept
+    ~server_op() noexcept
     {
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
@@ -42,6 +44,8 @@ public:
 };
 
 
+}   // namespace tcp
+}   // namespace net
 }   // namespace planet
 
 #endif  // PLANET_TCP_SERVER_OP_HPP

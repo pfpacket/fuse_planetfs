@@ -6,6 +6,8 @@
 #include <planet/fs_core.hpp>
 
 namespace planet {
+namespace net {
+namespace dns {
 
 
 class dns_op : public planet_operation {
@@ -39,6 +41,8 @@ public:
 };
 
 
+}   // namespace dns
+}   // namespace net
 }   // namespace planet
 
 #endif  // PLANET_DNS_OP_HPP

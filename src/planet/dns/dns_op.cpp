@@ -8,6 +8,8 @@
 #include <syslog.h>
 
 namespace planet {
+namespace net {
+namespace dns {
 
 
 //    dns_op::dns_op(core_file_system& fs_root)
@@ -104,4 +106,6 @@ namespace planet {
     }
 
 
+}   // namespace dns
+}   // namespace net
 }   // namespace planet

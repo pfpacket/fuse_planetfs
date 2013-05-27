@@ -1,6 +1,6 @@
 
 #include <planet/common.hpp>
-#include <planet/eth/packet_socket_op.hpp>
+#include <planet/eth/raw_op.hpp>
 #include <sys/socket.h>
 #include <netpacket/packet.h>
 #include <net/if.h>
@@ -10,14 +10,16 @@
 #include <arpa/inet.h>
 
 namespace planet {
+namespace net {
+namespace eth {
 
 
-    shared_ptr<planet_operation> packet_socket_op::new_instance() const
+    shared_ptr<planet_operation> raw_op::new_instance() const
     {
-        return std::make_shared<packet_socket_op>();
+        return std::make_shared<raw_op>();
     }
 
-    void packet_socket_op::bind_to_interface(int fd, std::string const& ifname, int protocol)
+    void raw_op::bind_to_interface(int fd, std::string const& ifname, int protocol)
     {
         sockaddr_ll sll = {};
         sll.sll_family      = AF_PACKET;
@@ -30,7 +32,7 @@ namespace planet {
             throw planet::exception_errno(errno);
     }
 
-    int packet_socket_op::do_packet_socket_open(int sock_type, int protocol, std::string const& ifname)
+    int raw_op::do_raw_open(int sock_type, int protocol, std::string const& ifname)
     {
         int fd = socket(AF_PACKET, sock_type, protocol);
         if (fd < 0)
@@ -39,48 +41,50 @@ namespace planet {
         return fd;
     }
 
-    int packet_socket_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
+    int raw_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
     {
         int socket_type, protocol = htons(ETH_P_ALL);
         if (path.parent_path() == "/eth")
             socket_type = SOCK_RAW;
         if (path.parent_path() == "/ip")
             socket_type = SOCK_DGRAM;
-        fd_ = do_packet_socket_open(socket_type, protocol, path.filename().string());
+        fd_ = do_raw_open(socket_type, protocol, path.filename().string());
         ::syslog(LOG_NOTICE, "%s: opened fd=%d ifname=%s"
             , __PRETTY_FUNCTION__, fd_, path.filename().string().c_str());
         return 0;
     }
 
-    int packet_socket_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
+    int raw_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
     {
         return ::recv(fd_, buf, size, 0);
     }
 
-    int packet_socket_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
+    int raw_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         return ::send(fd_, buf, size, 0);
     }
 
-    int packet_socket_op::release(shared_ptr<file_entry> file_ent)
+    int raw_op::release(shared_ptr<file_entry> file_ent)
     {
         return close(fd_);
     }
 
-    int packet_socket_op::mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t)
+    int raw_op::mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t)
     {
         return 0;
     }
 
-    int packet_socket_op::rmnod(shared_ptr<file_entry>, path_type const&)
+    int raw_op::rmnod(shared_ptr<file_entry>, path_type const&)
     {
         return -EPERM;
     }
 
-    bool packet_socket_op::is_matching_path(path_type const& path)
+    bool raw_op::is_matching_path(path_type const& path)
     {
         return (path.parent_path() == "/eth" || path.parent_path() == "/ip");
     }
 
 
+}   // namespace eth
+}   // namespace net
 }   // namespace planet
