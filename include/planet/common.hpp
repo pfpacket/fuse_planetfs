@@ -47,7 +47,7 @@ namespace planet {
         extern std::function<void (void *)> const null_deleter;
 
         // Index numbers and error messages
-        enum errmsg_number {fe_file_cast = 0, fe_dir_cast};
+        enum errmsg_number {pe_file_cast = 0, pe_dir_cast, pe_end};
         extern char const * const errmsg[];
 
         // generic null pointer of shared_ptr
