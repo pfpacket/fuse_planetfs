@@ -31,7 +31,7 @@ public:
     // Initialize the first arguemnt of file_entry
     // shared_ptr<file_entry> is the new file entry which a new file operation will use
     virtual int mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t) = 0;
-    // Destoroy the first arguments of file_entry
+    // Destoroy the first argument of file_entry
     // shared_ptr<file_entry> was used by an other file operation, and now no one never uses it
     virtual int rmnod(shared_ptr<file_entry>, path_type const&) = 0;
 };
