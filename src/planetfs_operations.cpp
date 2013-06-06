@@ -113,7 +113,7 @@ int planet_utimens(char const* path, struct timespec const tv[2])
                 (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_mod + sec_mod));
             entry->inode(new_inode);
         } else
-            throw planet::exception_errno(ENOENT);
+            ret = -ENOENT;
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
