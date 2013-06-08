@@ -124,8 +124,8 @@ namespace planet {
             return root->search_entries(p.substr(1));
         // Get parent directory from filename
         auto dir_entry = root->search_entries(p.substr(1, pos - 1));
-        if (dir_entry->type() != file_type::directory)
-            throw std::runtime_error{"Not directory entry"};
+        if (!dir_entry || dir_entry->type() != file_type::directory)
+            return detail::shared_null_ptr;
         return get_entry_of__(directory_cast(dir_entry), "/" + p.substr(pos + 1));
     }
 
