@@ -48,7 +48,7 @@ namespace planet {
     {
         int ret = 0;
         if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
-            auto fentry = file_cast(get_entry_of(path));
+            auto fentry = file_cast(parent_dir->search_entries(path.filename().string()));
             ret = ops_mgr_[fentry->get_op()]->rmnod(fentry, path);
             if (ret < 0)
                 return ret;
