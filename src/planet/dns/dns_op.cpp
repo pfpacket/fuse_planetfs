@@ -33,7 +33,7 @@ namespace dns {
 
         int s = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
         if (s != 0)
-            return s;
+            throw std::runtime_error(gai_strerror(s));
         auto result = make_unique_ptr(res, [](struct addrinfo *ptr){ freeaddrinfo(ptr); });
         std::vector<char> buf(1024, 0);
         for (struct addrinfo *ai = result.get(); ai; ai = ai->ai_next) {
