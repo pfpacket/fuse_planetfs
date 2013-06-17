@@ -42,12 +42,18 @@ namespace tcp {
 
     int server_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
     {
-        return ::recv(client_fd_, buf, size, 0);
+        int bytes = ::recv(client_fd_, buf, size, 0);
+        if (bytes < 0)
+            throw exception_errno(errno);
+        return bytes;
     }
 
     int server_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
-        return ::send(client_fd_, buf, size, 0);
+        int bytes = ::send(client_fd_, buf, size, 0);
+        if (bytes < 0)
+            throw exception_errno(errno);
+        return bytes;
     }
 
     int server_op::release(shared_ptr<file_entry> file_ent)

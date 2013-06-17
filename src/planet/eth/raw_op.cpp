@@ -56,12 +56,18 @@ namespace eth {
 
     int raw_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
     {
-        return ::recv(fd_, buf, size, 0);
+        int bytes = ::recv(fd_, buf, size, 0);
+        if (bytes < 0)
+            throw exception_errno(errno);
+        return bytes;
     }
 
     int raw_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
-        return ::send(fd_, buf, size, 0);
+        int bytes = ::send(fd_, buf, size, 0);
+        if (bytes < 0)
+            throw exception_errno(errno);
+        return bytes;
     }
 
     int raw_op::release(shared_ptr<file_entry> file_ent)
