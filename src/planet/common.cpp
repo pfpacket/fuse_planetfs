@@ -8,8 +8,8 @@ namespace planet {
         std::function<void (void *)> const null_deleter = [](void *) {};
 
         char const * const errmsg[] = {
-            "invalid cast from \'fs_entry\' to \'file_entry\'",
-            "invalid cast from \'fs_entry\' to \'dentry\'"
+            "Invalid cast: not a file",
+            "Invalid cast: not a directory"
         };
 
         generic_shared_null_ptr_t const shared_null_ptr;
