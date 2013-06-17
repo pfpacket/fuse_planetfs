@@ -31,9 +31,10 @@ namespace planet {
             st_inode new_inode;
             new_inode.dev  = device;
             new_inode.mode = mode | S_IFREG;
-            parent_dir->add_entry<file_entry>(path.filename().string(), op_code, new_inode);
+            auto entry =
+                parent_dir->add_entry<file_entry>(path.filename().string(), op_code, new_inode);
             try {
-                auto fentry = file_cast(get_entry_of(path));
+                auto fentry = file_cast(entry);
                 ops_mgr_[fentry->get_op()]->mknod(fentry, path, mode, device);
             } catch (...) {
                 parent_dir->remove_entry(path.filename().string());
