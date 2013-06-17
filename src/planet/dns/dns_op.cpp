@@ -42,7 +42,7 @@ namespace dns {
             else if (ai->ai_family == AF_INET6)
                 inet_ntop(ai->ai_family, &((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr, buf.data(), buf.size());
             store.emplace_back(buf.data());
-            std::fill(buf.begin(), buf.end(), 0);
+            std::fill(buf.begin(), buf.end(), '\0');
         }
         return 0;
     }

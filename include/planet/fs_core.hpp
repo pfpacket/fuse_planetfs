@@ -175,7 +175,7 @@ public:
         return entries_;
     }
 
-    shared_ptr<fs_entry> search_entries(string_type const& name) const
+    entry_type search_entries(string_type const& name) const
     {
         auto it = std::find_if(entries_.begin(), entries_.end(),
             [&name](entry_type const& ent) {
@@ -186,15 +186,15 @@ public:
     }
 
     template<typename EntryType, typename... Types>
-    bool add_entry(Types&&... args)
+    entry_type add_entry(Types&&... args)
     {
         entries_.push_back(std::make_shared<EntryType>(std::forward<Types>(args)...));
-        return true;
+        return entries_.back();
     }
 
     bool remove_entry(string_type const& name)
     {
-        entries_.erase(
+        auto it = entries_.erase(
             std::remove_if(
                 entries_.begin(), entries_.end(),
                 [&name](entry_type const& ent) {
@@ -203,7 +203,7 @@ public:
             ),
             entries_.end()
         );
-        return true;
+        return it != entries_.end();
     }
 };
 
