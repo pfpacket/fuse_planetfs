@@ -17,7 +17,7 @@ int planet_getattr(char const *path, struct stat *stbuf)
     int ret = 0;
     try {
         std::memset(stbuf, 0, sizeof (struct stat));
-        fs_root.getattr(path, *stbuf);
+        ret = fs_root.getattr(path, *stbuf);
         ::syslog(LOG_INFO, "getattr: path=%s size=%llu mode=%o nlink=%d",
             path, stbuf->st_size, stbuf->st_mode, stbuf->st_nlink);
     } catch (planet::exception_errno& e) {
