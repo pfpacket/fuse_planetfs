@@ -27,14 +27,13 @@ namespace planet {
 
     int core_file_system::mknod(path_type const& path, mode_t mode, dev_t device, op_type_code op_code)
     {
-        if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
+        if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             st_inode new_inode;
             new_inode.dev  = device;
             new_inode.mode = mode | S_IFREG;
-            auto entry =
+            auto fentry =
                 parent_dir->add_entry<file_entry>(path.filename().string(), op_code, new_inode);
             try {
-                auto fentry = file_cast(entry);
                 ops_mgr_[fentry->get_op()]->mknod(fentry, path, mode, device);
             } catch (...) {
                 parent_dir->remove_entry(path.filename().string());
@@ -48,7 +47,7 @@ namespace planet {
     int core_file_system::unlink(path_type const& path)
     {
         int ret = 0;
-        if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
+        if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             auto fentry = file_cast(parent_dir->search_entries(path.filename().string()));
             ret = ops_mgr_[fentry->get_op()]->rmnod(fentry, path);
             if (ret < 0)
@@ -61,7 +60,7 @@ namespace planet {
 
     int core_file_system::mkdir(path_type const& path, mode_t mode)
     {
-        if (auto parent_dir = directory_cast(get_entry_of(path.parent_path()))) {
+        if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             st_inode new_inode;
             new_inode.mode = mode | S_IFDIR;
             parent_dir->add_entry<dentry>(path.filename().string(), new_inode);
@@ -72,7 +71,7 @@ namespace planet {
 
     int core_file_system::rmdir(path_type const& path)
     {
-        if (auto parent_dir = directory_cast(get_entry_of(path.parent_path())))
+        if (auto parent_dir = search_dir_entry(*this, path.parent_path()))
             parent_dir->remove_entry(path.filename().string());
         else
             throw exception_errno(ENOENT);
@@ -82,10 +81,10 @@ namespace planet {
     std::vector<std::string> core_file_system::readdir(path_type const& path) const
     {
         std::vector<std::string> store;
-        if (auto dir_ent = directory_cast(get_entry_of(path))) {
+        if (auto dir_ent = search_dir_entry(*this, path))
             for (auto entry : dir_ent->entries())
                 store.push_back(entry->name());
-        } else
+        else
             throw exception_errno(ENOENT);
         return store;
     }

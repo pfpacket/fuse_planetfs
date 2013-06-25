@@ -39,6 +39,13 @@ namespace planet {
         return std::unique_ptr<T, D>(p, std::forward<D>(d));
     }
 
+    // Equivalent to `return file_cast(fs_root.get_entry_of())`
+    //  with exception handling
+    shared_ptr<file_entry> search_file_entry(core_file_system const&, path_type const&);
+
+    // Equivalent to `return dir_cast(fs_root.get_entry_of())`
+    //  with exception handling
+    shared_ptr<dentry> search_dir_entry(core_file_system const&, path_type const&);
 
 }   // namespace planet
 

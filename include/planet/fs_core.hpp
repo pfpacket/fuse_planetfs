@@ -186,10 +186,11 @@ public:
     }
 
     template<typename EntryType, typename... Types>
-    entry_type add_entry(Types&&... args)
+    shared_ptr<EntryType> add_entry(Types&&... args)
     {
-        entries_.push_back(std::make_shared<EntryType>(std::forward<Types>(args)...));
-        return entries_.back();
+        auto entry = std::make_shared<EntryType>(std::forward<Types>(args)...);
+        entries_.push_back(entry);
+        return entry;
     }
 
     bool remove_entry(string_type const& name)
