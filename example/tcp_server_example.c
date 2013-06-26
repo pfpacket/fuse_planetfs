@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -23,8 +24,8 @@ int main(int argc, char **argv)
     int client_fd, size;
 
     /* Establish a server waiting on port 10000 */
-    if (mknod("/net/tcp/*!10000", S_IFREG | S_IRWXU, 0) < 0)
-        die("open");
+    if (mknod("/net/tcp/*!10000", S_IFREG | S_IRWXU, 0) < 0 && errno != EEXIST)
+        die("mknod");
 
     while (1) {
         /* Accept a client's connection */
