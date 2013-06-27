@@ -23,14 +23,14 @@ namespace planet {
     shared_ptr<file_entry> search_file_entry(core_file_system const& root, path_type const& path)
     {
         auto entry = root.get_entry_of(path);
-        return (entry->type() == file_type::regular_file ?
+        return (entry && entry->type() == file_type::regular_file ?
             file_cast(entry) : detail::shared_null_ptr);
     }
 
     shared_ptr<dentry> search_dir_entry(core_file_system const& root, path_type const& path)
     {
         auto entry = root.get_entry_of(path);
-        return (entry->type() == file_type::directory ?
+        return (entry && entry->type() == file_type::directory ?
             directory_cast(entry) : detail::shared_null_ptr);
     }
 
