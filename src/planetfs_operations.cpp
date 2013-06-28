@@ -4,7 +4,7 @@
 #include <fuse.h>
 #include <planetfs_operations.hpp>
 #include <planet/operation_layer.hpp>
-#include <planet/planet_handle.hpp>
+#include <planet/handle.hpp>
 #include <syslog.h>
 
 // Core filesystem object

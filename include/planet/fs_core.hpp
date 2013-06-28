@@ -3,7 +3,7 @@
 
 #include <planet/common.hpp>
 #include <planet/basic_operation.hpp>
-#include <planet/planet_handle.hpp>
+#include <planet/handle.hpp>
 #include <vector>
 #include <deque>
 #include <chrono>
@@ -127,12 +127,14 @@ public:
 class dentry : public fs_entry {
 public:
     typedef shared_ptr<fs_entry> entry_type;
+    //typedef default_dir_op default_op_type;
 private:
     enum {default_vector_size = 512};
 
     string_type name_;
     st_inode inode_;
     std::vector<entry_type> entries_;
+    //op_type_code op_type_index_ = typeid(default_op_type);
 
 public:
     dentry(string_type const& name, st_inode const& sti = {})
@@ -169,6 +171,11 @@ public:
     {
         inode_ = inode;
     }
+
+    // op_type_code get_op() const
+    // {
+    //     return op_type_index_;
+    // }
 
     decltype(entries_) const& entries() const
     {

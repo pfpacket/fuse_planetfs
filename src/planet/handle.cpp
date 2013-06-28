@@ -1,24 +1,14 @@
 
 #include <planet/common.hpp>
 #include <planet/basic_operation.hpp>
-#include <planet/planet_handle.hpp>
+#include <planet/handle.hpp>
 #include <fuse/fuse.h>
 
 namespace planet {
 
 
-    inline planet_handle_manager::planet_handle_manager(int init) : current_(init)
-    {
-    }
-
-    void planet_handle_manager::unregister_op(handle_t ph)
-    {
-        lock_guard lock(mtx_);
-        ops_.erase(ph);
-    }
-
     // Global planet handle manager
-    planet_handle_manager handle_mgr;
+    handle_manager handle_mgr;
 
     handle_t get_handle_from(struct fuse_file_info const& fi)
     {

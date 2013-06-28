@@ -7,7 +7,7 @@ LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse
 OBJS       = src/planet/common.o \
              src/planet/fs_core.o \
              src/planet/utils.o \
-             src/planet/planet_handle.o \
+             src/planet/handle.o \
              src/planet/operation_layer.o \
              src/planet/basic_operation.o \
              src/planet/dns/dns_op.o \

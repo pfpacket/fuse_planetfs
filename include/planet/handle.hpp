@@ -18,19 +18,23 @@ namespace planet {
 // planet handle type
 typedef int handle_t;
 
-class planet_handle_manager {
+class handle_manager {
+public:
+    typedef std::tuple<
+        shared_ptr<planet_operation>,
+        shared_ptr<file_entry>
+    > entry_type;
 private:
     std::mutex mtx_;
     typedef std::lock_guard<decltype(mtx_)> lock_guard;
     handle_t current_;
-    typedef std::tuple<
-        shared_ptr<file_entry>,
-        shared_ptr<planet_operation>
-    > entry_type;
     std::map<handle_t, entry_type> ops_;
 
 public:
-    planet_handle_manager(int init = 0);
+    handle_manager(int init = 0)
+        : current_(init)
+    {
+    }
 
     entry_type const& get_operation_entry(handle_t ph)
     {
@@ -38,27 +42,30 @@ public:
     }
 
     template<typename ...Types>
-    handle_t register_op(shared_ptr<file_entry> fp, shared_ptr<planet_operation> op)
+    handle_t register_op(shared_ptr<planet_operation> op, shared_ptr<file_entry> fp)
     {
         lock_guard lock(mtx_);
         ops_.insert(
             std::make_pair(
                 current_ + 1,
-                std::make_tuple(fp, op)
+                std::make_tuple(op, fp)
             )
         );
         return ++current_;
     }
 
-    void unregister_op(handle_t ph);
+    void unregister_op(handle_t ph)
+    {
+        lock_guard lock(mtx_);
+        ops_.erase(ph);
+    }
 };
 
-extern planet_handle_manager handle_mgr;
+extern handle_manager handle_mgr;
 
+extern handle_t get_handle_from(struct fuse_file_info const& fi);
+extern void set_handle_to(struct fuse_file_info& fi, handle_t ph);
 
-handle_t get_handle_from(struct fuse_file_info const& fi);
-
-void set_handle_to(struct fuse_file_info& fi, handle_t ph);
 
 }   // namespace planet
 

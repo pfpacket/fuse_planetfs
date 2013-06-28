@@ -96,10 +96,10 @@ namespace planet {
             if (entry->type() != file_type::regular_file)
                 throw exception_errno(EISDIR);
             auto fentry = file_cast(entry);
-            new_handle = handle_mgr.register_op(fentry, ops_mgr_[fentry->get_op()]->new_instance());
+            new_handle = handle_mgr.register_op(ops_mgr_[fentry->get_op()]->new_instance(), fentry);
             try {
                 auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
-                std::get<1>(op_tuple)->open(std::get<0>(op_tuple), path);
+                std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
             } catch (...) {
                 handle_mgr.unregister_op(new_handle);
                 throw;
