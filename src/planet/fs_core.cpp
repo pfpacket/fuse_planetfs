@@ -133,7 +133,7 @@ namespace planet {
     shared_ptr<fs_entry> core_file_system::get_entry_of__(shared_ptr<dentry> root, path_type const& path) const
     {
         if (path.empty() || path.is_relative() || !root)
-            throw std::runtime_error{"empty string or invalid root passed"};
+            throw std::runtime_error{"detect null parent dir or relative path"};
         string_type p = path.string();
         auto pos = p.find_first_of('/', 1);
         if (pos == std::string::npos)

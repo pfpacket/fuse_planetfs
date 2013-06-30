@@ -27,21 +27,16 @@ void planet_install_fs_operations()
     fs_root.install_op<planet::net::tcp::client_op>(priority::normal);
     fs_root.install_op<planet::net::tcp::server_op>(priority::normal, fs_root);
     fs_root.install_op<planet::net::eth::raw_op>(priority::normal);
-    fs_root.install_op<planet::net::eth::dir_op>(priority::normal);
+    fs_root.install_op<planet::net::eth::dir_op>(priority::normal, fs_root);
 }
 
 // Create initial filesystem structure
 void planet_create_initial_fs_structure()
 {
-    fs_root.mkdir("/ip",            S_IRWXU);
-    fs_root.mkdir("/tcp",           S_IRWXU);
-    fs_root.mkdir("/eth",           S_IRWXU);
-    fs_root.mknod("/eth/lo",        S_IRUSR | S_IWUSR, 0);
-    fs_root.mknod("/eth/eth0",      S_IRUSR | S_IWUSR, 0);
-    fs_root.mknod("/eth/wlan0",     S_IRUSR | S_IWUSR, 0);
-    fs_root.mknod("/eth/enp6s0",    S_IRUSR | S_IWUSR, 0);
-    fs_root.mknod("/eth/wlp3s0",    S_IRUSR | S_IWUSR, 0);
-    fs_root.mknod("/dns",           S_IRUSR | S_IWUSR, 0);
+    fs_root.mkdir("/ip",    S_IRWXU);
+    fs_root.mkdir("/tcp",   S_IRWXU);
+    fs_root.mkdir("/eth",   S_IRWXU);
+    fs_root.mknod("/dns",   S_IRUSR | S_IWUSR, 0);
 }
 
 static struct fuse_operations planet_ops{};

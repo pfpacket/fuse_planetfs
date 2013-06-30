@@ -12,8 +12,9 @@ namespace eth {
 
 class dir_op final : public entry_operation {
 private:
+    core_file_system& fs_root_;
 public:
-    dir_op()
+    dir_op(core_file_system& fs_root) : fs_root_(fs_root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
