@@ -13,7 +13,7 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<planet_operation> server_op::new_instance() const
+    shared_ptr<entry_operation> server_op::new_instance() const
     {
         return std::make_shared<server_op, core_file_system&>(fs_root_);
     }
@@ -29,9 +29,9 @@ namespace tcp {
         return fd;
     }
 
-    int server_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
+    int server_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
-        server_fd_ = get_data_from_vector<int>(data_vector(*file_ent));
+        server_fd_ = get_data_from_vector<int>(data_vector(*file_cast(file_ent)));
         sockaddr_in client;
         socklen_t len = sizeof (client);
         client_fd_ = accept(server_fd_, reinterpret_cast<sockaddr *>(&client), &len);
@@ -40,7 +40,7 @@ namespace tcp {
         return 0;
     }
 
-    int server_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
+    int server_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
         int bytes = ::recv(client_fd_, buf, size, 0);
         if (bytes < 0)
@@ -48,7 +48,7 @@ namespace tcp {
         return bytes;
     }
 
-    int server_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
+    int server_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         int bytes = ::send(client_fd_, buf, size, 0);
         if (bytes < 0)
@@ -56,12 +56,12 @@ namespace tcp {
         return bytes;
     }
 
-    int server_op::release(shared_ptr<file_entry> file_ent)
+    int server_op::release(shared_ptr<fs_entry> file_ent)
     {
         return ::close(client_fd_);
     }
 
-    int server_op::mknod(shared_ptr<file_entry> file_ent, path_type const& path, mode_t, dev_t)
+    int server_op::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
     {
         std::string filename = path.filename().string();
         auto pos = filename.find_first_of(host_port_delimiter);
@@ -70,21 +70,22 @@ namespace tcp {
         syslog(LOG_INFO, "server_op::mknod: establishing server host=%s, port=%d", host.c_str(), port);
         int serverfd = establish_server(host, port);
         syslog(LOG_NOTICE, "server_op::mknod: established server %s:%d fd=%d opened", host.c_str(), port, serverfd);
-        store_data_to_vector(data_vector(*file_ent), serverfd);
+        store_data_to_vector(data_vector(*file_cast(file_ent)), serverfd);
         return 0;
     }
 
-    int server_op::rmnod(shared_ptr<file_entry> file_ent, path_type const& path)
+    int server_op::rmnod(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         return ::close(
-            get_data_from_vector<int>(data_vector(*file_ent))
+            get_data_from_vector<int>(data_vector(*file_cast(file_ent)))
         );
     }
 
-    bool server_op::is_matching_path(path_type const& path)
+    bool server_op::is_matching_path(path_type const& path, file_type type)
     {
-        return (path.parent_path() == "/tcp"
-                && path.filename().string()[0] == '*');
+        return  type == file_type::regular_file &&
+                path.parent_path() == "/tcp" &&
+                path.filename().string()[0] == '*';
     }
 
 

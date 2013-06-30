@@ -21,8 +21,8 @@ typedef int handle_t;
 class handle_manager {
 public:
     typedef std::tuple<
-        shared_ptr<planet_operation>,
-        shared_ptr<file_entry>
+        shared_ptr<entry_operation>,
+        shared_ptr<fs_entry>
     > entry_type;
 private:
     std::mutex mtx_;
@@ -42,7 +42,7 @@ public:
     }
 
     template<typename ...Types>
-    handle_t register_op(shared_ptr<planet_operation> op, shared_ptr<file_entry> fp)
+    handle_t register_op(shared_ptr<entry_operation> op, shared_ptr<fs_entry> fp)
     {
         lock_guard lock(mtx_);
         ops_.insert(

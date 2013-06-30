@@ -14,12 +14,13 @@ OBJS       = src/planet/common.o \
              src/planet/tcp/client_op.o \
              src/planet/tcp/server_op.o \
              src/planet/eth/raw_op.o \
+             src/planet/eth/dir_op.o \
              src/planetfs_operations.o \
              src/planetfs_main.o
 TARGET     = mount.planetfs
 MNTDIR     = /net
 MNTOPT     = -o direct_io -o atomic_o_trunc \
-             -o intr -o allow_other -s
+             -o intr -o allow_other
 MNTDBGOPT  = $(MNTOPT) -d -f
 
 all: $(TARGET)

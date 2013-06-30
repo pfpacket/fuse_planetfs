@@ -20,7 +20,7 @@ namespace dns {
 //        }
 //    }
 
-    shared_ptr<planet_operation> dns_op::new_instance() const
+    shared_ptr<entry_operation> dns_op::new_instance() const
     {
         return std::make_shared<dns_op>();
     }
@@ -47,12 +47,12 @@ namespace dns {
         return 0;
     }
 
-    int dns_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
+    int dns_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         return 0;
     }
 
-    int dns_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
+    int dns_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
         if (resolved_names_.empty())
             return 0;
@@ -66,7 +66,7 @@ namespace dns {
         return length + 1;
     }
 
-    int dns_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
+    int dns_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         std::string request(buf, size);
         auto pos = request.find_first_of(' ');
@@ -85,24 +85,24 @@ namespace dns {
         return request.length();
     }
 
-    int dns_op::release(shared_ptr<file_entry> file_ent)
+    int dns_op::release(shared_ptr<fs_entry> file_ent)
     {
         return 0;
     }
 
-    int dns_op::mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t)
+    int dns_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
     {
         return 0;
     }
 
-    int dns_op::rmnod(shared_ptr<file_entry>, path_type const&)
+    int dns_op::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
         return -EPERM;
     }
 
-    bool dns_op::is_matching_path(path_type const& path)
+    bool dns_op::is_matching_path(path_type const& path, file_type type)
     {
-        return path == "/dns";
+        return type == file_type::regular_file && path == "/dns";
     }
 
 

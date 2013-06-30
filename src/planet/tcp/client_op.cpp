@@ -14,7 +14,7 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<planet_operation> client_op::new_instance() const
+    shared_ptr<entry_operation> client_op::new_instance() const
     {
         return std::make_shared<client_op>();
     }
@@ -31,13 +31,13 @@ namespace tcp {
         return fd;
     }
 
-    int client_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
+    int client_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
-        fd_ = get_data_from_vector<int>(data_vector(*file_ent));
+        fd_ = get_data_from_vector<int>(data_vector(*file_cast(file_ent)));
         return 0;
     }
 
-    int client_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
+    int client_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
         int bytes = ::recv(fd_, buf, size, 0);
         if (bytes < 0)
@@ -45,7 +45,7 @@ namespace tcp {
         return bytes;
     }
 
-    int client_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
+    int client_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         int bytes = ::send(fd_, buf, size, 0);
         if (bytes < 0)
@@ -53,12 +53,12 @@ namespace tcp {
         return bytes;
     }
 
-    int client_op::release(shared_ptr<file_entry> file_ent)
+    int client_op::release(shared_ptr<fs_entry> file_ent)
     {
         return 0;
     }
 
-    int client_op::mknod(shared_ptr<file_entry> file_ent, path_type const& path, mode_t, dev_t)
+    int client_op::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
     {
         auto filename = path.filename().string();
         auto pos = filename.find_first_of(host_port_delimiter);
@@ -67,21 +67,22 @@ namespace tcp {
         syslog(LOG_INFO, "client_op::mknod: connecting to host=%s, port=%d", host.c_str(), port);
         int fd = connect_to(host, port);
         syslog(LOG_NOTICE, "client_op::mknod: connection established %s:%d fd=%d opened", host.c_str(), port, fd);
-        store_data_to_vector(data_vector(*file_ent), fd);
+        store_data_to_vector(data_vector(*file_cast(file_ent)), fd);
         return 0;
     }
 
-    int client_op::rmnod(shared_ptr<file_entry> file_ent, path_type const&)
+    int client_op::rmnod(shared_ptr<fs_entry> file_ent, path_type const&)
     {
         return ::close(
-            get_data_from_vector<int>(data_vector(*file_ent))
+            get_data_from_vector<int>(data_vector(*file_cast(file_ent)))
         );
     }
 
-    bool client_op::is_matching_path(path_type const& path)
+    bool client_op::is_matching_path(path_type const& path, file_type type)
     {
-        return (path.parent_path() == "/tcp"
-                && path.filename().string()[0] != '*');
+        return  type == file_type::regular_file &&
+                path.parent_path() == "/tcp" &&
+                path.filename().string()[0] != '*';
     }
 
 
