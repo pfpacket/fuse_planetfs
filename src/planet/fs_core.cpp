@@ -22,7 +22,7 @@ namespace planet {
 
     int core_file_system::mknod(path_type const& path, mode_t mode, dev_t device)
     {
-        return mknod(path, mode, device, path_mgr_[path]);
+        return mknod(path, mode, device, path_mgr_.matching_type(path, file_type::regular_file));
     }
 
     int core_file_system::mknod(path_type const& path, mode_t mode, dev_t device, op_type_code op_code)
@@ -60,10 +60,21 @@ namespace planet {
 
     int core_file_system::mkdir(path_type const& path, mode_t mode)
     {
+        return mkdir(path, mode, path_mgr_.matching_type(path, file_type::directory));
+    }
+
+    int core_file_system::mkdir(path_type const& path, mode_t mode, op_type_code op)
+    {
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             st_inode new_inode;
             new_inode.mode = mode | S_IFDIR;
-            parent_dir->add_entry<dentry>(path.filename().string(), new_inode);
+            auto dir_entry = parent_dir->add_entry<dentry>(path.filename().string(), op, new_inode);
+            try {
+                ops_mgr_[dir_entry->get_op()]->mknod(dir_entry, path, mode, 0);
+            } catch (...) {
+                parent_dir->remove_entry(path.filename().string());
+                throw;
+            }
         } else
             throw exception_errno(ENOENT);
         return 0;
@@ -71,11 +82,16 @@ namespace planet {
 
     int core_file_system::rmdir(path_type const& path)
     {
-        if (auto parent_dir = search_dir_entry(*this, path.parent_path()))
+        int ret = 0;
+        if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
+            auto dir_entry = directory_cast(parent_dir->search_entries(path.filename().string()));
+            ret = ops_mgr_[dir_entry->get_op()]->rmnod(dir_entry, path);
+            if (ret < 0)
+                return ret;
             parent_dir->remove_entry(path.filename().string());
-        else
+        } else
             throw exception_errno(ENOENT);
-        return 0;
+        return ret;
     }
 
     std::vector<std::string> core_file_system::readdir(path_type const& path) const
@@ -96,10 +112,10 @@ namespace planet {
             if (entry->type() != file_type::regular_file)
                 throw exception_errno(EISDIR);
             auto fentry = file_cast(entry);
-            new_handle = handle_mgr.register_op(fentry, ops_mgr_[fentry->get_op()]->new_instance());
+            new_handle = handle_mgr.register_op(ops_mgr_[fentry->get_op()]->new_instance(), fentry);
             try {
                 auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
-                std::get<1>(op_tuple)->open(std::get<0>(op_tuple), path);
+                std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
             } catch (...) {
                 handle_mgr.unregister_op(new_handle);
                 throw;
@@ -117,7 +133,7 @@ namespace planet {
     shared_ptr<fs_entry> core_file_system::get_entry_of__(shared_ptr<dentry> root, path_type const& path) const
     {
         if (path.empty() || path.is_relative() || !root)
-            throw std::runtime_error{"empty string or invalid root passed"};
+            throw std::runtime_error{"detect null parent dir or relative path"};
         string_type p = path.string();
         auto pos = p.find_first_of('/', 1);
         if (pos == std::string::npos)

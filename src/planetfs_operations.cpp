@@ -4,11 +4,11 @@
 #include <fuse.h>
 #include <planetfs_operations.hpp>
 #include <planet/operation_layer.hpp>
-#include <planet/planet_handle.hpp>
+#include <planet/handle.hpp>
 #include <syslog.h>
 
 // Core filesystem object
-planet::core_file_system fs_root(S_IRWXU);
+planet::core_file_system fs_root{S_IRWXU};
 
 
 int planet_getattr(char const *path, struct stat *stbuf)
@@ -80,7 +80,18 @@ int planet_mkdir(char const *path, mode_t mode)
 
 int planet_rmdir(char const *path)
 {
-    return -EPERM;
+    ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
+    int ret = 0;
+    try {
+        ret = fs_root.rmdir(path);
+    } catch (planet::exception_errno& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.get_errno();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
 }
 
 int planet_chmod(char const *path, mode_t mode)

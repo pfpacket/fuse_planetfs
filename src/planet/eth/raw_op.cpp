@@ -14,7 +14,7 @@ namespace net {
 namespace eth {
 
 
-    shared_ptr<planet_operation> raw_op::new_instance() const
+    shared_ptr<entry_operation> raw_op::new_instance() const
     {
         return std::make_shared<raw_op>();
     }
@@ -41,7 +41,7 @@ namespace eth {
         return fd;
     }
 
-    int raw_op::open(shared_ptr<file_entry> file_ent, path_type const& path)
+    int raw_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         int socket_type, protocol = htons(ETH_P_ALL);
         if (path.parent_path() == "/eth")
@@ -54,7 +54,7 @@ namespace eth {
         return 0;
     }
 
-    int raw_op::read(shared_ptr<file_entry> file_ent, char *buf, size_t size, off_t offset)
+    int raw_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
         int bytes = ::recv(fd_, buf, size, 0);
         if (bytes < 0)
@@ -62,7 +62,7 @@ namespace eth {
         return bytes;
     }
 
-    int raw_op::write(shared_ptr<file_entry> file_ent, char const *buf, size_t size, off_t offset)
+    int raw_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         int bytes = ::send(fd_, buf, size, 0);
         if (bytes < 0)
@@ -70,24 +70,25 @@ namespace eth {
         return bytes;
     }
 
-    int raw_op::release(shared_ptr<file_entry> file_ent)
+    int raw_op::release(shared_ptr<fs_entry> file_ent)
     {
         return close(fd_);
     }
 
-    int raw_op::mknod(shared_ptr<file_entry>, path_type const&, mode_t, dev_t)
+    int raw_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
     {
         return 0;
     }
 
-    int raw_op::rmnod(shared_ptr<file_entry>, path_type const&)
+    int raw_op::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
         return -EPERM;
     }
 
-    bool raw_op::is_matching_path(path_type const& path)
+    bool raw_op::is_matching_path(path_type const& path, file_type type)
     {
-        return (path.parent_path() == "/eth" || path.parent_path() == "/ip");
+        return type == file_type::regular_file &&
+            (path.parent_path() == "/eth" || path.parent_path() == "/ip");
     }
 
 

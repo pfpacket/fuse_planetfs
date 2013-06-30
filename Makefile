@@ -1,5 +1,5 @@
 CXX        = g++
-CXXFLAGS   = -Wall -std=c++0x -O2
+CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O2 -march=native
 LDFLAGS    =
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
@@ -7,20 +7,21 @@ LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse
 OBJS       = src/planet/common.o \
              src/planet/fs_core.o \
              src/planet/utils.o \
-             src/planet/planet_handle.o \
+             src/planet/handle.o \
              src/planet/operation_layer.o \
              src/planet/basic_operation.o \
              src/planet/dns/dns_op.o \
              src/planet/tcp/client_op.o \
              src/planet/tcp/server_op.o \
              src/planet/eth/raw_op.o \
+             src/planet/eth/dir_op.o \
              src/planetfs_operations.o \
              src/planetfs_main.o
 TARGET     = mount.planetfs
 MNTDIR     = /net
 MNTOPT     = -o direct_io -o atomic_o_trunc \
              -o intr -o allow_other
-MNTDBGOPT  = $(MNTOPT) -d -f -s
+MNTDBGOPT  = $(MNTOPT) -d -f
 
 all: $(TARGET)
 rebuild: clean all
