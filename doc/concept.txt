@@ -1,39 +1,44 @@
+#
+# concept.txt
+#
 
-== The basic concept of planetfs ==
- On TCP communications, a remote host can be said as `an endpoint`
-because TCP is connection-needed protocol.
-So we have to express `an endpoint` somehow. We express it as a file.
-Under the /net directory (also in planetfs filesystem) files express an endpoint.
-So processes can communicate with other hosts by opening the endpoint files.
+== Motivation ==
+ Expressing resources as files is one of the most important Unix philosophy.
+But through the evolution of Unix and Unix-like operating systems, a lot of
+technologies, serviecs and resources have not been represented as files.
+Network is not an exception. Programming and end user interface to network
+is specialized for network, not through filesystem. I think the network interface
+to programmer and end users should be integrated to the filesystem namespace.
+ This problem is solved by Plan 9, a free software distributed operating system.
+Plan 9 solved it by providing file interface to network. It maps network to the
+filesystem namespace. Anything related to access to network such as accessing NICs,
+connecting to the remote hosts, establishing servers is provided through files.
+ This project, fuse_planetfs, is a filesystem which implements the idea on Linux.
+It uses FUSE (Filesystem in Userspace) to provide its filesystem interface to
+userspace.
+ The name, planet, comes from 'plan 9 net'.
+    +---------+
+    |plan nine|
+    |    n    | ==> planet
+    |    e    |
+    |    t    |
+    +---------+
 
- - TCP client -
- Now let's think about a TCP client program. It will try to connect a remote host.
-As said above, under plnetfs, remote hosts (endpoints) are expressed as files.
-So a client program which tries to connect to a remote host just opens an endpoint file.
 
-    int remote_host_fd = open("/net/eth/ip/tcp/192.168.1.1:80", O_CREAT | O_RDWR, S_IRWXU);
+== Basic concept ==
+ As mentioned above, we provide filesystem interface to network through files.
+So planetfs is mounted at /net and has /net/tcp/, /net/dns or something like that.
+For example, /net/dns provides DNS service. It is a file and readable and writeable.
+To request name resolving of 'www.example.com' simply open and write the request to
+/net/dns and then read it to get the result. See list.1
 
-Then to send data to an endpoint or receive data from it just write or read `remote_host_fd`.
-That's simple.
+    char buf[1024];
+    int fd = open("/net/dns", O_RDWR), ret;
+    const char *request = "resolve www.example.com";
+    write(fd, request, strlen(request));
+    while ((ret = read(fd, buf, sizeof buf)) > 0)
+        printf("%s", buf);
 
- - TCP server -
- TCP servers are similar to TCP clinets. They are same at the point of their protocol, TCP.
-First we have to create out endpoint to allow client programs to connect to us.
-To do it we open a server endpoint file.
+       list.1 sample code using DNS service
 
-    int server_fd = open("/net/eth/ip/tcp/*:80", O_CREAT | O_RDWR, S_IRWXU);
-
-The above code shows you how we can establish our server endpoint.
-Then we have to accept the client programs which try to connect to us.
-
-    int size = read(server_fd, client_path, sizeof (client_path));
-
-The `read` operations to the server endpoint (actually its opened fd) cause client programs
-to accept them. And the second argument of `read`, client_path will be filled with a path to 
-an accepted client endpoint. So the next thing to do is opening it to establish a connection between
-it and us.
-
-    int client_fd = open(client_path, O_CREAT | O_RDWR, S_IRWXU);
-
-Then it is same as TCP client to send or receive data from and to the client.
-
+to be continued...
