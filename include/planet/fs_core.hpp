@@ -237,7 +237,7 @@ public:
                 priority, index_type(typeid(OpType)), OpType::is_matching_path
             )
         );
-        std::sort(path2type_.begin(), path2type_.end(),
+        std::stable_sort(path2type_.begin(), path2type_.end(),
             [](value_type const& l, value_type const& r) {
                 return std::get<0>(l) > std::get<0>(r);
             }
