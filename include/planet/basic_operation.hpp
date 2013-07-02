@@ -64,12 +64,12 @@ class default_dir_op final : public entry_operation {
 public:
     default_dir_op()
     {
-        ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
+        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
     //~default_dir_op() = default;
     ~default_dir_op()
     {
-        ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
+        ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
 
     shared_ptr<entry_operation> new_instance() const;

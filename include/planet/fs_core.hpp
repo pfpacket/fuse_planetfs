@@ -318,15 +318,7 @@ public:
 
     typedef path_manager::priority priority;
 
-    template<typename RootOperation = dentry::default_op_type>
-    explicit core_file_system(mode_t root_mode)
-    {
-        st_inode new_inode;
-        new_inode.mode = root_mode | S_IFDIR;
-        install_op<default_file_op>(priority::min);
-        install_op<RootOperation>(priority::min);
-        root = std::make_shared<dentry>("/", typeid(RootOperation), new_inode);
-    }
+    explicit core_file_system(mode_t);
 
     ~core_file_system() = default;
 

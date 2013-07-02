@@ -39,7 +39,7 @@ void planet_create_initial_fs_structure()
     fs_root.mknod("/dns",   S_IRUSR | S_IWUSR, 0);
 }
 
-static struct fuse_operations planet_ops{};
+static struct fuse_operations planetfs_ops{};
 
 int main(int argc, char **argv)
 {
@@ -49,21 +49,21 @@ int main(int argc, char **argv)
         ::syslog(LOG_INFO, "%s daemon started", PLANETFS_NAME);
         planet_install_fs_operations();
         planet_create_initial_fs_structure();
-        planet_ops.getattr  = planet_getattr;
-        planet_ops.mknod    = planet_mknod;
-        planet_ops.unlink   = planet_unlink;
-        planet_ops.mkdir    = planet_mkdir;
-        planet_ops.rmdir    = planet_rmdir;
-        planet_ops.chmod    = planet_chmod;
-        planet_ops.chown    = planet_chown;
-        planet_ops.truncate = planet_truncate;
-        planet_ops.utimens  = planet_utimens;
-        planet_ops.open     = planet_open;
-        planet_ops.read     = planet_read;
-        planet_ops.write    = planet_write;
-        planet_ops.readdir  = planet_readdir;
-        planet_ops.release  = planet_release;
-        exit_code = fuse_main(argc, argv, &planet_ops, nullptr);
+        planetfs_ops.getattr    =   planet_getattr;
+        planetfs_ops.mknod      =   planet_mknod;
+        planetfs_ops.unlink     =   planet_unlink;
+        planetfs_ops.mkdir      =   planet_mkdir;
+        planetfs_ops.rmdir      =   planet_rmdir;
+        planetfs_ops.chmod      =   planet_chmod;
+        planetfs_ops.chown      =   planet_chown;
+        planetfs_ops.truncate   =   planet_truncate;
+        planetfs_ops.utimens    =   planet_utimens;
+        planetfs_ops.open       =   planet_open;
+        planetfs_ops.read       =   planet_read;
+        planetfs_ops.write      =   planet_write;
+        planetfs_ops.readdir    =   planet_readdir;
+        planetfs_ops.release    =   planet_release;
+        exit_code = fuse_main(argc, argv, &planetfs_ops, nullptr);
         ::syslog(LOG_INFO, "%s daemon finished", PLANETFS_NAME);
     } catch (std::exception& e) {
         ::syslog(LOG_ERR, "fatal error occurred: %s", e.what());

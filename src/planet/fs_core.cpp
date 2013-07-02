@@ -6,6 +6,15 @@
 namespace planet {
 
 
+    core_file_system::core_file_system(mode_t root_mode)
+    {
+        st_inode new_inode;
+        new_inode.mode = root_mode | S_IFDIR;
+        install_op<default_file_op>(priority::min);
+        install_op<default_dir_op>(priority::min);
+        root = std::make_shared<dentry>("/", typeid(default_dir_op), new_inode);
+    }
+
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
         if (auto fs_ent = get_entry_of(path)) {

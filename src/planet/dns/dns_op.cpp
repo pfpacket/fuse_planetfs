@@ -29,7 +29,7 @@ namespace dns {
     {
         struct addrinfo hints = {}, *res;
         hints.ai_family     = family;       // AF_INET,AF_INET6,AF_UNSPEC
-        hints.ai_socktype   = SOCK_STREAM;  // Stream socke
+        hints.ai_socktype   = SOCK_STREAM;  // Stream socket
 
         int s = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
         if (s != 0)
