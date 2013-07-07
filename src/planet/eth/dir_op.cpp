@@ -14,26 +14,6 @@ namespace eth {
         return std::make_shared<dir_op>(fs_root_);
     }
 
-    int dir_op::open(shared_ptr<fs_entry> dir_ent, path_type const& path)
-    {
-        return 0;
-    }
-
-    int dir_op::read(shared_ptr<fs_entry> dir_ent, char *buf, size_t size, off_t offset)
-    {
-        return 0;
-    }
-
-    int dir_op::write(shared_ptr<fs_entry> dir_ent, char const *buf, size_t size, off_t offset)
-    {
-        return 0;
-    }
-
-    int dir_op::release(shared_ptr<fs_entry> dir_ent)
-    {
-        return 0;
-    }
-
     int dir_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
     {
         ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
