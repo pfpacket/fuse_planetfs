@@ -13,7 +13,7 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<fs_operation> server_op::new_instance() const
+    shared_ptr<fs_operation> server_op::new_instance()
     {
         return std::make_shared<server_op, core_file_system&>(fs_root_);
     }

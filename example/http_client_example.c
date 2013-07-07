@@ -47,5 +47,6 @@ int main(int argc, char **argv)
     } while (size != 0);
 
     close(fd);
+    remove("/net/tcp/74.125.235.240!80");
     return EXIT_SUCCESS;
 }

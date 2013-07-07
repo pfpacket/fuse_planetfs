@@ -9,11 +9,9 @@
 #include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
-#include <planet/dns/dns_op.hpp>
-#include <planet/tcp/client_op.hpp>
-#include <planet/tcp/server_op.hpp>
-#include <planet/eth/raw_op.hpp>
-#include <planet/eth/dir_op.hpp>
+#include <planet/dns/installer.hpp>
+#include <planet/tcp/installer.hpp>
+#include <planet/eth/installer.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
 
@@ -23,11 +21,9 @@
 void planet_install_fs_operations()
 {
     typedef planet::core_file_system::priority priority;
-    fs_root.install_op<planet::net::dns::dns_op>(priority::normal);
-    fs_root.install_op<planet::net::tcp::client_op>(priority::normal);
-    fs_root.install_op<planet::net::tcp::server_op>(priority::normal, fs_root);
-    fs_root.install_op<planet::net::eth::raw_op>(priority::normal);
-    fs_root.install_op<planet::net::eth::dir_op>(priority::normal, fs_root);
+    fs_root.install_op<planet::net::dns::installer>(priority::normal, fs_root);
+    fs_root.install_op<planet::net::tcp::installer>(priority::normal, fs_root);
+    fs_root.install_op<planet::net::eth::installer>(priority::normal, fs_root);
 }
 
 // Create initial filesystem structure

@@ -31,7 +31,7 @@ public:
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
 
-    shared_ptr<fs_operation> new_instance() const;
+    shared_ptr<fs_operation> new_instance() override;
     int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
     int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;

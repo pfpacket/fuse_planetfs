@@ -15,7 +15,7 @@ namespace planet {
     //
     // default_file_op
     //
-    shared_ptr<fs_operation> default_file_op::new_instance() const
+    shared_ptr<fs_operation> default_file_op::new_instance()
     {
         return std::make_shared<default_file_op>();
     }
@@ -65,7 +65,7 @@ namespace planet {
     //
     // default_dir_op
     //
-    shared_ptr<fs_operation> default_dir_op::new_instance() const
+    shared_ptr<fs_operation> default_dir_op::new_instance()
     {
         return std::make_shared<default_dir_op>();
     }

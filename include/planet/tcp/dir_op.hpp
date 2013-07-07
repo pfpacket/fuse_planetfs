@@ -1,13 +1,14 @@
-#ifndef PLANET_ETH_DIR_OP_HPP
-#define PLANET_ETH_DIR_OP_HPP
+#ifndef PLANET_TCP_DIR_OP_HPP
+#define PLANET_TCP_DIR_OP_HPP
 
 #include <planet/common.hpp>
+#include <planet/tcp/common.hpp>
 #include <planet/basic_operation.hpp>
 #include <planet/fs_core.hpp>
 
 namespace planet {
 namespace net {
-namespace eth {
+namespace tcp {
 
 
 class dir_op final : public fs_operation {
@@ -31,7 +32,7 @@ public:
 };
 
 
-}   // namespace eth
+}   // namespace tcp
 }   // namespace net
 }   // namespace planet
 

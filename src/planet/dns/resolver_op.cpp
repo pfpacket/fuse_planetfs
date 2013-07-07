@@ -1,6 +1,6 @@
 
 #include <planet/common.hpp>
-#include <planet/dns/dns_op.hpp>
+#include <planet/dns/resolver_op.hpp>
 #include <planet/utils.hpp>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -12,7 +12,7 @@ namespace net {
 namespace dns {
 
 
-//    dns_op::dns_op(core_file_system& fs_root)
+//    resolver_op::resolver_op(core_file_system& fs_root)
 //    {
 //        if (!fs_root.get_entry_of("/dns/clone")) {
 //            fs_root.install_op<dns_clone_op>(fs_root);
@@ -20,12 +20,12 @@ namespace dns {
 //        }
 //    }
 
-    shared_ptr<fs_operation> dns_op::new_instance() const
+    shared_ptr<fs_operation> resolver_op::new_instance()
     {
-        return std::make_shared<dns_op>();
+        return std::make_shared<resolver_op>();
     }
 
-    int dns_op::forward_lookup(std::string const& hostname, int family, std::vector<std::string>& store)
+    int resolver_op::forward_lookup(std::string const& hostname, int family, std::vector<std::string>& store)
     {
         struct addrinfo hints = {}, *res;
         hints.ai_family     = family;       // AF_INET,AF_INET6,AF_UNSPEC
@@ -47,12 +47,12 @@ namespace dns {
         return 0;
     }
 
-    int dns_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
+    int resolver_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         return 0;
     }
 
-    int dns_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
+    int resolver_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
         if (resolved_names_.empty())
             return 0;
@@ -66,14 +66,14 @@ namespace dns {
         return length + 1;
     }
 
-    int dns_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
+    int resolver_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         std::string request(buf, size);
         auto pos = request.find_first_of(' ');
         if (pos == std::string::npos)
             return -EINVAL;
         std::string opecode = request.substr(0, pos), hostname_ = request.substr(pos + 1);
-        syslog(LOG_INFO, "dns_op: write: opecode=%s / hostname=%s", opecode.c_str(), hostname_.c_str());
+        syslog(LOG_INFO, "resolver_op: write: opecode=%s / hostname=%s", opecode.c_str(), hostname_.c_str());
 
         int family;
         if (opecode == "resolve")            family = AF_UNSPEC;
@@ -85,22 +85,22 @@ namespace dns {
         return request.length();
     }
 
-    int dns_op::release(shared_ptr<fs_entry> file_ent)
+    int resolver_op::release(shared_ptr<fs_entry> file_ent)
     {
         return 0;
     }
 
-    int dns_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
+    int resolver_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
     {
         return 0;
     }
 
-    int dns_op::rmnod(shared_ptr<fs_entry>, path_type const&)
+    int resolver_op::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
         return -EPERM;
     }
 
-    bool dns_op::is_matching_path(path_type const& path, file_type type)
+    bool resolver_op::is_matching_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file && path == "/dns";
     }

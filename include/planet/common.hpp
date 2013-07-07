@@ -38,6 +38,7 @@ namespace planet {
     using boost::none;
 
     typedef boost::format format;
+    using boost::str;
 
     // file type number
     enum file_type {

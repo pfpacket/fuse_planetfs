@@ -10,7 +10,9 @@ OBJS       = src/planet/common.o \
              src/planet/handle.o \
              src/planet/operation_layer.o \
              src/planet/basic_operation.o \
-             src/planet/dns/dns_op.o \
+             src/planet/dns/resolver_op.o \
+             src/planet/tcp/dir_op.o \
+             src/planet/tcp/clone_op.o \
              src/planet/tcp/client_op.o \
              src/planet/tcp/server_op.o \
              src/planet/eth/raw_op.o \
