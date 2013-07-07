@@ -14,7 +14,7 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<entry_operation> client_op::new_instance() const
+    shared_ptr<fs_operation> client_op::new_instance() const
     {
         return std::make_shared<client_op>();
     }

@@ -20,7 +20,7 @@ namespace dns {
 //        }
 //    }
 
-    shared_ptr<entry_operation> dns_op::new_instance() const
+    shared_ptr<fs_operation> dns_op::new_instance() const
     {
         return std::make_shared<dns_op>();
     }

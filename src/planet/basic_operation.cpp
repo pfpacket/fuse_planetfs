@@ -7,7 +7,7 @@
 namespace planet {
 
 
-    std::vector<char>& entry_operation::data_vector(file_entry& file)
+    std::vector<char>& fs_operation::data_vector(file_entry& file)
     {
         return file.data_;
     }
@@ -15,7 +15,7 @@ namespace planet {
     //
     // default_file_op
     //
-    shared_ptr<entry_operation> default_file_op::new_instance() const
+    shared_ptr<fs_operation> default_file_op::new_instance() const
     {
         return std::make_shared<default_file_op>();
     }
@@ -65,7 +65,7 @@ namespace planet {
     //
     // default_dir_op
     //
-    shared_ptr<entry_operation> default_dir_op::new_instance() const
+    shared_ptr<fs_operation> default_dir_op::new_instance() const
     {
         return std::make_shared<default_dir_op>();
     }

@@ -11,7 +11,7 @@ namespace net {
 namespace tcp {
 
 
-class client_op : public entry_operation {
+class client_op : public fs_operation {
 private:
     int fd_;
 
@@ -29,7 +29,7 @@ public:
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
 
-    shared_ptr<entry_operation> new_instance() const;
+    shared_ptr<fs_operation> new_instance() const;
     int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
     int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;

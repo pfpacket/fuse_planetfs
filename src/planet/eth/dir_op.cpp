@@ -9,7 +9,7 @@ namespace net {
 namespace eth {
 
 
-    shared_ptr<entry_operation> dir_op::new_instance() const
+    shared_ptr<fs_operation> dir_op::new_instance() const
     {
         return std::make_shared<dir_op>(fs_root_);
     }

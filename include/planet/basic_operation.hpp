@@ -12,16 +12,16 @@ class file_entry;
 //
 // planet core handler
 //
-class entry_operation {
+class fs_operation {
 protected:
     static std::vector<char>& data_vector(file_entry& file);
 public:
-    virtual ~entry_operation() noexcept
+    virtual ~fs_operation() noexcept
     {
     }
 
     // Create new instance of this file operation
-    virtual shared_ptr<entry_operation> new_instance() const
+    virtual shared_ptr<fs_operation> new_instance() const
     {
         return detail::shared_null_ptr;
     }
@@ -64,17 +64,17 @@ public:
 
 
 //
-// Note: All of planetfs operations must inherit entry_operation
+// Note: All of planetfs operations must inherit fs_operation
 //       and implement static function named `is_matching_path()`
 //       which returns true if the given path is for the operation
 //
 
 // default file operation which is used if no other operations match the target path
-class default_file_op final : public entry_operation {
+class default_file_op final : public fs_operation {
 public:
     ~default_file_op() = default;
 
-    shared_ptr<entry_operation> new_instance() const override;
+    shared_ptr<fs_operation> new_instance() const override;
     int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
     int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
@@ -85,7 +85,7 @@ public:
 };
 
 // default dir operation which is used if no other operations match the target path
-class default_dir_op final : public entry_operation {
+class default_dir_op final : public fs_operation {
 public:
     default_dir_op()
     {
@@ -97,7 +97,7 @@ public:
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
 
-    shared_ptr<entry_operation> new_instance() const override;
+    shared_ptr<fs_operation> new_instance() const override;
     int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
     int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;

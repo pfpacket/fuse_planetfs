@@ -62,7 +62,7 @@ public:
     virtual void inode(st_inode const&) = 0;
 };
 
-class entry_operation;
+class fs_operation;
 
 class file_entry : public fs_entry,
   public std::enable_shared_from_this<file_entry> {
@@ -75,7 +75,7 @@ class file_entry : public fs_entry,
     st_inode inode_;
     std::vector<value_type> data_;
 
-    friend class entry_operation;
+    friend class fs_operation;
 
 public:
     file_entry(string_type const& name, op_type_code ti, st_inode const& sti)
@@ -275,7 +275,7 @@ private:
 class operation_manager {
 public:
     typedef op_type_code index_type;
-    typedef shared_ptr<entry_operation> op_type;
+    typedef shared_ptr<fs_operation> op_type;
     typedef std::map<index_type, op_type> map_type;
 
     template<typename OpType, typename ...Types>
