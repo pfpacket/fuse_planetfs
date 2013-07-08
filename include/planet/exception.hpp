@@ -8,7 +8,7 @@
 
 namespace planet {
 
-class exception_errno : std::exception {
+class exception_errno : public std::exception {
 public:
     exception_errno(int err) : errno_(err)
     {
