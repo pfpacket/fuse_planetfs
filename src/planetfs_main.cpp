@@ -64,6 +64,9 @@ int main(int argc, char **argv)
     } catch (std::exception& e) {
         ::syslog(LOG_ERR, "fatal error occurred: %s", e.what());
         exit_code = EXIT_FAILURE;
+    } catch (...) {
+        ::syslog(LOG_ERR, "unknown fatal error occurred");
+        exit_code = EXIT_FAILURE;
     }
     return exit_code;
 }
