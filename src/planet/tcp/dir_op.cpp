@@ -14,9 +14,9 @@ namespace tcp {
         return std::make_shared<dir_op>(fs_root_);
     }
 
-    int dir_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
+    int dir_op::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
     {
-        ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
+        ::syslog(LOG_NOTICE, "%s: dir=%s", __PRETTY_FUNCTION__, path.string().c_str());
         return fs_root_.mknod("/tcp/clone", S_IRUSR | S_IWUSR, 0);
     }
 

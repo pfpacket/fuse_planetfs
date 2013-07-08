@@ -90,9 +90,9 @@ namespace planet {
         return 0;
     }
 
-    int default_dir_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
+    int default_dir_op::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
     {
-        ::syslog(LOG_NOTICE, "%s: creating directory", __PRETTY_FUNCTION__);
+        ::syslog(LOG_NOTICE, "%s: path=%s", __PRETTY_FUNCTION__, path.string().c_str());
         return 0;
     }
 
