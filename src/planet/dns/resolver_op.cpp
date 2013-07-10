@@ -56,7 +56,7 @@ namespace dns {
     {
         if (resolved_names_.empty())
             return 0;
-        std::string& resolved = *resolved_names_.begin();
+        std::string const& resolved = resolved_names_.front();
         std::size_t length = resolved.length();
         if (size <= length)
             return -ENOBUFS;
