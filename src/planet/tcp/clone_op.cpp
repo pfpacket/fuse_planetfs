@@ -30,11 +30,9 @@ namespace tcp {
 
     bool target_ctl_is_connected(handle_t handle)
     {
-        char buffer[1024];
         const char *request = "is_connected";
-        planet::write(handle, request, strlen(request), 0);
-        planet::read(handle, buffer, sizeof (buffer), 0);
-        return std::string("true") == buffer;
+        int ret = planet::write(handle, request, strlen(request), 0);
+        return ret != -ECONNREFUSED;
     }
 
     shared_ptr<fs_operation> clone_op::new_instance()
@@ -56,33 +54,30 @@ namespace tcp {
 
     int clone_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
-        auto fmt = format("/tcp/%1%") % current_fd_;
-        if (!fs_root_.get_entry_of(path))
-            fs_root_.mkdir(str(fmt), S_IRWXU);
+        auto session_dir_path = str(format("/tcp/%1%") % current_fd_);
+        // Confirm the current fd session is started
+        if (!fs_root_.get_entry_of(session_dir_path))
+            fs_root_.mkdir(session_dir_path, S_IRWXU);
+        ctl_handle_ = fs_root_.open(session_dir_path + "/ctl");
         return 0;
     }
 
     int clone_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
-        std::string dir_number = str(format("%1%") % current_fd_);
-        if (dir_number.length() >= size)
-            return -ENOBUFS;
-        std::copy(dir_number.begin(), dir_number.end(), buf);
-        buf[dir_number.length()] = '\0';
-        return 0;
+        int bytes = planet::read(ctl_handle_, buf, size, offset);
+        return bytes;
     }
 
     int clone_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
-        auto handle = fs_root_.open(str(format("/net/tcp/%1%/ctl") % current_fd_));
-        int bytes = planet::write(handle, buf, size, offset);
-        planet::close(handle);
+        int bytes = planet::write(ctl_handle_, buf, size, offset);
         return bytes;
     }
 
     int clone_op::release(shared_ptr<fs_entry> file_ent)
     {
-        return 0;
+        int ret = planet::close(ctl_handle_);
+        return ret;
     }
 
     int clone_op::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)

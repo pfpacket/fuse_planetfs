@@ -43,8 +43,8 @@ public:
     {
         path2type_.erase(
             std::remove_if(
-                path2type_.begin(), path2type_.end(),[]
-                (value_type const& t) {
+                path2type_.begin(), path2type_.end(),
+                [](value_type const& t) {
                     return std::get<1>(t) == typeid(OpType);
                 }
             ), path2type_.end()
