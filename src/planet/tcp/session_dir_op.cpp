@@ -33,7 +33,7 @@ namespace tcp {
         return type == file_type::directory
             && boost::regex_match(
                 path.string(),
-                boost::regex("/tcp/[0-9]+")
+                path_reg::session_dir
             );
     }
 

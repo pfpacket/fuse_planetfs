@@ -15,6 +15,8 @@ namespace net {
 namespace tcp {
 
 
+    boost::regex reg_connect_req {R"(^connect ((\d{1,3}\.){3}\d{1,3})\!(\d{1,6}))"};
+
     shared_ptr<fs_operation> ctl_op::new_instance()
     {
         return std::make_shared<ctl_op>(fs_root_);
@@ -23,7 +25,7 @@ namespace tcp {
     int ctl_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         boost::smatch m;
-        if (!boost::regex_match(path.string(), m, boost::regex("/tcp/([0-9]+)/ctl")))
+        if (!boost::regex_match(path.string(), m, path_reg::ctl))
             throw std::runtime_error(
                 __PRETTY_FUNCTION__ + std::string(": ") + path.string() + ": unexpected path"
             );
@@ -76,8 +78,8 @@ namespace tcp {
                 ret = -ECONNREFUSED;
                 ::shutdown(socket_, SHUT_RDWR);
             }
-        } else if (boost::regex_search(request, m, boost::regex(R"(^connect ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\!([0-9]+))")))
-            sock_connect_to(socket_, m[1], boost::lexical_cast<int>(m[2]));
+        } else if (boost::regex_search(request, m, reg_connect_req))
+            sock_connect_to(socket_, m[1], boost::lexical_cast<int>(m[3]));
         else
             ret = -ENOTSUP;
         return ret;
@@ -104,7 +106,7 @@ namespace tcp {
             type == file_type::regular_file
             && boost::regex_match(
                 path.string(),
-                boost::regex("/tcp/([0-9]+)/ctl")
+                path_reg::ctl
             );
 
     }

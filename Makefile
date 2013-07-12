@@ -11,6 +11,7 @@ OBJS       = src/planet/common.o \
              src/planet/operation_layer.o \
              src/planet/basic_operation.o \
              src/planet/dns/resolver_op.o \
+             src/planet/tcp/common.o \
              src/planet/tcp/dir_op.o \
              src/planet/tcp/clone_op.o \
              src/planet/tcp/ctl_op.o \

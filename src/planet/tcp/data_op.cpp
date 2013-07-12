@@ -72,7 +72,7 @@ namespace tcp {
             type == file_type::regular_file
             && boost::regex_match(
                 path.string(),
-                boost::regex("/tcp/([0-9]+)/data")
+                path_reg::data
             );
 
     }
