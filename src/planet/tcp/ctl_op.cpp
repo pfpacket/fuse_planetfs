@@ -5,9 +5,7 @@
 #include <planet/operation_layer.hpp>
 #include <planet/tcp/ctl_op.hpp>
 #include <planet/utils.hpp>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
+#include <netinet/tcp.h>
 #include <syslog.h>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
@@ -50,7 +48,7 @@ namespace tcp {
         return ret;
     }
 
-    void connect_to(int fd, std::string const& host, int port)
+    void sock_connect_to(int fd, std::string const& host, int port)
     {
         struct sockaddr_in sin = {AF_INET, htons(port), {0}, {0}};
         inet_pton(AF_INET, host.c_str(), &sin.sin_addr);
@@ -58,17 +56,31 @@ namespace tcp {
             throw planet::exception_errno(errno);
     }
 
+    // getsockopt(TCP_INFO) depends on Linux functionality
+    bool sock_is_connected(int sock)
+    {
+        struct tcp_info info;
+        socklen_t info_length = sizeof (info);
+        if (getsockopt(sock, SOL_TCP, TCP_INFO, &info, &info_length) != 0)
+            throw exception_errno(errno);
+        return info.tcpi_state == TCP_ESTABLISHED;
+    }
+
     int ctl_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
+        int ret = size;
         boost::smatch m;
         std::string request(buf, size);
-        if (boost::regex_search(request, boost::regex("^is_connected")))
-            return -ECONNREFUSED;
-        else if (boost::regex_search(request, m, boost::regex(R"(^connect ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\!([0-9]+))")))
-            connect_to(socket_, m[1], boost::lexical_cast<int>(m[2]));
+        if (boost::regex_search(request, boost::regex("^is_connected"))) {
+            if (!sock_is_connected(socket_)) {
+                ret = -ECONNREFUSED;
+                ::shutdown(socket_, SHUT_RDWR);
+            }
+        } else if (boost::regex_search(request, m, boost::regex(R"(^connect ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\!([0-9]+))")))
+            sock_connect_to(socket_, m[1], boost::lexical_cast<int>(m[2]));
         else
-            return -ENOTSUP;
-        return size;
+            ret = -ENOTSUP;
+        return ret;
     }
 
     int ctl_op::release(shared_ptr<fs_entry> file_ent)
