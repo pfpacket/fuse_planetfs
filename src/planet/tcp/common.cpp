@@ -13,7 +13,7 @@ namespace tcp {
         boost::regex local          {R"(/tcp/(\d+)/local)"};
         boost::regex remote         {R"(/tcp/(\d+)/remote)"};
         boost::regex session_dir    {R"(/tcp/(\d+))"};
-        boost::regex dir_num        {R"(/tcp/(\d+)[/\w]*)"};
+        boost::regex dir_num        {R"(/\w+/(\d+)[/\w]*)"};
     }   // namespace path_reg
 
     namespace detail {
