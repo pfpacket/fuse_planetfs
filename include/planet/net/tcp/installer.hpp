@@ -2,15 +2,15 @@
 #define PLANET_TCP_INSTALLER_HPP
 
 #include <planet/common.hpp>
-#include <planet/tcp/common.hpp>
-#include <planet/tcp/dir_op.hpp>
-#include <planet/tcp/clone_op.hpp>
-#include <planet/tcp/ctl_op.hpp>
-#include <planet/tcp/data_op.hpp>
-#include <planet/tcp/address_op.hpp>
-#include <planet/tcp/session_dir_op.hpp>
-#include <planet/tcp/client_op.hpp>
-#include <planet/tcp/server_op.hpp>
+#include <planet/net/tcp/common.hpp>
+#include <planet/net/tcp/dir_op.hpp>
+#include <planet/net/tcp/clone_op.hpp>
+#include <planet/net/tcp/ctl_op.hpp>
+#include <planet/net/tcp/data_op.hpp>
+#include <planet/net/tcp/address_op.hpp>
+#include <planet/net/tcp/session_dir_op.hpp>
+#include <planet/net/tcp/client_op.hpp>
+#include <planet/net/tcp/server_op.hpp>
 #include <planet/fs_core.hpp>
 
 namespace planet {

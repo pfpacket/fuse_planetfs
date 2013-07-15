@@ -2,7 +2,7 @@
 #define PLANET_TCP_ADDRESS_OP_HPP
 
 #include <planet/common.hpp>
-#include <planet/tcp/common.hpp>
+#include <planet/net/tcp/common.hpp>
 #include <planet/basic_operation.hpp>
 #include <planet/fs_core.hpp>
 

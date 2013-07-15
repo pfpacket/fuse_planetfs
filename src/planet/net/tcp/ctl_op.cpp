@@ -3,7 +3,7 @@
 #include <planet/fs_core.hpp>
 #include <planet/basic_operation.hpp>
 #include <planet/operation_layer.hpp>
-#include <planet/tcp/ctl_op.hpp>
+#include <planet/net/tcp/ctl_op.hpp>
 #include <planet/utils.hpp>
 #include <syslog.h>
 #include <boost/regex.hpp>

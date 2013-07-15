@@ -10,18 +10,18 @@ OBJS       = src/planet/common.o \
              src/planet/handle.o \
              src/planet/operation_layer.o \
              src/planet/basic_operation.o \
-             src/planet/dns/resolver_op.o \
-             src/planet/tcp/common.o \
-             src/planet/tcp/dir_op.o \
-             src/planet/tcp/clone_op.o \
-             src/planet/tcp/ctl_op.o \
-             src/planet/tcp/data_op.o \
-             src/planet/tcp/address_op.o \
-             src/planet/tcp/session_dir_op.o \
-             src/planet/tcp/client_op.o \
-             src/planet/tcp/server_op.o \
-             src/planet/eth/raw_op.o \
-             src/planet/eth/dir_op.o \
+             src/planet/net/dns/resolver_op.o \
+             src/planet/net/tcp/common.o \
+             src/planet/net/tcp/dir_op.o \
+             src/planet/net/tcp/clone_op.o \
+             src/planet/net/tcp/ctl_op.o \
+             src/planet/net/tcp/data_op.o \
+             src/planet/net/tcp/address_op.o \
+             src/planet/net/tcp/session_dir_op.o \
+             src/planet/net/tcp/client_op.o \
+             src/planet/net/tcp/server_op.o \
+             src/planet/net/eth/raw_op.o \
+             src/planet/net/eth/dir_op.o \
              src/planetfs_operations.o \
              src/planetfs_main.o
 TARGET     = mount.planetfs

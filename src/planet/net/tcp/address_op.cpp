@@ -1,6 +1,6 @@
 
 #include <planet/common.hpp>
-#include <planet/tcp/address_op.hpp>
+#include <planet/net/tcp/address_op.hpp>
 #include <planet/utils.hpp>
 #include <boost/regex.hpp>
 #include <boost/format.hpp>

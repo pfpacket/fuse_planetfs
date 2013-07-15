@@ -1,7 +1,7 @@
 
 #include <planet/common.hpp>
 #include <planet/utils.hpp>
-#include <planet/tcp/session_dir_op.hpp>
+#include <planet/net/tcp/session_dir_op.hpp>
 #include <boost/regex.hpp>
 
 namespace planet {

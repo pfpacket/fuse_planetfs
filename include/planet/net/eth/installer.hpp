@@ -2,8 +2,8 @@
 #define PLANET_ETH_INSTALLER_HPP
 
 #include <planet/common.hpp>
-#include <planet/eth/dir_op.hpp>
-#include <planet/eth/raw_op.hpp>
+#include <planet/net/eth/dir_op.hpp>
+#include <planet/net/eth/raw_op.hpp>
 #include <planet/fs_core.hpp>
 
 namespace planet {

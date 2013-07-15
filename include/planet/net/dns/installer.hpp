@@ -2,7 +2,7 @@
 #define PLANET_DNS_INSTALLER_HPP
 
 #include <planet/common.hpp>
-#include <planet/dns/resolver_op.hpp>
+#include <planet/net/dns/resolver_op.hpp>
 #include <planet/fs_core.hpp>
 
 namespace planet {

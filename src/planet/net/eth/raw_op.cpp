@@ -1,6 +1,6 @@
 
 #include <planet/common.hpp>
-#include <planet/eth/raw_op.hpp>
+#include <planet/net/eth/raw_op.hpp>
 #include <sys/socket.h>
 #include <netpacket/packet.h>
 #include <net/if.h>

@@ -9,9 +9,9 @@
 #include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
-#include <planet/dns/installer.hpp>
-#include <planet/tcp/installer.hpp>
-#include <planet/eth/installer.hpp>
+#include <planet/net/dns/installer.hpp>
+#include <planet/net/tcp/installer.hpp>
+#include <planet/net/eth/installer.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
 

@@ -1,8 +1,8 @@
-#ifndef PLANET_TCP_CTL_OP_HPP
-#define PLANET_TCP_CTL_OP_HPP
+#ifndef PLANET_TCP_CLONE_OP_HPP
+#define PLANET_TCP_CLONE_OP_HPP
 
 #include <planet/common.hpp>
-#include <planet/tcp/common.hpp>
+#include <planet/net/tcp/common.hpp>
 #include <planet/basic_operation.hpp>
 #include <planet/fs_core.hpp>
 
@@ -11,21 +11,24 @@ namespace net {
 namespace tcp {
 
 
-class ctl_op : public fs_operation {
+class clone_op : public fs_operation {
 private:
     core_file_system& fs_root_;
     int current_fd_;
-    bool fd_number_already_read_ = false;
+    handle_t ctl_handle_;
 
 public:
 
-    //ctl_op() = default;
-    ctl_op(core_file_system& root)
-        : fs_root_(root)
+    //clone_op() = default;
+    clone_op(core_file_system& root, int current)
+        : fs_root_(root), current_fd_(current)
     {
+        // fs_root_.install_op<ctl_op>(fs_root_);
+        // fs_root_.install_op<status_op>(fs_root_);
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
+        //fs_root_.install_op<dir_op>(fs_root_);
     }
-    ~ctl_op()
+    ~clone_op() noexcept
     {
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
@@ -45,4 +48,4 @@ public:
 }   // namespace net
 }   // namespace planet
 
-#endif  // PLANET_TCP_CTL_OP_HPP
+#endif  // PLANET_TCP_CLONE_OP_HPP
