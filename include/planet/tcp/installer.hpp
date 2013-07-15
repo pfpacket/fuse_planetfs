@@ -28,6 +28,7 @@ public:
         fs_root.install_op<ctl_op>(priority::normal, fs_root);
         fs_root.install_op<data_op>(priority::normal, fs_root);
         fs_root.install_op<remote_op>(priority::normal, fs_root);
+        fs_root.install_op<local_op>(priority::normal, fs_root);
         fs_root.install_op<session_dir_op>(priority::normal, fs_root);
         fs_root.install_op<client_op>(priority::normal);
         fs_root.install_op<server_op>(priority::normal, fs_root);

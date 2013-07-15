@@ -21,6 +21,7 @@ namespace tcp {
         boost::regex_match(path.string(), m, path_reg::session_dir);
         fs_root_.mknod(path.string() + "/data", S_IRUSR | S_IWUSR, 0);
         fs_root_.mknod(path.string() + "/ctl", S_IRUSR | S_IWUSR, 0);
+        fs_root_.mknod(path.string() + "/local", S_IRUSR | S_IWUSR, 0);
         fs_root_.mknod(path.string() + "/remote", S_IRUSR | S_IWUSR, 0);
         return 0;
     }
