@@ -124,7 +124,9 @@ namespace planet {
             new_handle = handle_mgr.register_op(ops_mgr_[fentry->get_op()]->new_instance(), fentry);
             try {
                 auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
-                std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
+                int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
+                if (open_ret < 0)
+                    throw exception_errno(-open_ret);
             } catch (...) {
                 handle_mgr.unregister_op(new_handle);
                 throw;
