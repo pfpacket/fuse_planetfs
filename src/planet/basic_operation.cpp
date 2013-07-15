@@ -27,22 +27,18 @@ namespace planet {
 
     int default_file_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
-        ::syslog(LOG_NOTICE, "%s: called size=%d offset=%lld", __PRETTY_FUNCTION__, size, offset);
         if (file_ent->size() < size + offset)
             size = file_ent->size() - offset;
         std::copy_n(this->data_vector(*file_cast(file_ent)).begin() + offset, size, buf);
-        ::syslog(LOG_NOTICE, "%s: called size=%d", __PRETTY_FUNCTION__, size);
         return size;
     }
 
     int default_file_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
-        ::syslog(LOG_NOTICE, "%s: called size=%d offset=%lld", __PRETTY_FUNCTION__, size, offset);
         auto fentry = file_cast(file_ent);
         if (fentry->size() < size + offset)
             data_vector(*fentry).resize(size + offset, 0);
         std::copy_n(buf, size, this->data_vector(*fentry).begin() + offset);
-        ::syslog(LOG_NOTICE, "%s: called size=%d", __PRETTY_FUNCTION__, size);
         return size;
     }
 

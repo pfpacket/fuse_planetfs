@@ -18,7 +18,7 @@ namespace tcp {
     namespace detail {
         optional<fd_table::mapped_type> fd_table::find(const fd_table::key_type& k) const
         {
-            ::syslog(LOG_NOTICE, "fdtable.insert(): finding KEY=%s", k.c_str());
+            ::syslog(LOG_NOTICE, "fdtable.find(): finding KEY=%s", k.c_str());
             auto it = table_.find(k);
             if (it == table_.end())
                 return boost::none;

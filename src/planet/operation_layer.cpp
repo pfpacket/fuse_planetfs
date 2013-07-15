@@ -7,7 +7,6 @@ namespace planet {
 
     int read(handle_t handle, char *buf, size_t size, off_t offset)
     {
-        ::syslog(LOG_NOTICE, "%s: called size=%d", __PRETTY_FUNCTION__, size);
         auto& op_tuple = handle_mgr.get_operation_entry(handle);
         return std::get<0>(op_tuple)->read(
             std::get<1>(op_tuple), buf, size, offset
