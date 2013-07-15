@@ -70,40 +70,40 @@ public:
 //
 
 // default file operation which is used if no other operations match the target path
-class default_file_op final : public fs_operation {
+class default_file_op : public fs_operation {
 public:
-    ~default_file_op() = default;
+    virtual ~default_file_op() = default;
 
-    shared_ptr<fs_operation> new_instance() override;
-    int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-    int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
-    int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
-    int release(shared_ptr<fs_entry> file_ent) override;
-    int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
-    int rmnod(shared_ptr<fs_entry>, path_type const&) override;
+    virtual shared_ptr<fs_operation> new_instance() override;
+    virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
+    virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
+    virtual int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
+    virtual int release(shared_ptr<fs_entry> file_ent) override;
+    virtual int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
+    virtual int rmnod(shared_ptr<fs_entry>, path_type const&) override;
     static bool is_matching_path(path_type const&, file_type);
 };
 
 // default dir operation which is used if no other operations match the target path
-class default_dir_op final : public fs_operation {
+class default_dir_op : public fs_operation {
 public:
     default_dir_op()
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
     //~default_dir_op() = default;
-    ~default_dir_op()
+    virtual ~default_dir_op()
     {
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
 
-    shared_ptr<fs_operation> new_instance() override;
-    int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-    int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
-    int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
-    int release(shared_ptr<fs_entry> file_ent) override;
-    int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
-    int rmnod(shared_ptr<fs_entry>, path_type const&) override;
+    virtual shared_ptr<fs_operation> new_instance() override;
+    virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
+    virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
+    virtual int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
+    virtual int release(shared_ptr<fs_entry> file_ent) override;
+    virtual int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
+    virtual int rmnod(shared_ptr<fs_entry>, path_type const&) override;
     static bool is_matching_path(path_type const&, file_type);
 };
 

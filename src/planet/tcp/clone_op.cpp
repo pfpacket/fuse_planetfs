@@ -32,7 +32,7 @@ namespace tcp {
     {
         const char *request = "is_connected";
         int ret = planet::write(handle, request, strlen(request), 0);
-        return ret != -ECONNREFUSED;
+        return ret != -ENOTCONN;
     }
 
     shared_ptr<fs_operation> clone_op::new_instance()

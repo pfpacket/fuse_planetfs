@@ -16,7 +16,6 @@ private:
     core_file_system& fs_root_;
     int current_fd_;
     bool fd_number_already_read_ = false;
-    int socket_ = -1;
 
 public:
 

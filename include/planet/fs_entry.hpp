@@ -109,7 +109,12 @@ public:
         inode_ = inode;
     }
 
-    decltype(data_) const& data_buffer() const
+    decltype(data_)& data()
+    {
+        return data_;
+    }
+
+    decltype(data_) const& data() const
     {
         return data_;
     }

@@ -10,8 +10,10 @@ namespace planet {
 
 class exception_errno : public std::exception {
 public:
-    exception_errno(int err) : errno_(err)
+    exception_errno(int err, const char *pre = "", const char *post = "")
+        : errno_(err)
     {
+        ((msg_ += pre) += std::strerror(err)) += post;
     }
 
     virtual ~exception_errno() = default;
@@ -23,11 +25,12 @@ public:
 
     char const *what() const noexcept
     {
-        return std::strerror(errno_);
+        return msg_.c_str();
     }
 
 private:
     int errno_;
+    std::string msg_;
 };
 
 }   // namespace planet

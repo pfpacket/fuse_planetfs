@@ -16,6 +16,7 @@ OBJS       = src/planet/common.o \
              src/planet/tcp/clone_op.o \
              src/planet/tcp/ctl_op.o \
              src/planet/tcp/data_op.o \
+             src/planet/tcp/address_op.o \
              src/planet/tcp/session_dir_op.o \
              src/planet/tcp/client_op.o \
              src/planet/tcp/server_op.o \
@@ -26,7 +27,7 @@ OBJS       = src/planet/common.o \
 TARGET     = mount.planetfs
 MNTDIR     = /net
 MNTOPT     = -o direct_io -o atomic_o_trunc \
-             -o intr -o allow_other
+             -o intr -o intr_signal=2 -o allow_other
 MNTDBGOPT  = $(MNTOPT) -d -f
 
 all: $(TARGET)

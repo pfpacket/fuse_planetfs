@@ -7,6 +7,7 @@
 #include <planet/tcp/clone_op.hpp>
 #include <planet/tcp/ctl_op.hpp>
 #include <planet/tcp/data_op.hpp>
+#include <planet/tcp/address_op.hpp>
 #include <planet/tcp/session_dir_op.hpp>
 #include <planet/tcp/client_op.hpp>
 #include <planet/tcp/server_op.hpp>
@@ -26,6 +27,7 @@ public:
         fs_root.install_op<clone_op>(priority::normal, fs_root, 0);
         fs_root.install_op<ctl_op>(priority::normal, fs_root);
         fs_root.install_op<data_op>(priority::normal, fs_root);
+        fs_root.install_op<remote_op>(priority::normal, fs_root);
         fs_root.install_op<session_dir_op>(priority::normal, fs_root);
         fs_root.install_op<client_op>(priority::normal);
         fs_root.install_op<server_op>(priority::normal, fs_root);

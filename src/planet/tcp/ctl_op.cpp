@@ -5,7 +5,6 @@
 #include <planet/operation_layer.hpp>
 #include <planet/tcp/ctl_op.hpp>
 #include <planet/utils.hpp>
-#include <netinet/tcp.h>
 #include <syslog.h>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
@@ -25,13 +24,8 @@ namespace tcp {
     int ctl_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         boost::smatch m;
-        if (!boost::regex_match(path.string(), m, path_reg::ctl))
-            throw std::runtime_error(
-                __PRETTY_FUNCTION__ + std::string(": ") + path.string() + ": unexpected path"
-            );
-        current_fd_ = boost::lexical_cast<int>(m[1]);
-        auto data_file = fs_root_.get_entry_of(path.parent_path().string() + "/data");
-        socket_ = get_data_from_vector<int>(data_vector(*file_cast(data_file)));
+        boost::regex_search(path.string(), m, path_reg::ctl);
+        current_fd_ = lexical_cast<int>(m[1]);
         return 0;
     }
 
@@ -50,38 +44,23 @@ namespace tcp {
         return ret;
     }
 
-    void sock_connect_to(int fd, std::string const& host, int port)
-    {
-        struct sockaddr_in sin = {AF_INET, htons(port), {0}, {0}};
-        inet_pton(AF_INET, host.c_str(), &sin.sin_addr);
-        if (connect(fd, reinterpret_cast<struct sockaddr *>(&sin), sizeof(sin)) < 0)
-            throw planet::exception_errno(errno);
-    }
-
-    // getsockopt(TCP_INFO) depends on Linux functionality
-    bool sock_is_connected(int sock)
-    {
-        struct tcp_info info;
-        socklen_t info_length = sizeof (info);
-        if (getsockopt(sock, SOL_TCP, TCP_INFO, &info, &info_length) != 0)
-            throw exception_errno(errno);
-        return info.tcpi_state == TCP_ESTABLISHED;
-    }
-
     int ctl_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
-        int ret = size;
+        int ret = -ENOTCONN;
         boost::smatch m;
         std::string request(buf, size);
+        auto socket = detail::fdtable.find(lexical_cast<string_type>(current_fd_));
         if (boost::regex_search(request, boost::regex("^is_connected"))) {
-            if (!sock_is_connected(socket_)) {
-                ret = -ECONNREFUSED;
-                ::shutdown(socket_, SHUT_RDWR);
-            }
-        } else if (boost::regex_search(request, m, reg_connect_req))
-            sock_connect_to(socket_, m[1], boost::lexical_cast<int>(m[3]));
-        else
-            ret = -ENOTSUP;
+            if (socket && sock_is_connected(*socket))
+                ret = size;
+        } else if (boost::regex_search(request, m, reg_connect_req)) {
+            ::syslog(LOG_NOTICE, "%s: connecting to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
+            int new_sock = sock_create4();
+            sock_connect_to(new_sock, m[1], lexical_cast<int>(m[3]));
+            detail::fdtable.insert(lexical_cast<string_type>(current_fd_), new_sock);
+            ret = size;
+            ::syslog(LOG_NOTICE, "%s: connected to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
+        }
         return ret;
     }
 

@@ -17,18 +17,14 @@ namespace tcp {
         return std::make_shared<data_op>(fs_root_);
     }
 
-    int create_socket()
-    {
-        int soc = ::socket(sock_arg::domain, sock_arg::type, sock_arg::protocol);
-        if (soc < 0)
-            throw exception_errno(errno);
-        return soc;
-    }
-
     int data_op::open(shared_ptr<fs_entry> fs_ent, path_type const& path)
     {
-        socket_ = get_data_from_vector<int>(data_vector(*file_cast(fs_ent)));
-        return 0;
+        int ret = 0;
+        if (auto sock = detail::fdtable.find_from_path(path.string()))
+            socket_ = *sock;
+        else
+            ret = -ENOTCONN;
+        return ret;
     }
 
     int data_op::read(shared_ptr<fs_entry> fs_ent, char *buf, size_t size, off_t offset)
@@ -54,15 +50,11 @@ namespace tcp {
 
     int data_op::mknod(shared_ptr<fs_entry> fs_ent, path_type const& path, mode_t, dev_t)
     {
-        int sock = create_socket();
-        store_data_to_vector(data_vector(*file_cast(fs_ent)), sock);
         return 0;
     }
 
     int data_op::rmnod(shared_ptr<fs_entry> fs_ent, path_type const&)
     {
-        if (socket_ >= 0)
-            ::close(socket_);
         return -EPERM;
     }
 

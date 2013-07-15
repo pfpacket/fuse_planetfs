@@ -14,6 +14,7 @@ namespace tcp {
 class session_dir_op final : public fs_operation {
 private:
     core_file_system& fs_root_;
+
 public:
     session_dir_op(core_file_system& fs_root) : fs_root_(fs_root)
     {
