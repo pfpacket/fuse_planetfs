@@ -10,7 +10,7 @@ namespace net {
 namespace dns {
 
 
-class dns_op : public entry_operation {
+class resolver_op : public fs_operation {
 private:
     std::string hostname_;
     std::vector<std::string> resolved_names_;
@@ -20,17 +20,17 @@ private:
     );
 
 public:
-    //dns_op() = default;
-    dns_op()
+    //resolver_op() = default;
+    resolver_op()
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
-    ~dns_op() noexcept
+    ~resolver_op() noexcept
     {
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
 
-    shared_ptr<entry_operation> new_instance() const;
+    shared_ptr<fs_operation> new_instance() override;
     int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
     int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;

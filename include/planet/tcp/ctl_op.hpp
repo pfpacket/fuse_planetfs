@@ -1,5 +1,5 @@
-#ifndef PLANET_TCP_CLIENT_OP_HPP
-#define PLANET_TCP_CLIENT_OP_HPP
+#ifndef PLANET_TCP_CTL_OP_HPP
+#define PLANET_TCP_CTL_OP_HPP
 
 #include <planet/common.hpp>
 #include <planet/tcp/common.hpp>
@@ -11,18 +11,21 @@ namespace net {
 namespace tcp {
 
 
-class client_op : public fs_operation {
+class ctl_op : public fs_operation {
 private:
-    int fd_;
+    core_file_system& fs_root_;
+    int current_fd_;
+    bool fd_number_already_read_ = false;
 
 public:
 
-    //client_op() = default;
-    client_op()
+    //ctl_op() = default;
+    ctl_op(core_file_system& root)
+        : fs_root_(root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
-    ~client_op() noexcept
+    ~ctl_op()
     {
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
@@ -42,4 +45,4 @@ public:
 }   // namespace net
 }   // namespace planet
 
-#endif  // PLANET_TCP_CLIENT_OP_HPP
+#endif  // PLANET_TCP_CTL_OP_HPP

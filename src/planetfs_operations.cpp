@@ -111,6 +111,7 @@ int planet_truncate(char const *path, off_t offset)
 
 int planet_utimens(char const* path, struct timespec const tv[2])
 {
+    ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
     int ret = 0;
     try {
         namespace ch = std::chrono;

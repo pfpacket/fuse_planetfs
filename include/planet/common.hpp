@@ -14,6 +14,8 @@
 #include <typeindex>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
 #include <syslog.h>
 
 // namespace for planetfs
@@ -35,6 +37,11 @@ namespace planet {
     template<typename T>
     using optional = boost::optional<T>;
     using boost::none;
+
+    typedef boost::format format;
+    using boost::str;
+
+    using boost::lexical_cast;
 
     // file type number
     enum file_type {

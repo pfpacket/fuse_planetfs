@@ -3,14 +3,21 @@ CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
 LDFLAGS    =
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
-LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse
+LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lboost_regex -lfuse
 OBJS       = src/planet/common.o \
              src/planet/fs_core.o \
              src/planet/utils.o \
              src/planet/handle.o \
              src/planet/operation_layer.o \
              src/planet/basic_operation.o \
-             src/planet/dns/dns_op.o \
+             src/planet/dns/resolver_op.o \
+             src/planet/tcp/common.o \
+             src/planet/tcp/dir_op.o \
+             src/planet/tcp/clone_op.o \
+             src/planet/tcp/ctl_op.o \
+             src/planet/tcp/data_op.o \
+             src/planet/tcp/address_op.o \
+             src/planet/tcp/session_dir_op.o \
              src/planet/tcp/client_op.o \
              src/planet/tcp/server_op.o \
              src/planet/eth/raw_op.o \

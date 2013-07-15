@@ -9,11 +9,9 @@
 #include <cstring>
 #include <unistd.h>
 #include <fcntl.h>
-#include <planet/dns/dns_op.hpp>
-#include <planet/tcp/client_op.hpp>
-#include <planet/tcp/server_op.hpp>
-#include <planet/eth/raw_op.hpp>
-#include <planet/eth/dir_op.hpp>
+#include <planet/dns/installer.hpp>
+#include <planet/tcp/installer.hpp>
+#include <planet/eth/installer.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
 
@@ -23,11 +21,9 @@
 void planet_install_fs_operations()
 {
     typedef planet::core_file_system::priority priority;
-    fs_root.install_op<planet::net::dns::dns_op>(priority::normal);
-    fs_root.install_op<planet::net::tcp::client_op>(priority::normal);
-    fs_root.install_op<planet::net::tcp::server_op>(priority::normal, fs_root);
-    fs_root.install_op<planet::net::eth::raw_op>(priority::normal);
-    fs_root.install_op<planet::net::eth::dir_op>(priority::normal, fs_root);
+    fs_root.install_op<planet::net::dns::installer>(priority::normal, fs_root);
+    fs_root.install_op<planet::net::tcp::installer>(priority::normal, fs_root);
+    fs_root.install_op<planet::net::eth::installer>(priority::normal, fs_root);
 }
 
 // Create initial filesystem structure
@@ -39,7 +35,7 @@ void planet_create_initial_fs_structure()
     fs_root.mknod("/dns",   S_IRUSR | S_IWUSR, 0);
 }
 
-static struct fuse_operations planet_ops{};
+static struct fuse_operations planetfs_ops{};
 
 int main(int argc, char **argv)
 {
@@ -49,24 +45,27 @@ int main(int argc, char **argv)
         ::syslog(LOG_INFO, "%s daemon started", PLANETFS_NAME);
         planet_install_fs_operations();
         planet_create_initial_fs_structure();
-        planet_ops.getattr  = planet_getattr;
-        planet_ops.mknod    = planet_mknod;
-        planet_ops.unlink   = planet_unlink;
-        planet_ops.mkdir    = planet_mkdir;
-        planet_ops.rmdir    = planet_rmdir;
-        planet_ops.chmod    = planet_chmod;
-        planet_ops.chown    = planet_chown;
-        planet_ops.truncate = planet_truncate;
-        planet_ops.utimens  = planet_utimens;
-        planet_ops.open     = planet_open;
-        planet_ops.read     = planet_read;
-        planet_ops.write    = planet_write;
-        planet_ops.readdir  = planet_readdir;
-        planet_ops.release  = planet_release;
-        exit_code = fuse_main(argc, argv, &planet_ops, nullptr);
+        planetfs_ops.getattr    =   planet_getattr;
+        planetfs_ops.mknod      =   planet_mknod;
+        planetfs_ops.unlink     =   planet_unlink;
+        planetfs_ops.mkdir      =   planet_mkdir;
+        planetfs_ops.rmdir      =   planet_rmdir;
+        planetfs_ops.chmod      =   planet_chmod;
+        planetfs_ops.chown      =   planet_chown;
+        planetfs_ops.truncate   =   planet_truncate;
+        planetfs_ops.utimens    =   planet_utimens;
+        planetfs_ops.open       =   planet_open;
+        planetfs_ops.read       =   planet_read;
+        planetfs_ops.write      =   planet_write;
+        planetfs_ops.readdir    =   planet_readdir;
+        planetfs_ops.release    =   planet_release;
+        exit_code = fuse_main(argc, argv, &planetfs_ops, nullptr);
         ::syslog(LOG_INFO, "%s daemon finished", PLANETFS_NAME);
     } catch (std::exception& e) {
         ::syslog(LOG_ERR, "fatal error occurred: %s", e.what());
+        exit_code = EXIT_FAILURE;
+    } catch (...) {
+        ::syslog(LOG_ERR, "unknown fatal error occurred");
         exit_code = EXIT_FAILURE;
     }
     return exit_code;

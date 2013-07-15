@@ -7,7 +7,7 @@
 namespace planet {
 
 
-    std::vector<char>& entry_operation::data_vector(file_entry& file)
+    std::vector<char>& fs_operation::data_vector(file_entry& file)
     {
         return file.data_;
     }
@@ -15,7 +15,7 @@ namespace planet {
     //
     // default_file_op
     //
-    shared_ptr<entry_operation> default_file_op::new_instance() const
+    shared_ptr<fs_operation> default_file_op::new_instance()
     {
         return std::make_shared<default_file_op>();
     }
@@ -65,7 +65,7 @@ namespace planet {
     //
     // default_dir_op
     //
-    shared_ptr<entry_operation> default_dir_op::new_instance() const
+    shared_ptr<fs_operation> default_dir_op::new_instance()
     {
         return std::make_shared<default_dir_op>();
     }
@@ -90,9 +90,9 @@ namespace planet {
         return 0;
     }
 
-    int default_dir_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
+    int default_dir_op::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
     {
-        ::syslog(LOG_NOTICE, "%s: creating directory", __PRETTY_FUNCTION__);
+        ::syslog(LOG_NOTICE, "%s: path=%s", __PRETTY_FUNCTION__, path.string().c_str());
         return 0;
     }
 

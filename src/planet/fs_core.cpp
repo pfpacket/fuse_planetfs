@@ -6,6 +6,15 @@
 namespace planet {
 
 
+    core_file_system::core_file_system(mode_t root_mode)
+    {
+        st_inode new_inode;
+        new_inode.mode = root_mode | S_IFDIR;
+        install_op<default_file_op>(priority::min);
+        install_op<default_dir_op>(priority::min);
+        root = std::make_shared<dentry>("/", typeid(default_dir_op), new_inode);
+    }
+
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
         if (auto fs_ent = get_entry_of(path)) {
@@ -115,7 +124,9 @@ namespace planet {
             new_handle = handle_mgr.register_op(ops_mgr_[fentry->get_op()]->new_instance(), fentry);
             try {
                 auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
-                std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
+                int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
+                if (open_ret < 0)
+                    throw exception_errno(-open_ret);
             } catch (...) {
                 handle_mgr.unregister_op(new_handle);
                 throw;

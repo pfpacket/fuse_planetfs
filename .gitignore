@@ -1,9 +1,8 @@
 a.out
 fuse_planetfs
 *.o
-open
 test.out
-utils/main.cpp
+utils/*
 net/
 TODO
 mount.planetfs
