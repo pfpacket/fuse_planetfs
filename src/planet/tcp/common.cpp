@@ -1,5 +1,6 @@
 
 #include <planet/tcp/common.hpp>
+#include <planet/utils.hpp>
 
 namespace planet {
 namespace net {
@@ -75,30 +76,43 @@ namespace tcp {
         fd_table fdtable;
     }   // namespace detail
 
-    int sock_create(int domain, int type, int protocol)
+    void get_name_info(sockaddr const *peer, int addrlen, string_type& node, string_type& serv, int flags)
     {
-        int soc = ::socket(domain, type, protocol);
-        if (soc < 0)
-            throw exception_errno(errno);
-        return soc;
+        char hostname[NI_MAXHOST], servname[NI_MAXSERV];
+        int r = getnameinfo(
+            peer, addrlen,
+            hostname, sizeof (hostname), servname, sizeof (servname), flags
+        );
+        if (r != 0)
+            throw std::runtime_error(str(format("getnameinfo: %1%") % gai_strerror(r)));
+        node.assign(hostname);
+        serv.assign(servname);
     }
 
-    int sock_create4()
+    int sock_connect_to(string_type const& host, string_type const& port)
     {
-        return sock_create(sock_arg::domain, sock_arg::type, sock_arg::protocol);
-    }
+        int s, sock = -1;
+        struct addrinfo hints, *res;
+        std::memset(&hints, 0, sizeof (hints));
+        hints.ai_family     = AF_UNSPEC;
+        hints.ai_socktype   = SOCK_STREAM;
+        hints.ai_flags      = AI_PASSIVE;
 
-    int sock_create6()
-    {
-        return sock_create(sock_arg::domain6, sock_arg::type6, sock_arg::protocol6);
-    }
+        s = getaddrinfo(host.c_str(), port.c_str(), &hints, &res);
+        if (s != 0)
+            throw std::runtime_error(gai_strerror(s));
+        auto result = make_unique_ptr(res, [](struct addrinfo *ptr){ freeaddrinfo(ptr); });
 
-    void sock_connect_to(int fd, std::string const& host, int port)
-    {
-        struct sockaddr_in sin = {AF_INET, htons(port), {0}, {0}};
-        inet_pton(AF_INET, host.c_str(), &sin.sin_addr);
-        if (connect(fd, reinterpret_cast<struct sockaddr *>(&sin), sizeof(sin)) < 0)
-            throw planet::exception_errno(errno);
+        for (struct addrinfo *ai = result.get(); ai; ai = ai->ai_next) {
+            sock = ::socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+            if (sock < 0)
+                throw exception_errno(errno);
+            if (connect(sock, ai->ai_addr, ai->ai_addrlen) < 0 && ai->ai_next == nullptr)
+                throw exception_errno(errno);
+        }
+        if (sock < 0)
+            throw exception_errno(EHOSTUNREACH);
+        return sock;
     }
 
     struct tcp_info sock_get_tcp_info(int sock)

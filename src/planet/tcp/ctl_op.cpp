@@ -55,12 +55,12 @@ namespace tcp {
                 ret = size;
         } else if (boost::regex_search(request, m, reg_connect_req)) {
             ::syslog(LOG_NOTICE, "%s: connecting to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
-            int new_sock = sock_create4();
-            sock_connect_to(new_sock, m[1], lexical_cast<int>(m[3]));
+            int new_sock = sock_connect_to(m[1], m[3]);
             detail::fdtable.insert(lexical_cast<string_type>(current_fd_), new_sock);
             ret = size;
             ::syslog(LOG_NOTICE, "%s: connected to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
-        }
+        } else
+            ret = -ENOTSUP;
         return ret;
     }
 

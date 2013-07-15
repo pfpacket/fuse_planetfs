@@ -15,8 +15,6 @@ class client_op : public fs_operation {
 private:
     int fd_;
 
-    static int connect_to(std::string const& host, int port);
-
 public:
 
     //client_op() = default;

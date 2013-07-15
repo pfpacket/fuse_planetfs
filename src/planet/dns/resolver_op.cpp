@@ -1,6 +1,7 @@
 
 #include <planet/common.hpp>
 #include <planet/dns/resolver_op.hpp>
+#include <planet/tcp/common.hpp>
 #include <planet/utils.hpp>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -25,24 +26,21 @@ namespace dns {
         return std::make_shared<resolver_op>();
     }
 
-    int resolver_op::forward_lookup(std::string const& hostname, int family, std::vector<std::string>& store)
+    int resolver_op::forward_lookup(std::string const& host, int family, std::vector<std::string>& store)
     {
         struct addrinfo hints = {}, *res;
         hints.ai_family     = family;       // AF_INET,AF_INET6,AF_UNSPEC
         hints.ai_socktype   = SOCK_STREAM;  // Stream socket
 
-        int s = getaddrinfo(hostname.c_str(), nullptr, &hints, &res);
+        int s = getaddrinfo(host.c_str(), nullptr, &hints, &res);
         if (s != 0)
             throw std::runtime_error(gai_strerror(s));
         auto result = make_unique_ptr(res, [](struct addrinfo *ptr){ freeaddrinfo(ptr); });
-        std::vector<char> buf(1024, 0);
         for (struct addrinfo *ai = result.get(); ai; ai = ai->ai_next) {
-            if (ai->ai_family == AF_INET)
-                inet_ntop(ai->ai_family, &((struct sockaddr_in *)ai->ai_addr)->sin_addr, buf.data(), buf.size());
-            else if (ai->ai_family == AF_INET6)
-                inet_ntop(ai->ai_family, &((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr, buf.data(), buf.size());
-            store.emplace_back(buf.data());
-            std::fill(buf.begin(), buf.end(), '\0');
+            std::string hostname, servname;
+            tcp::get_name_info(ai->ai_addr, ai->ai_addrlen,
+                    hostname, servname, NI_NUMERICHOST | NI_NUMERICSERV);
+            store.emplace_back(hostname);
         }
         return 0;
     }

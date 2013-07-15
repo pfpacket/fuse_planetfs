@@ -67,10 +67,8 @@ namespace tcp {
         extern fd_table fdtable;
     }   // namespace detail
 
-    extern int sock_create(int domain, int type, int protocol);
-    extern int sock_create4();
-    extern int sock_create6();
-    extern void sock_connect_to(int, std::string const& host, int port);
+    extern void get_name_info(sockaddr const *peer, int addrlen, string_type& node, string_type& serv, int flags = 0);
+    extern int sock_connect_to(string_type const& host, string_type const& port);
     extern struct tcp_info sock_get_tcp_info(int);
     extern bool sock_is_connected(int);
 

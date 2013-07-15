@@ -19,21 +19,12 @@ namespace tcp {
         return std::make_shared<client_op>();
     }
 
-    int client_op::connect_to(std::string const& host, int port)
-    {
-        int fd = ::socket(AF_INET, SOCK_STREAM, 0);
-        if (fd < 0)
-            throw planet::exception_errno(errno);
-        struct sockaddr_in sin = {AF_INET, htons(port), {0}, {0}};
-        inet_pton(AF_INET, host.c_str(), &sin.sin_addr);
-        if (connect(fd, reinterpret_cast<struct sockaddr *>(&sin), sizeof(sin)) < 0)
-            throw planet::exception_errno(errno);
-        return fd;
-    }
-
     int client_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
-        fd_ = get_data_from_vector<int>(data_vector(*file_cast(file_ent)));
+        if (auto fd = detail::fdtable.find(path.string()))
+            fd_ = *fd;
+        else
+            throw std::runtime_error("client_op: open: cannot get socket from fdtable");
         return 0;
     }
 
@@ -60,22 +51,21 @@ namespace tcp {
 
     int client_op::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
     {
-        auto filename = path.filename().string();
-        auto pos = filename.find_first_of(host_port_delimiter);
-        string_type host = filename.substr(0, pos);
-        int port = atoi(filename.substr(pos + 1).c_str());
-        syslog(LOG_INFO, "client_op::mknod: connecting to host=%s, port=%d", host.c_str(), port);
-        int fd = connect_to(host, port);
-        syslog(LOG_NOTICE, "client_op::mknod: connection established %s:%d fd=%d opened", host.c_str(), port, fd);
-        store_data_to_vector(data_vector(*file_cast(file_ent)), fd);
+        auto filename   = path.filename().string();
+        auto pos        = filename.find_first_of(host_port_delimiter);
+        auto host       = filename.substr(0, pos);
+        auto port       = filename.substr(pos + 1);
+        syslog(LOG_INFO, "client_op::mknod: connecting to host=%s, port=%s", host.c_str(), port.c_str());
+        int sock = sock_connect_to(host, port);
+        syslog(LOG_NOTICE, "client_op::mknod: connection established %s!%s fd=%d opened", host.c_str(), port.c_str(), sock);
+        detail::fdtable.insert(path.string(), sock);
         return 0;
     }
 
-    int client_op::rmnod(shared_ptr<fs_entry> file_ent, path_type const&)
+    int client_op::rmnod(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
-        return ::close(
-            get_data_from_vector<int>(data_vector(*file_cast(file_ent)))
-        );
+        detail::fdtable.erase(path.string());
+        return 0;
     }
 
     bool client_op::is_matching_path(path_type const& path, file_type type)

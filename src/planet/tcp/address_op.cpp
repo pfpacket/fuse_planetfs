@@ -20,13 +20,8 @@ namespace tcp {
         socklen_t len = sizeof (peer);
         if (getsockname(sock, (sockaddr *)&peer, &len) < 0)
             throw exception_errno(errno, "getpeername: ", str(format(": fd=%1%") % sock).c_str());
-        char hostname[NI_MAXHOST], servname[NI_MAXSERV];
-        int r = getnameinfo(
-            (sockaddr *)&peer, len,
-            hostname, sizeof (hostname), servname, sizeof (servname), 0
-        );
-        if (r != 0)
-            throw std::runtime_error(str(format("getnameinfo: %1%") % gai_strerror(r)));
+        std::string hostname, servname;
+        get_name_info((sockaddr *)&peer, len, hostname, servname);
         auto local_addr = str(format("%1%!%2%") % hostname % servname);
         file_cast(file)->data().clear();
         this->write(file, local_addr.c_str(), local_addr.length(), 0);
@@ -64,13 +59,8 @@ namespace tcp {
         socklen_t len = sizeof (peer);
         if (getpeername(sock, (sockaddr *)&peer, &len) < 0)
             throw exception_errno(errno, "getpeername: ", str(format(": fd=%1%") % sock).c_str());
-        char hostname[NI_MAXHOST], servname[NI_MAXSERV];
-        int r = getnameinfo(
-            (sockaddr *)&peer, len,
-            hostname, sizeof (hostname), servname, sizeof (servname), 0
-        );
-        if (r != 0)
-            throw std::runtime_error(str(format("getnameinfo: %1%") % gai_strerror(r)));
+        std::string hostname, servname;
+        get_name_info((sockaddr *)&peer, len, hostname, servname);
         auto local_addr = str(format("%1%!%2%") % hostname % servname);
         file_cast(file)->data().clear();
         this->write(file, local_addr.c_str(), local_addr.length(), 0);
