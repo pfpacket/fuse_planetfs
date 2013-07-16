@@ -13,8 +13,6 @@ class file_entry;
 // planet core handler
 //
 class fs_operation {
-protected:
-    static std::vector<char>& data_vector(file_entry& file);
 public:
     virtual ~fs_operation() noexcept
     {

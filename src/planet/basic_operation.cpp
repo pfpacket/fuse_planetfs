@@ -7,11 +7,6 @@
 namespace planet {
 
 
-    std::vector<char>& fs_operation::data_vector(file_entry& file)
-    {
-        return file.data_;
-    }
-
     //
     // default_file_op
     //
@@ -29,7 +24,7 @@ namespace planet {
     {
         if (file_ent->size() < size + offset)
             size = file_ent->size() - offset;
-        std::copy_n(this->data_vector(*file_cast(file_ent)).begin() + offset, size, buf);
+        std::copy_n(file_cast(file_ent)->data().begin() + offset, size, buf);
         return size;
     }
 
@@ -37,8 +32,8 @@ namespace planet {
     {
         auto fentry = file_cast(file_ent);
         if (fentry->size() < size + offset)
-            data_vector(*fentry).resize(size + offset, 0);
-        std::copy_n(buf, size, this->data_vector(*fentry).begin() + offset);
+            fentry->data().resize(size + offset, 0);
+        std::copy_n(buf, size, fentry->data().begin() + offset);
         return size;
     }
 

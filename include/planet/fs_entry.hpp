@@ -59,8 +59,6 @@ public:
     virtual void inode(st_inode const&) = 0;
 };
 
-class fs_operation;
-
 class file_entry : public fs_entry,
   public std::enable_shared_from_this<file_entry> {
     typedef char value_type;
@@ -71,8 +69,6 @@ class file_entry : public fs_entry,
     op_type_code op_type_index_ = typeid(default_op_type);
     st_inode inode_;
     std::vector<value_type> data_;
-
-    friend class fs_operation;
 
 public:
     file_entry(string_type const& name, op_type_code ti, st_inode const& sti)
