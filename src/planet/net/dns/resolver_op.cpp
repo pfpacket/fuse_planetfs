@@ -1,7 +1,6 @@
 
 #include <planet/common.hpp>
 #include <planet/net/dns/resolver_op.hpp>
-#include <planet/net/tcp/common.hpp>
 #include <planet/utils.hpp>
 #include <netinet/in.h>
 #include <arpa/inet.h>
