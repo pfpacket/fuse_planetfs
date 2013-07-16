@@ -3,7 +3,6 @@ fuse_planetfs
 *.o
 test.out
 utils/*
-net/
 TODO
 mount.planetfs
 example/dns_example
