@@ -38,7 +38,7 @@ namespace dns {
         auto result = make_unique_ptr(res, [](struct addrinfo *ptr){ freeaddrinfo(ptr); });
         for (struct addrinfo *ai = result.get(); ai; ai = ai->ai_next) {
             std::string hostname, servname;
-            tcp::get_name_info(ai->ai_addr, ai->ai_addrlen,
+            get_name_info(ai->ai_addr, ai->ai_addrlen,
                     hostname, servname, NI_NUMERICHOST | NI_NUMERICSERV);
             store.emplace_back(hostname);
         }

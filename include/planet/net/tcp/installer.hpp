@@ -2,6 +2,7 @@
 #define PLANET_TCP_INSTALLER_HPP
 
 #include <planet/common.hpp>
+#include <planet/net/common.hpp>
 #include <planet/net/tcp/common.hpp>
 #include <planet/net/tcp/dir_op.hpp>
 #include <planet/net/tcp/clone_op.hpp>

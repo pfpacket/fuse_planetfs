@@ -2,6 +2,7 @@
 #define PLANET_TCP_DATA_OP_HPP
 
 #include <planet/common.hpp>
+#include <planet/net/common.hpp>
 #include <planet/net/tcp/common.hpp>
 #include <planet/fs_core.hpp>
 
