@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
     int fd, size;
     char buffer[1024],
-         request[1024] = "resolve_inet ";
+         request[1024] = "resolve ";
 
     if (argc < 2) {
         printf("Usage: %s HOSTNAME\n", argv[0]);
