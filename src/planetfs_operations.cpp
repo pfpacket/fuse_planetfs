@@ -5,6 +5,7 @@
 #include <planetfs_operations.hpp>
 #include <planet/operation_layer.hpp>
 #include <planet/handle.hpp>
+#include <planet/utils.hpp>
 #include <syslog.h>
 
 // Core filesystem object
@@ -106,7 +107,22 @@ int planet_chown(char const *path, uid_t uid, gid_t gid)
 
 int planet_truncate(char const *path, off_t offset)
 {
-    return 0;
+    ::syslog(LOG_INFO, "%s: path=%s offset=%lld", __func__, path, offset);
+    int ret = 0;
+    try {
+        if (auto entry = fs_root.get_entry_of(path)) {
+            auto file_ent = planet::file_cast(entry);
+            file_ent->data().resize(offset);
+        } else
+            ret = -ENOENT;
+    } catch (planet::exception_errno& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.get_errno();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
 }
 
 int planet_utimens(char const* path, struct timespec const tv[2])

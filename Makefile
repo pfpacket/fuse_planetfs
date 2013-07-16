@@ -27,7 +27,7 @@ OBJS       = src/planet/common.o \
              src/planetfs_main.o
 TARGET     = mount.planetfs
 MNTDIR     = /net
-MNTOPT     = -o direct_io -o atomic_o_trunc \
+MNTOPT     = -o direct_io \
              -o intr -o allow_other
 MNTDBGOPT  = $(MNTOPT) -d -f
 
