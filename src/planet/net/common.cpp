@@ -39,8 +39,6 @@ namespace net {
 
         bool fd_table::erase_from_path(fd_table::key_type const& path)
         {
-            if (auto fd = find_from_path(path))
-                ::close(*fd);
             return erase(dir_number(path));
         }
 
