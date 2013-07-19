@@ -17,6 +17,7 @@ private:
     core_file_system& fs_root_;
     int current_fd_;
     bool fd_number_already_read_ = false;
+    int interpret_request(string_type const& request);
 
 public:
 

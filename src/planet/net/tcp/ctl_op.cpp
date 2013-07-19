@@ -44,24 +44,45 @@ namespace tcp {
         return ret;
     }
 
-    int ctl_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
+    int ctl_op::interpret_request(string_type const& request)
     {
-        int ret = -ENOTCONN;
         boost::smatch m;
-        std::string request(buf, size);
+        int ret = -ENOTCONN;
         auto socket = detail::fdtable.find(lexical_cast<string_type>(current_fd_));
         if (boost::regex_search(request, boost::regex("^is_connected"))) {
             if (socket && sock_is_connected(*socket))
-                ret = size;
+                ret = 0;
         } else if (boost::regex_search(request, m, reg_connect_req)) {
             ::syslog(LOG_NOTICE, "%s: connecting to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
             int new_sock = sock_connect_to(m[1], m[3]);
             detail::fdtable.insert(lexical_cast<string_type>(current_fd_), new_sock);
-            ret = size;
+            ret = 0;
             ::syslog(LOG_NOTICE, "%s: connected to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
+        } else if (boost::regex_search(request, boost::regex("^hangup"))) {
+            detail::fdtable.erase(lexical_cast<string_type>(current_fd_));
+            ret = 0;
+        } else if (boost::regex_search(request, boost::regex{R"(^keepalive(|( (\d+))))"})) {
+            if (socket) {
+                int optvalue = 1;
+                if (::setsockopt(*socket, SOL_SOCKET, SO_KEEPALIVE, &optvalue, sizeof (optvalue)) < 0)
+                    throw exception_errno(errno);
+                if (m[3].length()) {
+                    optvalue = lexical_cast<int>(m[3]);
+                    if (::setsockopt(*socket, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&optvalue, sizeof(optvalue)) < 0)
+                        throw exception_errno(errno);
+                }
+                ret = 0;
+            }
         } else
             ret = -ENOTSUP;
         return ret;
+    }
+
+    int ctl_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
+    {
+        std::string request(buf, size);
+        int result = interpret_request(request);
+        return !result ? size : result;
     }
 
     int ctl_op::release(shared_ptr<fs_entry> file_ent)
