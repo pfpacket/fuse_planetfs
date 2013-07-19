@@ -12,14 +12,6 @@ namespace net {
 namespace dns {
 
 
-//    resolver_op::resolver_op(core_file_system& fs_root)
-//    {
-//        if (!fs_root.get_entry_of("/dns/clone")) {
-//            fs_root.install_op<dns_clone_op>(fs_root);
-//            fs_root.mknod("/dns/clone", S_IWUSR | S_IRUSR, 0, );
-//        }
-//    }
-
     shared_ptr<fs_operation> resolver_op::new_instance()
     {
         return std::make_shared<resolver_op>();
