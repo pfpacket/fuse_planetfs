@@ -36,3 +36,6 @@ RUN:
 API:
     See example/ directory for example programs.
     Most functionalities are provided through files.
+
+License:
+    fuse_planetfs is licensed under The BSD 2-Clause License.
