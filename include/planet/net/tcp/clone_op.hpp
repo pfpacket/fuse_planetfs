@@ -16,7 +16,10 @@ class clone_op : public fs_operation {
 private:
     core_file_system& fs_root_;
     int current_fd_;
+    bool current_is_incremented_ = false;
     handle_t ctl_handle_;
+
+    bool target_ctl_is_connected(string_type const&);
 
 public:
 

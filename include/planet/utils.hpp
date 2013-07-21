@@ -47,6 +47,31 @@ namespace planet {
     //  with exception handling
     shared_ptr<dentry> search_dir_entry(core_file_system const&, path_type const&);
 
+    class raii_wrapper {
+    private:
+        std::function<void (void)> finalizer_;
+    public:
+        template<typename Functor, typename ...Types>
+        raii_wrapper(Functor f, Types&& ...args)
+        {
+            finalizer_ = std::bind(std::forward<Functor>(f), std::forward<Types>(args)...);
+        }
+
+        ~raii_wrapper()
+        {
+            try {
+                finalize();
+            } catch (...) {
+                // dtor must not throw any exceptions
+            }
+        }
+
+        void finalize() const
+        {
+            finalizer_();
+        }
+    };
+
 }   // namespace planet
 
 #endif  // PLANET_UTILS_HPP

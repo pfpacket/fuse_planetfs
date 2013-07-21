@@ -28,27 +28,30 @@ namespace tcp {
     // hello
     //
 
-    bool target_ctl_is_connected(handle_t handle)
+    bool clone_op::target_ctl_is_connected(string_type const& ctl_path)
     {
         const char *request = "is_connected";
+        auto handle = fs_root_.open(ctl_path);
+        raii_wrapper raii([handle](){ planet::close(handle); });
         int ret = planet::write(handle, request, strlen(request), 0);
         return ret != -ENOTCONN;
     }
 
     shared_ptr<fs_operation> clone_op::new_instance()
     try {
-        auto fmt = format("/tcp/%1%/ctl") % current_fd_;
+        auto next_ctl_path = str(format("/tcp/%1%/ctl") % current_fd_);
         // If current_fd_ ctl file isn't created, we have to create it first
-        if (!fs_root_.get_entry_of(str(fmt)))
+        if (!fs_root_.get_entry_of(next_ctl_path))
             return std::make_shared<clone_op>(fs_root_, current_fd_);
         // Else, we confirm current ctl file is connected-state
-        bool is_connected = target_ctl_is_connected(fs_root_.open(str(fmt)));
-        auto new_op = std::make_shared<clone_op>(fs_root_, is_connected ? current_fd_ + 1 : current_fd_);
-        if (is_connected)
-            ++current_fd_;
-        return new_op;
+        bool current_is_incremented_ = target_ctl_is_connected(next_ctl_path);
+        current_fd_ = current_is_incremented_ ? current_fd_ + 1 : current_fd_;
+        return std::make_shared<clone_op>(fs_root_, current_fd_);
     } catch (...) {
-        --current_fd_;
+        if (current_is_incremented_) {
+            --current_fd_;
+            current_is_incremented_ = false;
+        }
         throw;
     }
 

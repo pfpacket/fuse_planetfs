@@ -53,6 +53,8 @@ namespace tcp {
             if (socket && sock_is_connected(*socket))
                 ret = 0;
         } else if (boost::regex_search(request, m, reg_connect_req)) {
+            if (socket && sock_is_connected(*socket))
+                return -EISCONN;
             ::syslog(LOG_NOTICE, "%s: connecting to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
             int new_sock = sock_connect_to(m[1], m[3]);
             detail::fdtable.insert(lexical_cast<string_type>(current_fd_), new_sock);
@@ -68,7 +70,7 @@ namespace tcp {
                     throw exception_errno(errno);
                 if (m[3].length()) {
                     optvalue = lexical_cast<int>(m[3]);
-                    if (::setsockopt(*socket, IPPROTO_TCP, TCP_KEEPIDLE, (void*)&optvalue, sizeof(optvalue)) < 0)
+                    if (::setsockopt(*socket, IPPROTO_TCP, TCP_KEEPIDLE, &optvalue, sizeof (optvalue)) < 0)
                         throw exception_errno(errno);
                 }
                 ret = 0;

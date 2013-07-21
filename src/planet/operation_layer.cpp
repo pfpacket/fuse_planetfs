@@ -1,6 +1,7 @@
 
 #include <planet/operation_layer.hpp>
 #include <planet/fs_core.hpp>
+#include <planet/utils.hpp>
 
 namespace planet {
 
@@ -24,8 +25,8 @@ namespace planet {
     int close(handle_t handle)
     {
         auto& op_tuple = handle_mgr.get_operation_entry(handle);
+        raii_wrapper raii([handle]{ handle_mgr.unregister_op(handle); });
         int ret = std::get<0>(op_tuple)->release(std::get<1>(op_tuple));
-        handle_mgr.unregister_op(handle);
         return ret;
     }
 
