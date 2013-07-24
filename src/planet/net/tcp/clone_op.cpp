@@ -38,21 +38,20 @@ namespace tcp {
     }
 
     shared_ptr<fs_operation> clone_op::new_instance()
-    try {
+    {
         auto next_ctl_path = str(format("/tcp/%1%/ctl") % current_fd_);
         // If current_fd_ ctl file isn't created, we have to create it first
         if (!fs_root_.get_entry_of(next_ctl_path))
             return std::make_shared<clone_op>(fs_root_, current_fd_);
         // Else, we confirm current ctl file is connected-state
-        bool current_is_incremented_ = target_ctl_is_connected(next_ctl_path);
-        current_fd_ = current_is_incremented_ ? current_fd_ + 1 : current_fd_;
+        bool is_connected = target_ctl_is_connected(next_ctl_path);
+        raii_wrapper finalizer([is_connected, this]()
+                {
+                    if (is_connected && std::uncaught_exception())
+                        --current_fd_;
+                });
+        current_fd_ = is_connected ? current_fd_ + 1 : current_fd_;
         return std::make_shared<clone_op>(fs_root_, current_fd_);
-    } catch (...) {
-        if (current_is_incremented_) {
-            --current_fd_;
-            current_is_incremented_ = false;
-        }
-        throw;
     }
 
     int clone_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
