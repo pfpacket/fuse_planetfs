@@ -34,5 +34,33 @@ namespace planet {
             directory_cast(entry) : detail::shared_null_ptr);
     }
 
+    //
+    // raii_wrapper
+    //
+    inline raii_wrapper::raii_wrapper(raii_wrapper&& r)
+    {
+        finalizer_ = std::move(r.finalizer_);
+    }
+
+    raii_wrapper::~raii_wrapper()
+    {
+        try {
+            finalize();
+        } catch (...) {
+            // dtor must not throw any exceptions
+        }
+    }
+
+    inline raii_wrapper::functor_t const& raii_wrapper::get_finalizer() const
+    {
+        return finalizer_;
+    }
+
+    inline void raii_wrapper::finalize() const
+    {
+        if (finalizer_)
+            finalizer_();
+    }
+
 
 }   // namespace planet

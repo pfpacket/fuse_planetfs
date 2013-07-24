@@ -49,27 +49,32 @@ namespace planet {
 
     class raii_wrapper {
     private:
-        std::function<void (void)> finalizer_;
+        typedef std::function<void (void)> functor_t;
+        functor_t finalizer_;
     public:
         template<typename Functor, typename ...Types>
         raii_wrapper(Functor f, Types&& ...args)
+            :   finalizer_{
+                    std::bind(std::forward<Functor>(f), std::forward<Types>(args)...)
+                }
+        {
+        }
+
+        raii_wrapper(raii_wrapper const&) = delete;
+
+        raii_wrapper(raii_wrapper&& r);
+
+        ~raii_wrapper();
+
+        template<typename Functor, typename ...Types>
+        void set_finalizer(Functor f, Types&& ...args)
         {
             finalizer_ = std::bind(std::forward<Functor>(f), std::forward<Types>(args)...);
         }
 
-        ~raii_wrapper()
-        {
-            try {
-                finalize();
-            } catch (...) {
-                // dtor must not throw any exceptions
-            }
-        }
+        functor_t const& get_finalizer() const;
 
-        void finalize() const
-        {
-            finalizer_();
-        }
+        void finalize() const;
     };
 
 }   // namespace planet
