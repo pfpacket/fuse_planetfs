@@ -40,6 +40,13 @@ $(TARGET): $(OBJS)
 examples:
 	$(MAKE) -C example/
 
+test: mount examples
+	./example/dns_example www.google.com
+	./example/get_google_page.sh
+	./example/http_client_example
+	./example/new_get_google_page.sh
+	./example/new_http_client
+
 mount: $(TARGET)
 	mkdir -p $(MNTDIR)
 	./$(TARGET) $(MNTOPT) $(MNTDIR)
