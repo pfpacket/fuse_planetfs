@@ -1,5 +1,5 @@
-#ifndef PLANET_ETH_RAW_OP_HPP 
-#define PLANET_ETH_RAW_OP_HPP 
+#ifndef PLANET_ETH_RAW_OP_HPP
+#define PLANET_ETH_RAW_OP_HPP
 
 #include <planet/common.hpp>
 #include <planet/net/common.hpp>
@@ -43,4 +43,4 @@ public:
 }   // namespace net
 }   // namespace planet
 
-#endif  // PLANET_ETH_RAW_OP_HPP 
+#endif  // PLANET_ETH_RAW_OP_HPP

@@ -14,8 +14,7 @@
 int main(int argc, char **argv)
 {
     int fd, size;
-    char buffer[1024],
-         request[1024] = "resolve ";
+    char buffer[1024], request[1024];
 
     if (argc < 2) {
         printf("Usage: %s HOSTNAME\n", argv[0]);
@@ -34,7 +33,7 @@ int main(int argc, char **argv)
      * 'resolve_inet hostname'  - AF_INET
      * 'resolve_inet6 hostname' - AF_INET6
      */
-    strcat(request, argv[1]);
+    snprintf(request, sizeof (request), "resolve %s", argv[1]);
     size = write(fd, request, strlen(request));
     if (size < 0) {
         perror("write");

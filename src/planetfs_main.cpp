@@ -3,12 +3,7 @@
 
 #include <fuse.h>
 #include <iostream>
-#include <memory>
-#include <functional>
 #include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-#include <fcntl.h>
 #include <planet/net/dns/installer.hpp>
 #include <planet/net/tcp/installer.hpp>
 #include <planet/net/eth/installer.hpp>
@@ -18,7 +13,7 @@
 #define PLANETFS_NAME "fuse_planetfs"
 
 // Install certain file operations
-void planet_install_fs_operations()
+void planetfs_install_fs_operations()
 {
     typedef planet::core_file_system::priority priority;
     fs_root.install_op<planet::net::dns::installer>(priority::normal, fs_root);
@@ -27,7 +22,7 @@ void planet_install_fs_operations()
 }
 
 // Create initial filesystem structure
-void planet_create_initial_fs_structure()
+void planetfs_create_initial_fs_structure()
 {
     fs_root.mkdir("/ip",    S_IRWXU);
     fs_root.mkdir("/tcp",   S_IRWXU);
@@ -43,8 +38,8 @@ int main(int argc, char **argv)
     try {
         openlog(PLANETFS_NAME, LOG_CONS | LOG_PID, LOG_USER);
         ::syslog(LOG_INFO, "%s daemon started", PLANETFS_NAME);
-        planet_install_fs_operations();
-        planet_create_initial_fs_structure();
+        planetfs_install_fs_operations();
+        planetfs_create_initial_fs_structure();
         planetfs_ops.getattr    =   planet_getattr;
         planetfs_ops.mknod      =   planet_mknod;
         planetfs_ops.unlink     =   planet_unlink;
