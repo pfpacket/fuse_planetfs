@@ -51,7 +51,10 @@ namespace planet {
     private:
         typedef std::function<void (void)> functor_t;
         functor_t finalizer_;
+
     public:
+        raii_wrapper() = default;
+
         template<typename Functor, typename ...Types>
         raii_wrapper(Functor f, Types&& ...args)
             :   finalizer_{
@@ -61,8 +64,10 @@ namespace planet {
         }
 
         raii_wrapper(raii_wrapper const&) = delete;
+        raii_wrapper& operator=(raii_wrapper const&) = delete;
 
         raii_wrapper(raii_wrapper&& r);
+        raii_wrapper& operator=(raii_wrapper &&);
 
         ~raii_wrapper();
 

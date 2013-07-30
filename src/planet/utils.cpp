@@ -37,9 +37,15 @@ namespace planet {
     //
     // raii_wrapper
     //
-    inline raii_wrapper::raii_wrapper(raii_wrapper&& r)
+    raii_wrapper::raii_wrapper(raii_wrapper&& r)
     {
         finalizer_ = std::move(r.finalizer_);
+    }
+
+    raii_wrapper& raii_wrapper::operator=(raii_wrapper&& r)
+    {
+        finalizer_ = std::move(r.finalizer_);
+        return *this;
     }
 
     raii_wrapper::~raii_wrapper()
