@@ -12,18 +12,27 @@ namespace dns {
 
 
 class installer : public fs_operation {
+private:
+    core_file_system& fs_root_;
 public:
-    installer(core_file_system& fs_root)
+    installer(core_file_system& fs_root) : fs_root_(fs_root)
     {
         typedef planet::core_file_system::priority priority;
         fs_root.install_op<resolver_op>(priority::normal);
+    }
+
+    ~installer()
+    {
+        try {
+            fs_root_.uninstall_op<resolver_op>();
+        } catch (...) {
+        }
     }
 
     static bool is_matching_path(path_type const&, file_type)
     {
         return false;
     }
-private:
 };
 
 

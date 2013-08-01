@@ -32,7 +32,36 @@ namespace planet {
     typedef boost::filesystem::path path_type;
 
     // Operation index code
-    typedef std::type_index op_type_code;
+    class op_type_code {
+    private:
+        string_type name_;
+    public:
+        explicit op_type_code(string_type const& type_name)
+            :   name_(type_name)
+        {
+        }
+        explicit op_type_code(std::type_info const& typeinfo)
+            :   name_(typeinfo.name())
+        {
+        }
+        bool operator==(op_type_code const& r) const
+        {
+            return name_ == r.name_;
+        }
+        bool operator<(op_type_code const& r) const
+        {
+            return name_ < r.name_;
+        }
+        bool operator>(op_type_code const& r) const
+        {
+            return name_ > r.name_;
+        }
+        op_type_code& operator=(op_type_code const& r)
+        {
+            name_ = r.name_;
+            return *this;
+        }
+    };
 
     template<typename T>
     using optional = boost::optional<T>;
@@ -50,8 +79,6 @@ namespace planet {
     };
 
     namespace detail {
-
-        extern std::function<void (void *)> const null_deleter;
 
         // Index numbers and error messages
         enum errmsg_number {pe_file_cast = 0, pe_dir_cast, pe_end};

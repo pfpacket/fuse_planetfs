@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
     if (argc < 2) {
         printf("Usage: %s HOSTNAME\n", argv[0]);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     fd = open("/net/dns", O_RDWR);

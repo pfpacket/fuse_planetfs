@@ -2,9 +2,14 @@
 #define PLANET_UTILS_HPP
 
 #include <planet/common.hpp>
-#include <planet/fs_core.hpp>
 
 namespace planet {
+
+
+    class fs_entry;
+    class file_entry;
+    class dentry;
+    class core_file_system;
 
     // Cast entry to file_entry
     // Exception: If `entry` is not a type of file_entry

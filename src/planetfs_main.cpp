@@ -16,7 +16,10 @@
 void planetfs_install_fs_operations()
 {
     typedef planet::core_file_system::priority priority;
-    fs_root.install_op<planet::net::dns::installer>(priority::normal, fs_root);
+    // static module loading
+    //fs_root.install_op<planet::net::dns::installer>(priority::normal, fs_root);
+    // dynamic module loading
+    fs_root.install_dynamic_module("mod_net_dns.so");
     fs_root.install_op<planet::net::tcp::installer>(priority::normal, fs_root);
     fs_root.install_op<planet::net::eth::installer>(priority::normal, fs_root);
 }

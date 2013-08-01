@@ -1,5 +1,6 @@
 
 #include <planet/common.hpp>
+#include <planet/fs_core.hpp>
 #include <planet/utils.hpp>
 #include <syslog.h>
 
@@ -12,7 +13,7 @@ namespace planet {
         new_inode.mode = root_mode | S_IFDIR;
         install_op<default_file_op>(priority::min);
         install_op<default_dir_op>(priority::min);
-        root = std::make_shared<dentry>("/", typeid(default_dir_op), new_inode);
+        root = std::make_shared<dentry>("/", op_type_code(typeid(default_dir_op)), new_inode);
     }
 
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const

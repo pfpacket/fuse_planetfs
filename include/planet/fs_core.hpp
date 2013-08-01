@@ -3,6 +3,7 @@
 
 #include <planet/common.hpp>
 #include <planet/fs_entry.hpp>
+#include <planet/dyn_module_op.hpp>
 #include <vector>
 #include <algorithm>
 
@@ -26,9 +27,15 @@ public:
     template<typename OpType>
     void add_new_type(priority_type priority)
     {
+        add_new_type<OpType>(priority, &OpType::is_matching_path);
+    }
+
+    template<typename OpType, typename Callable>
+    void add_new_type(priority_type priority, Callable matcher)
+    {
         path2type_.push_back(
             std::make_tuple(
-                priority, index_type(typeid(OpType)), OpType::is_matching_path
+                priority, index_type(typeid(OpType)), matcher
             )
         );
         std::stable_sort(path2type_.begin(), path2type_.end(),
@@ -45,7 +52,7 @@ public:
             std::remove_if(
                 path2type_.begin(), path2type_.end(),
                 [](value_type const& t) {
-                    return std::get<1>(t) == typeid(OpType);
+                    return std::get<1>(t) == index_type(typeid(OpType));
                 }
             ), path2type_.end()
         );
@@ -72,6 +79,12 @@ public:
     typedef shared_ptr<fs_operation> op_type;
     typedef std::map<index_type, op_type> map_type;
 
+    template<typename OpType>
+    void add_new_op(shared_ptr<OpType> new_op)
+    {
+        type2op_.insert(std::make_pair(index_type(typeid(OpType)), new_op));
+    }
+
     template<typename OpType, typename ...Types>
     void add_new_op(Types&& ...args)
     {
@@ -85,12 +98,13 @@ public:
     template<typename OpType>
     void remove_op()
     {
-        type2op_.erase(
-            std::remove(
-                type2op_.begin(), type2op_.end(), typeid(OpType)
-            ),
-            type2op_.end()
-        );
+        auto it = type2op_.begin(), endit = type2op_.end();
+        for(; it != endit; ) {
+            if (it->first == index_type(typeid(OpType)))
+                type2op_.erase(it++);
+            else
+                ++it;
+        }
     }
 
     op_type matching_op(index_type const& typeindex) const
@@ -139,6 +153,27 @@ public:
     {
         path_mgr_.add_new_type<OperationType>(p);
         ops_mgr_.add_new_op<OperationType>(std::forward<Types>(args)...);
+    }
+
+    template<typename OperationType>
+    void uninstall_op()
+    {
+        path_mgr_.remove_type<OperationType>();
+        ops_mgr_.remove_op<OperationType>();
+    }
+
+    void install_dynamic_module(string_type const& mod_name)
+    {
+        using namespace std::placeholders;
+        auto new_op = std::make_shared<dyn_module_op>(mod_name, *this);
+        auto functor = std::bind(&dyn_module_op::is_matching_path, new_op.get(), _1, _2);
+        path_mgr_.add_new_type<dyn_module_op>(priority::normal, functor);
+        ops_mgr_.add_new_op<dyn_module_op>(new_op);
+    }
+
+    void uninstall_module(string_type const& mod_name)
+    {
+        uninstall_op<dyn_module_op>();
     }
 
 private:

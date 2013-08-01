@@ -5,8 +5,6 @@ namespace planet {
 
     namespace detail {
 
-        std::function<void (void *)> const null_deleter = [](void *) {};
-
         char const * const errmsg[] = {
             "Invalid cast: not a file",
             "Invalid cast: not a directory"

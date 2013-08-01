@@ -66,7 +66,7 @@ class file_entry : public fs_entry,
     typedef default_file_op default_op_type;
 
     std::string name_;
-    op_type_code op_type_index_ = typeid(default_op_type);
+    op_type_code op_type_index_{typeid(default_op_type)};
     st_inode inode_;
     std::vector<value_type> data_;
 
@@ -134,7 +134,7 @@ private:
     enum {default_vector_size = 512};
 
     string_type name_;
-    op_type_code op_type_index_ = typeid(default_op_type);
+    op_type_code op_type_index_{typeid(default_op_type)};
     st_inode inode_;
     std::vector<entry_type> entries_;
 
