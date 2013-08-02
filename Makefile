@@ -57,7 +57,7 @@ test: examples
 	@echo "[*] Starting test: new_http_client"
 	./example/new_http_client
 
-mount: $(TARGET)
+mount: $(TARGET) modules
 	mkdir -p $(MNTDIR)
 	$(EXEC_ENV) ./$(TARGET) $(MNTOPT) $(MNTDIR)
 
