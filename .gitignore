@@ -1,11 +1,12 @@
+TODO
+BUGS
+SYSCALL_LIST
 a.out
-fuse_planetfs
+mount.planetfs
 *.o
 *.so
 test.out
 utils/*
-TODO
-mount.planetfs
 example/dns_example
 example/packet_recv_example
 example/tcp_client_example
