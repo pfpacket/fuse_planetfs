@@ -39,18 +39,18 @@ public:
 
     ~installer()
     {
-        try {
-            //fs_root_.uninstall_op<server_op>();
-            //fs_root_.uninstall_op<client_op>();
-            //fs_root_.uninstall_op<session_dir_op>();
-            //fs_root_.uninstall_op<local_op>();
-            //fs_root_.uninstall_op<remote_op>();
-            //fs_root_.uninstall_op<data_op>();
-            //fs_root_.uninstall_op<ctl_op>();
-            //fs_root_.uninstall_op<clone_op>();
-            //fs_root_.uninstall_op<dir_op>();
-        } catch (...) {
-        }
+        //try {
+        //    fs_root_.uninstall_op<server_op>();
+        //    fs_root_.uninstall_op<client_op>();
+        //    fs_root_.uninstall_op<session_dir_op>();
+        //    fs_root_.uninstall_op<local_op>();
+        //    fs_root_.uninstall_op<remote_op>();
+        //    fs_root_.uninstall_op<data_op>();
+        //    fs_root_.uninstall_op<ctl_op>();
+        //    fs_root_.uninstall_op<clone_op>();
+        //    fs_root_.uninstall_op<dir_op>();
+        //} catch (...) {
+        //}
     }
 
     static bool is_matching_path(path_type const&, file_type)

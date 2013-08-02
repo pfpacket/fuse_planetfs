@@ -25,11 +25,11 @@ public:
 
     ~installer()
     {
-        try {
-            fs_root_.uninstall_op<raw_op>();
-            fs_root_.uninstall_op<dir_op>();
-        } catch (...) {
-        }
+        //try {
+        //    fs_root_.uninstall_op<raw_op>();
+        //    fs_root_.uninstall_op<dir_op>();
+        //} catch (...) {
+        //}
     }
 
     static bool is_matching_path(path_type const&, file_type)
