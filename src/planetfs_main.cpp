@@ -19,7 +19,7 @@ void planetfs_install_fs_operations()
     // static module loading
     //fs_root.install_op<planet::net::dns::installer>(priority::normal, fs_root);
     // dynamic module loading
-    fs_root.install_dynamic_module("mod_net_dns.so");
+    fs_root.install_dynamic_module(priority::normal, "mod_net_dns.so");
     fs_root.install_op<planet::net::tcp::installer>(priority::normal, fs_root);
     fs_root.install_op<planet::net::eth::installer>(priority::normal, fs_root);
 }
@@ -58,7 +58,6 @@ int main(int argc, char **argv)
         planetfs_ops.readdir    =   planet_readdir;
         planetfs_ops.release    =   planet_release;
         exit_code = fuse_main(argc, argv, &planetfs_ops, nullptr);
-        ::syslog(LOG_INFO, "%s daemon finished", PLANETFS_NAME);
     } catch (std::exception& e) {
         ::syslog(LOG_ERR, "fatal error occurred: %s", e.what());
         exit_code = EXIT_FAILURE;
@@ -66,5 +65,6 @@ int main(int argc, char **argv)
         ::syslog(LOG_ERR, "unknown fatal error occurred");
         exit_code = EXIT_FAILURE;
     }
+    ::syslog(LOG_INFO, "%s daemon finished", PLANETFS_NAME);
     return exit_code;
 }

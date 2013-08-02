@@ -137,6 +137,21 @@ namespace planet {
         return new_handle;
     }
 
+    void core_file_system::install_dynamic_module(priority p, string_type const& mod_name)
+    {
+        using namespace std::placeholders;
+        auto new_op = std::make_shared<dyn_module_op>(mod_name, *this);
+        auto functor = std::bind(&dyn_module_op::is_matching_path, new_op.get(), _1, _2);
+        path_mgr_.add_new_type<dyn_module_op>(p, op_type_code(mod_name), functor);
+        ops_mgr_.add_new_op<dyn_module_op>(mod_name, new_op);
+    }
+
+    void core_file_system::uninstall_module(string_type const& mod_name)
+    {
+        path_mgr_.remove_type(op_type_code(mod_name));
+        ops_mgr_.remove_op(op_type_code(mod_name));
+    }
+
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const
     {
         return (path == "/" ? root : get_entry_of__(root, path));

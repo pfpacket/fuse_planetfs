@@ -27,15 +27,15 @@ public:
     template<typename OpType>
     void add_new_type(priority_type priority)
     {
-        add_new_type<OpType>(priority, &OpType::is_matching_path);
+        add_new_type<OpType>(priority, index_type(typeid(OpType)), &OpType::is_matching_path);
     }
 
     template<typename OpType, typename Callable>
-    void add_new_type(priority_type priority, Callable matcher)
+    void add_new_type(priority_type priority, index_type const& op_code, Callable matcher)
     {
         path2type_.push_back(
             std::make_tuple(
-                priority, index_type(typeid(OpType)), matcher
+                priority, op_code, matcher
             )
         );
         std::stable_sort(path2type_.begin(), path2type_.end(),
@@ -48,11 +48,16 @@ public:
     template<typename OpType>
     void remove_type()
     {
+        remove_type(index_type(typeid(OpType)));
+    }
+
+    void remove_type(index_type const& op_code)
+    {
         path2type_.erase(
             std::remove_if(
                 path2type_.begin(), path2type_.end(),
-                [](value_type const& t) {
-                    return std::get<1>(t) == index_type(typeid(OpType));
+                [&op_code](value_type const& t) {
+                    return std::get<1>(t) == op_code;
                 }
             ), path2type_.end()
         );
@@ -80,9 +85,9 @@ public:
     typedef std::map<index_type, op_type> map_type;
 
     template<typename OpType>
-    void add_new_op(shared_ptr<OpType> new_op)
+    void add_new_op(string_type const& name, shared_ptr<OpType> new_op)
     {
-        type2op_.insert(std::make_pair(index_type(typeid(OpType)), new_op));
+        type2op_.insert(std::make_pair(index_type(name), new_op));
     }
 
     template<typename OpType, typename ...Types>
@@ -95,12 +100,18 @@ public:
         );
     }
 
+
     template<typename OpType>
     void remove_op()
     {
+        remove_op(index_type(typeid(OpType)));
+    }
+
+    void remove_op(index_type const& op_code)
+    {
         auto it = type2op_.begin(), endit = type2op_.end();
         for(; it != endit; ) {
-            if (it->first == index_type(typeid(OpType)))
+            if (it->first == op_code)
                 type2op_.erase(it++);
             else
                 ++it;
@@ -108,8 +119,13 @@ public:
     }
 
     op_type matching_op(index_type const& typeindex) const
-    {
+    try {
         return type2op_.at(typeindex);
+    } catch (...) {
+        throw std::runtime_error(str(
+            format("%1%: try to get unknown operation for: %2%")
+                % "operation_manager" % typeindex.name()
+        ));
     }
 
     op_type operator[](index_type const& typeindex) const
@@ -162,19 +178,9 @@ public:
         ops_mgr_.remove_op<OperationType>();
     }
 
-    void install_dynamic_module(string_type const& mod_name)
-    {
-        using namespace std::placeholders;
-        auto new_op = std::make_shared<dyn_module_op>(mod_name, *this);
-        auto functor = std::bind(&dyn_module_op::is_matching_path, new_op.get(), _1, _2);
-        path_mgr_.add_new_type<dyn_module_op>(priority::normal, functor);
-        ops_mgr_.add_new_op<dyn_module_op>(new_op);
-    }
+    void install_dynamic_module(priority, string_type const&);
 
-    void uninstall_module(string_type const& mod_name)
-    {
-        uninstall_op<dyn_module_op>();
-    }
+    void uninstall_module(string_type const&);
 
 private:
     path_manager        path_mgr_;

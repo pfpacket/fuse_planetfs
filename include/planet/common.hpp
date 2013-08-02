@@ -44,6 +44,10 @@ namespace planet {
             :   name_(typeinfo.name())
         {
         }
+        string_type const& name() const
+        {
+            return name_;
+        }
         bool operator==(op_type_code const& r) const
         {
             return name_ == r.name_;
