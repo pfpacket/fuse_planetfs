@@ -36,9 +36,8 @@ namespace tcp {
     {
         int ret = 0;
         ::syslog(LOG_INFO, "%s: %s", __PRETTY_FUNCTION__, path.parent_path().string().c_str());
-        auto data_file = fs_root_.get_entry_of(path.string());
         if (auto sock = detail::fdtable.find_from_path(path.string()))
-            update_address(*sock, data_file);
+            update_address(*sock, file_ent);
         else
             ret = -ENOTCONN;
         return ret;
@@ -75,9 +74,8 @@ namespace tcp {
     {
         int ret = 0;
         ::syslog(LOG_INFO, "%s: %s", __PRETTY_FUNCTION__, path.parent_path().string().c_str());
-        auto data_file = fs_root_.get_entry_of(path.string());
         if (auto sock = detail::fdtable.find_from_path(path.string()))
-            update_address(*sock, data_file);
+            update_address(*sock, file_ent);
         else
             ret = -ENOTCONN;
         return ret;
