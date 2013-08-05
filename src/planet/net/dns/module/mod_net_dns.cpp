@@ -14,7 +14,6 @@ using planet::fs_operation;
 using resolver_type = planet::net::dns::resolver_op;
 
 static shared_ptr<resolver_type> resolver = shared_null_ptr;
-static planet::core_file_system *fs_root;
 
 extern "C" {
 
@@ -22,7 +21,6 @@ extern "C" {
     {
         ::syslog(LOG_NOTICE, "module=%s: %s: module installed", MODULE_NAME, __PRETTY_FUNCTION__);
         resolver = std::make_shared<resolver_type>();
-        fs_root = fs;
     }
 
     void planet_mod_fin()

@@ -2,6 +2,7 @@
 #include <planet/common.hpp>
 #include <planet/fs_core.hpp>
 #include <planet/utils.hpp>
+#include <planet/dyn_module_op.hpp>
 #include <syslog.h>
 
 namespace planet {

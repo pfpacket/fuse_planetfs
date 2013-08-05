@@ -2,10 +2,9 @@
 #define PLANET_FS_CORE_HPP
 
 #include <planet/common.hpp>
-#include <planet/fs_entry.hpp>
-#include <planet/dyn_module_op.hpp>
 #include <vector>
 #include <algorithm>
+#include <planet/fs_entry.hpp>
 
 namespace planet {
 
