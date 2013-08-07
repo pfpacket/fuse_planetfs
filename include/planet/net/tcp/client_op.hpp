@@ -19,7 +19,7 @@ private:
 public:
 
     //client_op() = default;
-    client_op()
+    client_op(shared_ptr<core_file_system>)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }

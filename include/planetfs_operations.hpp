@@ -7,7 +7,7 @@
     ::syslog(LOG_ERR, "%s: %s", __func__, (e).what());
 
 // Core filesystem object
-extern planet::core_file_system fs_root;
+extern planet::shared_ptr<planet::core_file_system> fs_root;
 
 
 extern int planet_getattr(char const *, struct stat *);

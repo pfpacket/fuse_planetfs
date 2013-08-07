@@ -12,8 +12,6 @@ namespace planet {
     {
         st_inode new_inode;
         new_inode.mode = root_mode | S_IFDIR;
-        install_op<default_file_op>(priority::min);
-        install_op<default_dir_op>(priority::min);
         root = std::make_shared<dentry>("/", op_type_code(typeid(default_dir_op)), new_inode);
     }
 
@@ -138,10 +136,10 @@ namespace planet {
         return new_handle;
     }
 
-    void core_file_system::install_dynamic_module(priority p, string_type const& mod_name)
+    void core_file_system::install_module(priority p, string_type const& mod_name)
     {
         using namespace std::placeholders;
-        auto new_op = std::make_shared<dyn_module_op>(mod_name, *this);
+        auto new_op = std::make_shared<dyn_module_op>(mod_name, this->shared_from_this());
         auto functor = std::bind(&dyn_module_op::is_matching_path, new_op.get(), _1, _2);
         path_mgr_.add_new_type<dyn_module_op>(p, op_type_code(mod_name), functor);
         ops_mgr_.add_new_op<dyn_module_op>(mod_name, new_op);

@@ -31,7 +31,7 @@ namespace tcp {
     bool clone_op::target_ctl_is_connected(string_type const& ctl_path)
     {
         const char *request = "is_connected";
-        auto handle = fs_root_.open(ctl_path);
+        auto handle = fs_root_->open(ctl_path);
         raii_wrapper raii([handle](){ planet::close(handle); });
         int ret = planet::write(handle, request, strlen(request), 0);
         return ret != -ENOTCONN;
@@ -41,7 +41,7 @@ namespace tcp {
     {
         auto next_ctl_path = str(format("/tcp/%1%/ctl") % current_fd_);
         // If current_fd_ ctl file isn't created, we have to create it first
-        if (!fs_root_.get_entry_of(next_ctl_path))
+        if (!fs_root_->get_entry_of(next_ctl_path))
             return std::make_shared<clone_op>(fs_root_, current_fd_);
         // Else, we confirm current ctl file is connected-state
         bool is_connected = target_ctl_is_connected(next_ctl_path);
@@ -58,9 +58,9 @@ namespace tcp {
     {
         auto session_dir_path = str(format("/tcp/%1%") % current_fd_);
         // Confirm the current fd session is started
-        if (!fs_root_.get_entry_of(session_dir_path))
-            fs_root_.mkdir(session_dir_path, S_IRWXU);
-        ctl_handle_ = fs_root_.open(session_dir_path + "/ctl");
+        if (!fs_root_->get_entry_of(session_dir_path))
+            fs_root_->mkdir(session_dir_path, S_IRWXU);
+        ctl_handle_ = fs_root_->open(session_dir_path + "/ctl");
         return 0;
     }
 

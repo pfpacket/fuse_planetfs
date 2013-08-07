@@ -16,7 +16,7 @@ namespace eth {
 
     shared_ptr<fs_operation> raw_op::new_instance()
     {
-        return std::make_shared<raw_op>();
+        return std::make_shared<raw_op>(::planet::detail::shared_null_ptr);
     }
 
     void raw_op::bind_to_interface(int fd, std::string const& ifname, int protocol)

@@ -17,7 +17,7 @@ namespace tcp {
     int dir_op::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
     {
         ::syslog(LOG_NOTICE, "%s: dir=%s", __PRETTY_FUNCTION__, path.string().c_str());
-        return fs_root_.mknod("/tcp/clone", S_IRUSR | S_IWUSR, 0);
+        return fs_root_->mknod("/tcp/clone", S_IRUSR | S_IWUSR, 0);
     }
 
     int dir_op::rmnod(shared_ptr<fs_entry>, path_type const&)

@@ -15,13 +15,13 @@ namespace tcp {
 class server_op : public fs_operation {
 private:
     int server_fd_, client_fd_;
-    core_file_system& fs_root_;
+    shared_ptr<core_file_system> fs_root_;
 
     static int establish_server(std::string const& host, int port);
 
 public:
 
-    server_op(core_file_system& fs_root)
+    server_op(shared_ptr<core_file_system> fs_root)
         : fs_root_(fs_root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);

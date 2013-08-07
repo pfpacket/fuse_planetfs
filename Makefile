@@ -1,5 +1,6 @@
 CXX        = g++
-CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O2 -march=native
+#CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O2 -march=native
+CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O1 -g -D_FORTIFY_SOURCE=1
 LDFLAGS    = -rdynamic
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
@@ -31,7 +32,7 @@ MNTDIR     = /net
 MNTOPT     = -o direct_io \
              -o intr -o allow_other
 MNTDBGOPT  = $(MNTOPT) -d -f
-EXEC_ENV   = LD_LIBRARY_PATH=./
+EXEC_ENV   = LD_LIBRARY_PATH=./ MALLOC_CHECK_=3
 
 all: $(TARGET) modules
 rebuild: clean all

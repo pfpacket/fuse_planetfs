@@ -6,15 +6,14 @@
 namespace planet {
 
 
-    dyn_module_op::dyn_module_op(std::string const& module_path, core_file_system& fs_root)
+    dyn_module_op::dyn_module_op(std::string const& module_path, shared_ptr<core_file_system> fs_root)
             :   mod_name_(module_path),
                 handle_(dlopen(module_path.c_str(), RTLD_LAZY))
     {
         if (!handle_)
             throw std::runtime_error(dlerror());
-        dl_remover_ = raii_wrapper([this](){ dlclose(handle_); });
         reload();
-        init_(&fs_root);
+        init_(fs_root);
     }
 
     dyn_module_op::~dyn_module_op()
@@ -24,6 +23,7 @@ namespace planet {
         } catch (...) {
             // dtor must not throw any exceptions
         }
+        dlclose(handle_);
     }
 
     shared_ptr<fs_operation> dyn_module_op::new_instance()

@@ -22,7 +22,7 @@ namespace eth {
         if (!ifnames)
             throw exception_errno(errno);
         for (auto *i = ifnames.get(); !(i->if_index == 0 && i->if_name == NULL); i++)
-            fs_root_.mknod(path.string() + "/" + i->if_name, S_IRUSR | S_IWUSR, 0);
+            fs_root_->mknod(path.string() + "/" + i->if_name, S_IRUSR | S_IWUSR, 0);
         return 0;
     }
 

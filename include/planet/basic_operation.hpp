@@ -8,6 +8,7 @@ namespace planet {
 
 class fs_entry;
 class file_entry;
+class core_file_system;
 
 //
 // planet core handler
@@ -70,6 +71,9 @@ public:
 // default file operation which is used if no other operations match the target path
 class default_file_op : public fs_operation {
 public:
+    default_file_op(shared_ptr<core_file_system>)
+    {
+    }
     virtual ~default_file_op() = default;
 
     virtual shared_ptr<fs_operation> new_instance() override;
@@ -85,7 +89,7 @@ public:
 // default dir operation which is used if no other operations match the target path
 class default_dir_op : public fs_operation {
 public:
-    default_dir_op()
+    default_dir_op(shared_ptr<core_file_system>)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }

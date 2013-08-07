@@ -12,7 +12,7 @@ namespace planet {
 
     class dyn_module_op : public fs_operation {
     private:
-        typedef void (*mod_init_t)(core_file_system *);
+        typedef void (*mod_init_t)(shared_ptr<core_file_system>);
         typedef void (*mod_fin_t)(void);
         typedef shared_ptr<fs_operation> (*mod_new_instance_t)();
         typedef int (*mod_open_t)(shared_ptr<fs_entry>, path_type const&);
@@ -24,7 +24,6 @@ namespace planet {
         typedef bool (*mod_matching_path_t)(path_type const&, file_type);
 
         string_type mod_name_;
-        raii_wrapper dl_remover_;
         void *handle_;
 
         // loaded module's functions
@@ -40,7 +39,7 @@ namespace planet {
         mod_matching_path_t matching_path_;
 
     public:
-        dyn_module_op(std::string const& module_path, core_file_system&);
+        dyn_module_op(std::string const& module_path, shared_ptr<core_file_system>);
 
         ~dyn_module_op();
 

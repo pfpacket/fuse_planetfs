@@ -21,34 +21,37 @@ namespace tcp {
 
 class installer : public fs_operation {
 private:
-    core_file_system& fs_root_;
+    shared_ptr<core_file_system> fs_root_;
 public:
-    installer(core_file_system& fs_root) : fs_root_(fs_root)
+    installer(shared_ptr<core_file_system> fs_root) : fs_root_(fs_root)
     {
         typedef planet::core_file_system::priority priority;
-        fs_root.install_op<dir_op>(priority::normal, fs_root);
-        fs_root.install_op<clone_op>(priority::normal, fs_root, 0);
-        fs_root.install_op<ctl_op>(priority::normal, fs_root);
-        fs_root.install_op<data_op>(priority::normal, fs_root);
-        fs_root.install_op<remote_op>(priority::normal, fs_root);
-        fs_root.install_op<local_op>(priority::normal, fs_root);
-        fs_root.install_op<session_dir_op>(priority::normal, fs_root);
-        fs_root.install_op<client_op>(priority::normal);
-        fs_root.install_op<server_op>(priority::normal, fs_root);
+        fs_root_->install_op<dir_op>(priority::normal);
+        fs_root_->install_op<clone_op>(priority::normal, 0);
+        fs_root_->install_op<ctl_op>(priority::normal);
+        fs_root_->install_op<data_op>(priority::normal);
+        fs_root_->install_op<remote_op>(priority::normal);
+        fs_root_->install_op<local_op>(priority::normal);
+        fs_root_->install_op<session_dir_op>(priority::normal);
+        fs_root_->install_op<client_op>(priority::normal);
+        fs_root_->install_op<server_op>(priority::normal);
     }
 
     ~installer()
     {
         //try {
-        //    fs_root_.uninstall_op<server_op>();
-        //    fs_root_.uninstall_op<client_op>();
-        //    fs_root_.uninstall_op<session_dir_op>();
-        //    fs_root_.uninstall_op<local_op>();
-        //    fs_root_.uninstall_op<remote_op>();
-        //    fs_root_.uninstall_op<data_op>();
-        //    fs_root_.uninstall_op<ctl_op>();
-        //    fs_root_.uninstall_op<clone_op>();
-        //    fs_root_.uninstall_op<dir_op>();
+        //    if (fs_root_) {
+        //        ::syslog(LOG_NOTICE, "tcp::installer: dtor: fs_root use_count=%ld", fs_root_.use_count());
+        //        fs_root_->uninstall_op<server_op>();
+        //        fs_root_->uninstall_op<client_op>();
+        //        fs_root_->uninstall_op<session_dir_op>();
+        //        fs_root_->uninstall_op<local_op>();
+        //        fs_root_->uninstall_op<remote_op>();
+        //        fs_root_->uninstall_op<data_op>();
+        //        fs_root_->uninstall_op<ctl_op>();
+        //        fs_root_->uninstall_op<clone_op>();
+        //        fs_root_->uninstall_op<dir_op>();
+        //    }
         //} catch (...) {
         //}
     }

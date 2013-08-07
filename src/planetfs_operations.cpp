@@ -9,7 +9,8 @@
 #include <syslog.h>
 
 // Core filesystem object
-planet::core_file_system fs_root{S_IRWXU};
+planet::shared_ptr<planet::core_file_system>
+    fs_root = planet::core_file_system::create(S_IRWXU);
 
 
 int planet_getattr(char const *path, struct stat *stbuf)
@@ -18,7 +19,7 @@ int planet_getattr(char const *path, struct stat *stbuf)
     int ret = 0;
     try {
         std::memset(stbuf, 0, sizeof (struct stat));
-        ret = fs_root.getattr(path, *stbuf);
+        ret = fs_root->getattr(path, *stbuf);
         ::syslog(LOG_INFO, "getattr: path=%s size=%llu mode=%o nlink=%d",
             path, stbuf->st_size, stbuf->st_mode, stbuf->st_nlink);
     } catch (planet::exception_errno& e) {
@@ -36,7 +37,7 @@ int planet_mknod(char const *path, mode_t mode, dev_t device)
     ::syslog(LOG_INFO, "%s: path=%s mode=%o %lld", __func__, path, mode, device);
     int ret = 0;
     try {
-        ret = fs_root.mknod(path, mode, device);
+        ret = fs_root->mknod(path, mode, device);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -52,7 +53,7 @@ int planet_unlink(char const *path)
     ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
     int ret = 0;
     try {
-        ret = fs_root.unlink(path);
+        ret = fs_root->unlink(path);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -68,7 +69,7 @@ int planet_mkdir(char const *path, mode_t mode)
     ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path, mode);
     int ret = 0;
     try {
-        ret = fs_root.mkdir(path, 0755);
+        ret = fs_root->mkdir(path, 0755);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -84,7 +85,7 @@ int planet_rmdir(char const *path)
     ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
     int ret = 0;
     try {
-        ret = fs_root.rmdir(path);
+        ret = fs_root->rmdir(path);
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.get_errno();
@@ -110,7 +111,7 @@ int planet_truncate(char const *path, off_t offset)
     ::syslog(LOG_INFO, "%s: path=%s offset=%lld", __func__, path, offset);
     int ret = 0;
     try {
-        if (auto entry = fs_root.get_entry_of(path)) {
+        if (auto entry = fs_root->get_entry_of(path)) {
             auto file_ent = planet::file_cast(entry);
             file_ent->data().resize(offset);
         } else
@@ -131,7 +132,7 @@ int planet_utimens(char const* path, struct timespec const tv[2])
     int ret = 0;
     try {
         namespace ch = std::chrono;
-        if (auto entry = fs_root.get_entry_of(path)) {
+        if (auto entry = fs_root->get_entry_of(path)) {
             ch::nanoseconds nano_access(tv[0].tv_nsec), nano_mod(tv[1].tv_nsec);
             ch::seconds sec_access(tv[0].tv_sec), sec_mod(tv[1].tv_sec);
             planet::st_inode new_inode = entry->inode();
@@ -157,7 +158,7 @@ int planet_open(char const *path, struct fuse_file_info *fi)
     ::syslog(LOG_INFO, "%s: path=%s fi=%p", __func__, path, fi);
     int ret = 0;
     try {
-        planet::handle_t ph = fs_root.open(path);
+        planet::handle_t ph = fs_root->open(path);
         planet::set_handle_to(*fi, ph);
         ::syslog(LOG_INFO, "%s: handle=%d", __func__, ph);
     } catch (planet::exception_errno& e) {
@@ -213,7 +214,7 @@ int planet_readdir(char const *path, void *buf, fuse_fill_dir_t filler, off_t of
     try {
         filler(buf, ".", nullptr, 0);
         filler(buf, "..", nullptr, 0);
-        for (auto const& entry_name : fs_root.readdir(path))
+        for (auto const& entry_name : fs_root->readdir(path))
             if (filler(buf, entry_name.c_str(), nullptr, 0))
                 break;
     } catch (planet::exception_errno& e) {

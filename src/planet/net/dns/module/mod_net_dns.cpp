@@ -17,10 +17,10 @@ static shared_ptr<resolver_type> resolver = shared_null_ptr;
 
 extern "C" {
 
-    void planet_mod_init(planet::core_file_system *fs)
+    void planet_mod_init(shared_ptr<planet::core_file_system> fs_root)
     {
         ::syslog(LOG_NOTICE, "module=%s: %s: module installed", MODULE_NAME, __PRETTY_FUNCTION__);
-        resolver = std::make_shared<resolver_type>();
+        resolver = std::make_shared<resolver_type>(fs_root);
     }
 
     void planet_mod_fin()

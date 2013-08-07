@@ -13,11 +13,11 @@ namespace tcp {
 
 class data_op : public fs_operation {
 private:
-    core_file_system& fs_root_;
+    shared_ptr<core_file_system> fs_root_;
     int socket_ = -1;
 
 public:
-    data_op(core_file_system& fs_root)
+    data_op(shared_ptr<core_file_system> fs_root)
         : fs_root_(fs_root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);

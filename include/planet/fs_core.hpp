@@ -18,9 +18,9 @@ public:
     typedef std::vector<value_type> mapper_type;
 
     enum priority : priority_type {
-        max     = std::numeric_limits<priority_type>::max(),
-        normal  = max / 2,
-        min     = std::numeric_limits<priority_type>::min(),
+        high    = std::numeric_limits<priority_type>::max(),
+        normal  = high / 2,
+        low     = std::numeric_limits<priority_type>::min(),
     };
 
     template<typename OpType>
@@ -73,6 +73,11 @@ public:
         return std::get<1>(*it);
     }
 
+    void clear()
+    {
+        path2type_.clear();
+    }
+
 private:
     mapper_type path2type_;
 };
@@ -98,7 +103,6 @@ public:
             )
         );
     }
-
 
     template<typename OpType>
     void remove_op()
@@ -132,11 +136,17 @@ public:
         return matching_op(typeindex);
     }
 
+    void clear()
+    {
+        type2op_.clear();
+    }
+
 private:
     map_type type2op_;
 };
 
-class core_file_system {
+class core_file_system
+    : public std::enable_shared_from_this<core_file_system> {
 public:
 
     typedef path_manager::priority priority;
@@ -144,6 +154,26 @@ public:
     explicit core_file_system(mode_t);
 
     ~core_file_system() = default;
+
+    template<typename ...Types>
+    static shared_ptr<core_file_system> create(Types&& ...args)
+    {
+        auto fs = std::make_shared<core_file_system>(std::forward<Types>(args)...);
+        fs->install_op<default_file_op>(priority::low);
+        fs->install_op<default_dir_op>(priority::low);
+        return fs;
+    }
+
+    static void destroy(shared_ptr<core_file_system> fs_root)
+    {
+        fs_root->clear();
+    }
+
+    void clear()
+    {
+        path_mgr_.clear();
+        ops_mgr_.clear();
+    }
 
     int getattr(path_type const& path, struct stat& stbuf) const;
 
@@ -167,7 +197,9 @@ public:
     void install_op(priority p, Types&& ...args)
     {
         path_mgr_.add_new_type<OperationType>(p);
-        ops_mgr_.add_new_op<OperationType>(std::forward<Types>(args)...);
+        ops_mgr_.add_new_op<OperationType>(
+            this->shared_from_this(), std::forward<Types>(args)...
+        );
     }
 
     template<typename OperationType>
@@ -177,7 +209,7 @@ public:
         ops_mgr_.remove_op<OperationType>();
     }
 
-    void install_dynamic_module(priority, string_type const&);
+    void install_module(priority, string_type const&);
 
     void uninstall_module(string_type const&);
 
