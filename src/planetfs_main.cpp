@@ -18,20 +18,20 @@ void planetfs_install_fs_operations()
 {
     typedef planet::core_file_system::priority priority;
     // static module loading
-    //fs_root->install_op<planet::net::dns::installer>(priority::normal, fs_root);
+    //fs.root()->install_op<planet::net::dns::installer>(priority::normal);
     // dynamic module loading
-    fs_root->install_module(priority::normal, "mod_net_dns.so");
-    fs_root->install_op<planet::net::tcp::installer>(priority::normal);
-    fs_root->install_op<planet::net::eth::installer>(priority::normal);
+    fs.root()->install_module(priority::normal, "mod_net_dns.so");
+    fs.root()->install_op<planet::net::tcp::installer>(priority::normal);
+    fs.root()->install_op<planet::net::eth::installer>(priority::normal);
 }
 
 // Create initial filesystem structure
 void planetfs_create_initial_fs_structure()
 {
-    fs_root->mkdir("/ip",    S_IRWXU);
-    fs_root->mkdir("/tcp",   S_IRWXU);
-    fs_root->mkdir("/eth",   S_IRWXU);
-    fs_root->mknod("/dns",   S_IRUSR | S_IWUSR, 0);
+    fs.root()->mkdir("/ip",    S_IRWXU);
+    fs.root()->mkdir("/tcp",   S_IRWXU);
+    fs.root()->mkdir("/eth",   S_IRWXU);
+    fs.root()->mknod("/dns",   S_IRUSR | S_IWUSR, 0);
 }
 
 void planetfs_sig_handler(int sig)
@@ -56,8 +56,7 @@ int main(int argc, char **argv)
         ::syslog(LOG_INFO, "%s daemon started", PLANETFS_NAME);
         planetfs_install_fs_operations();
         planetfs_create_initial_fs_structure();
-        fs_root->uninstall_op<planet::net::eth::raw_op>();
-        fs_root->uninstall_op<planet::net::eth::dir_op>();
+        //fs.root()->uninstall_op<planet::net::eth::installer>();
         planetfs_ops.getattr    =   planet_getattr;
         planetfs_ops.mknod      =   planet_mknod;
         planetfs_ops.unlink     =   planet_unlink;
@@ -80,7 +79,6 @@ int main(int argc, char **argv)
         ::syslog(LOG_ERR, "unknown fatal error occurred");
         exit_code = EXIT_FAILURE;
     }
-    planet::core_file_system::destroy(fs_root);
     ::syslog(LOG_INFO, "%s daemon finished", PLANETFS_NAME);
     return exit_code;
 }

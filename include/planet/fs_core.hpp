@@ -52,14 +52,14 @@ public:
 
     void remove_type(index_type const& op_code)
     {
-        path2type_.erase(
-            std::remove_if(
-                path2type_.begin(), path2type_.end(),
-                [&op_code](value_type const& t) {
-                    return std::get<1>(t) == op_code;
-                }
-            ), path2type_.end()
+        auto it = std::remove_if(
+            path2type_.begin(), path2type_.end(),
+            [&op_code](value_type const& t) {
+                return std::get<1>(t) == op_code;
+            }
         );
+        if (it != path2type_.end())
+            path2type_.erase(it, path2type_.end());
     }
 
     index_type matching_type(path_type const& path, file_type type) const
@@ -83,10 +83,20 @@ private:
 };
 
 class operation_manager {
+private:
+    template<typename Container, typename Pred>
+    static void release_op_if(Container& cont, Pred const& predicate)
+    {
+        for (auto it = cont.begin(); it != cont.end(); ++it)
+            if (predicate(*it))
+                it->second.reset();
+    }
+
 public:
     typedef op_type_code index_type;
     typedef shared_ptr<fs_operation> op_type;
     typedef std::map<index_type, op_type> map_type;
+    typedef map_type::value_type value_type;
 
     template<typename OpType>
     void add_new_op(string_type const& name, shared_ptr<OpType> new_op)
@@ -112,13 +122,13 @@ public:
 
     void remove_op(index_type const& op_code)
     {
-        auto it = type2op_.begin(), endit = type2op_.end();
-        for(; it != endit; ) {
-            if (it->first == op_code)
-                type2op_.erase(it++);
-            else
-                ++it;
-        }
+        release_op_if(
+            type2op_,
+            [&op_code](value_type const& p) {
+                return p.first == op_code;
+            }
+        );
+        type2op_.erase(op_code);
     }
 
     op_type matching_op(index_type const& typeindex) const
@@ -151,28 +161,20 @@ public:
 
     typedef path_manager::priority priority;
 
-    explicit core_file_system(mode_t);
+    core_file_system(
+        mode_t, weak_ptr<path_manager>, weak_ptr<operation_manager>
+    );
 
-    ~core_file_system() = default;
+    ~core_file_system();
 
     template<typename ...Types>
     static shared_ptr<core_file_system> create(Types&& ...args)
     {
-        auto fs = std::make_shared<core_file_system>(std::forward<Types>(args)...);
-        fs->install_op<default_file_op>(priority::low);
-        fs->install_op<default_dir_op>(priority::low);
-        return fs;
-    }
-
-    static void destroy(shared_ptr<core_file_system> fs_root)
-    {
-        fs_root->clear();
-    }
-
-    void clear()
-    {
-        path_mgr_.clear();
-        ops_mgr_.clear();
+        auto new_fs =
+            std::make_shared<core_file_system>(std::forward<Types>(args)...);
+        new_fs-> template install_op<default_file_op>(priority::low);
+        new_fs-> template install_op<default_dir_op>(priority::low);
+        return new_fs;
     }
 
     int getattr(path_type const& path, struct stat& stbuf) const;
@@ -196,8 +198,10 @@ public:
     template<typename OperationType, typename ...Types>
     void install_op(priority p, Types&& ...args)
     {
-        path_mgr_.add_new_type<OperationType>(p);
-        ops_mgr_.add_new_op<OperationType>(
+        auto path_mgr = path_mgr_.lock();
+        auto ops_mgr  = ops_mgr_.lock();
+        path_mgr->add_new_type<OperationType>(p);
+        ops_mgr->add_new_op<OperationType>(
             this->shared_from_this(), std::forward<Types>(args)...
         );
     }
@@ -205,8 +209,10 @@ public:
     template<typename OperationType>
     void uninstall_op()
     {
-        path_mgr_.remove_type<OperationType>();
-        ops_mgr_.remove_op<OperationType>();
+        auto path_mgr = path_mgr_.lock();
+        auto ops_mgr  = ops_mgr_.lock();
+        path_mgr->remove_type<OperationType>();
+        ops_mgr->remove_op<OperationType>();
     }
 
     void install_module(priority, string_type const&);
@@ -214,9 +220,9 @@ public:
     void uninstall_module(string_type const&);
 
 private:
-    path_manager        path_mgr_;
-    operation_manager   ops_mgr_;
-    shared_ptr<dentry>  root = detail::shared_null_ptr;
+    weak_ptr<path_manager>      path_mgr_;
+    weak_ptr<operation_manager> ops_mgr_;
+    shared_ptr<dentry>          root = detail::shared_null_ptr;
 
     shared_ptr<fs_entry> get_entry_of__(shared_ptr<dentry> root, path_type const& path) const;
 };

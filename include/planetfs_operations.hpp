@@ -1,13 +1,13 @@
 #ifndef PLANETFS_OPERATIONS_HPP
 #define PLANETFS_OPERATIONS_HPP
 
-#include <planet/fs_core.hpp>
+#include <planet/filesystem.hpp>
 
 #define LOG_EXCEPTION_MSG(e) \
     ::syslog(LOG_ERR, "%s: %s", __func__, (e).what());
 
 // Core filesystem object
-extern planet::shared_ptr<planet::core_file_system> fs_root;
+extern planet::filesystem fs;
 
 
 extern int planet_getattr(char const *, struct stat *);

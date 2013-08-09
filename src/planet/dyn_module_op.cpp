@@ -14,6 +14,7 @@ namespace planet {
             throw std::runtime_error(dlerror());
         reload();
         init_(fs_root);
+        ::syslog(LOG_NOTICE, "dyn_module_op: ctor: installed module: %s", mod_name_.c_str());
     }
 
     dyn_module_op::~dyn_module_op()
@@ -23,7 +24,8 @@ namespace planet {
         } catch (...) {
             // dtor must not throw any exceptions
         }
-        dlclose(handle_);
+        ::dlclose(handle_);
+        ::syslog(LOG_NOTICE, "dyn_module_op: dtor: uninstalled module: %s", mod_name_.c_str());
     }
 
     shared_ptr<fs_operation> dyn_module_op::new_instance()
