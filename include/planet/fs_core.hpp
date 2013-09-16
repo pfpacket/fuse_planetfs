@@ -146,8 +146,10 @@ public:
         return matching_op(typeindex);
     }
 
-    void clear()
+    void clear(shared_ptr<core_file_system> fs_root)
     {
+        for (auto&& pair : type2op_)
+            pair.second->uninstall(fs_root);
         type2op_.clear();
     }
 
@@ -204,6 +206,7 @@ public:
         ops_mgr->add_new_op<OperationType>(
             this->shared_from_this(), std::forward<Types>(args)...
         );
+        ops_mgr->matching_op(op_type_code(typeid(OperationType)))->install(this->shared_from_this());
     }
 
     template<typename OperationType>
@@ -211,7 +214,11 @@ public:
     {
         auto path_mgr = path_mgr_.lock();
         auto ops_mgr  = ops_mgr_.lock();
+        // First, do not create new operation of this type
         path_mgr->remove_type<OperationType>();
+        // Call uninstaller
+        ops_mgr->matching_op(op_type_code(typeid(OperationType)))->uninstall(this->shared_from_this());
+        // Remove operations of this type
         ops_mgr->remove_op<OperationType>();
     }
 

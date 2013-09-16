@@ -33,7 +33,7 @@ namespace planet {
             // Destroy them before
             //  destructing core_file_system
             path_mgr_->clear();
-            ops_mgr_->clear();
+            ops_mgr_->clear(root_);
             ::syslog(LOG_NOTICE, "filesystem: dtor: detroyed path_mgr_ and ops_mgr_");
             ::syslog(LOG_NOTICE, "filesystem: dtor: core_file_system: use_count=%ld", root_.use_count());
         }

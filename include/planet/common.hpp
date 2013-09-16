@@ -39,30 +39,41 @@ namespace planet {
     private:
         string_type name_;
     public:
+        template<typename OperationType>
+        op_type_code() : name_(typeid(OperationType).name())
+        {
+        }
+
         explicit op_type_code(string_type const& type_name)
             :   name_(type_name)
         {
         }
+
         explicit op_type_code(std::type_info const& typeinfo)
             :   name_(typeinfo.name())
         {
         }
+
         string_type const& name() const
         {
             return name_;
         }
+
         bool operator==(op_type_code const& r) const
         {
             return name_ == r.name_;
         }
+
         bool operator<(op_type_code const& r) const
         {
             return name_ < r.name_;
         }
+
         bool operator>(op_type_code const& r) const
         {
             return name_ > r.name_;
         }
+
         op_type_code& operator=(op_type_code const& r)
         {
             name_ = r.name_;

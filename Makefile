@@ -1,6 +1,6 @@
 CXX        = g++
-#CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O2 -march=native
-CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O2 -g -march=native #-D_FORTIFY_SOURCE=1
+#CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
+CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O2 -g #-D_FORTIFY_SOURCE=1
 LDFLAGS    = -rdynamic
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
@@ -38,14 +38,15 @@ all: $(TARGET) modules
 rebuild: clean all
 
 modules:
-	$(MAKE) -C src/planet/net/dns/module/
-	@find src/ -type f -name "*.so" -exec cp {} . \;
+	@$(MAKE) -C src/planet/net/dns/module/
+	@$(MAKE) -C src/planet/dummy_mod/
+	find src/ -type f -name "*.so" -exec cp {} . \;
 
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 examples:
-	$(MAKE) -C example/
+	@$(MAKE) -C example/
 
 test: examples
 	@echo "[*] Starting test: dns_example"
@@ -77,6 +78,7 @@ remount: $(TARGET) umount mount
 
 clean:
 	rm -f $(TARGET) $(OBJS)
-	$(MAKE) -C example/ clean
-	$(MAKE) -C src/planet/net/dns/module/ clean
+	@$(MAKE) -C example/ clean
+	@$(MAKE) -C src/planet/net/dns/module/ clean
+	@$(MAKE) -C src/planet/dummy_mod/ clean
 	@find . -maxdepth 1 -type f -name "*.so" | xargs rm -f

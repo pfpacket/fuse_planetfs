@@ -13,3 +13,4 @@ example/tcp_client_example
 example/tcp_server_example
 example/http_client_example
 example/new_http_client
+valgrind.log

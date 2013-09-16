@@ -21,12 +21,14 @@ public:
         fs_root->install_op<resolver_op>(priority::normal);
     }
 
+    //int uninstall(shared_ptr<core_file_system>)
+    //{
+    //    fs_root_->uninstall_op<resolver_op>();
+    //    return 0;
+    //}
+
     ~installer()
     {
-        //try {
-        //    fs_root_->uninstall_op<resolver_op>();
-        //} catch (...) {
-        //}
     }
 
     static bool is_matching_path(path_type const&, file_type)

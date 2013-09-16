@@ -160,13 +160,18 @@ namespace planet {
         auto ops_mgr  = ops_mgr_.lock();
         path_mgr->add_new_type<dyn_module_op>(p, op_type_code(mod_name), functor);
         ops_mgr->add_new_op<dyn_module_op>(mod_name, new_op);
+        ops_mgr->matching_op(op_type_code(mod_name))->install(this->shared_from_this());
     }
 
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
         auto path_mgr = path_mgr_.lock();
         auto ops_mgr  = ops_mgr_.lock();
+        // First, do not create new operation of this type
         path_mgr->remove_type(op_type_code(mod_name));
+        // Call uninstaller
+        ops_mgr->matching_op(op_type_code(mod_name))->uninstall(this->shared_from_this());
+        // Remove operations of this type
         ops_mgr->remove_op(op_type_code(mod_name));
     }
 
