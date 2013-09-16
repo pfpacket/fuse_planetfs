@@ -110,10 +110,9 @@ int planet_truncate(char const *path, off_t offset)
     ::syslog(LOG_INFO, "%s: path=%s offset=%lld", __func__, path, offset);
     int ret = 0;
     try {
-        if (auto entry = fs.root()->get_entry_of(path)) {
-            auto file_ent = planet::file_cast(entry);
-            file_ent->data().resize(offset);
-        } else
+        if (auto entry = fs.root()->get_entry_of(path))
+            planet::file_cast(entry)->data().resize(offset);
+        else
             ret = -ENOENT;
     } catch (planet::exception_errno& e) {
         LOG_EXCEPTION_MSG(e);

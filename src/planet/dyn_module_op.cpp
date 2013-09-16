@@ -6,12 +6,12 @@
 namespace planet {
 
 
-    dyn_module_op::dyn_module_op(std::string const& module_path, shared_ptr<core_file_system> fs_root)
-            :   mod_name_(module_path),
-                handle_(dlopen(module_path.c_str(), RTLD_LAZY))
+    dyn_module_op::dyn_module_op(string_type const& mod_name, shared_ptr<core_file_system> fs_root)
+            :   mod_name_(mod_name)
     {
+        handle_ = ::dlopen(mod_name_.c_str(), RTLD_NOW);
         if (!handle_)
-            throw std::runtime_error(dlerror());
+            throw std::runtime_error(::dlerror());
         reload();
         init_(fs_root);
         ::syslog(LOG_NOTICE, "dyn_module_op: ctor: installed module: %s", mod_name_.c_str());
@@ -70,36 +70,36 @@ namespace planet {
 
     void dyn_module_op::reload()
     {
-        init_           = reinterpret_cast<mod_init_t>(dlsym(handle_, "planet_mod_init"));
+        init_           = reinterpret_cast<mod_init_t>(::dlsym(handle_, "planet_mod_init"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        fin_            = reinterpret_cast<mod_fin_t>(dlsym(handle_, "planet_mod_fin"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        fin_            = reinterpret_cast<mod_fin_t>(::dlsym(handle_, "planet_mod_fin"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        new_instance_   = reinterpret_cast<mod_new_instance_t>(dlsym(handle_, "planet_mod_new_instance"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        new_instance_   = reinterpret_cast<mod_new_instance_t>(::dlsym(handle_, "planet_mod_new_instance"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        open_           = reinterpret_cast<mod_open_t>(dlsym(handle_, "planet_mod_open"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        open_           = reinterpret_cast<mod_open_t>(::dlsym(handle_, "planet_mod_open"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        read_           = reinterpret_cast<mod_read_t>(dlsym(handle_, "planet_mod_read"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        read_           = reinterpret_cast<mod_read_t>(::dlsym(handle_, "planet_mod_read"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        write_          = reinterpret_cast<mod_write_t>(dlsym(handle_, "planet_mod_write"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        write_          = reinterpret_cast<mod_write_t>(::dlsym(handle_, "planet_mod_write"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        release_        = reinterpret_cast<mod_release_t>(dlsym(handle_, "planet_mod_release"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        release_        = reinterpret_cast<mod_release_t>(::dlsym(handle_, "planet_mod_release"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        mknod_          = reinterpret_cast<mod_mknod_t>(dlsym(handle_, "planet_mod_mknod"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        mknod_          = reinterpret_cast<mod_mknod_t>(::dlsym(handle_, "planet_mod_mknod"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        rmnod_          = reinterpret_cast<mod_rmnod_t>(dlsym(handle_, "planet_mod_rmnod"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        rmnod_          = reinterpret_cast<mod_rmnod_t>(::dlsym(handle_, "planet_mod_rmnod"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
-        matching_path_  = reinterpret_cast<mod_matching_path_t>(dlsym(handle_, "planet_mod_is_matching_path"));
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        matching_path_  = reinterpret_cast<mod_matching_path_t>(::dlsym(handle_, "planet_mod_is_matching_path"));
         if (auto err = dlerror())
-            throw exception_errno(ELIBACC, str(format("%1%: ") % err).c_str());
+            throw exception_errno(ELIBACC, str(format("%1%: ") % err));
     }
 
 

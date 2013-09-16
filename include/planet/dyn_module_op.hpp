@@ -8,8 +8,6 @@
 namespace planet {
 
 
-    class raii_wrapper;
-
     class dyn_module_op : public fs_operation {
     private:
         typedef void (*mod_init_t)(shared_ptr<core_file_system>);

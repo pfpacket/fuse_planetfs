@@ -21,12 +21,11 @@ int main(int argc, char **argv)
 {
     int clone_fd, data_fd, size;
     char data_file[256], buffer[1024];
-    const char *clone_file   = "/net/tcp/clone",
-               *ctl_request  = "connect 74.125.235.240!80",
+    const char *ctl_request  = "connect 74.125.235.240!80",
                *http_request = "GET /index.html HTTP/1.1\r\n"
                                "Host: www.google.co.jp\r\n"
                                "Connection: close\r\n\r\n";
-    clone_fd = open(clone_file, O_RDWR);
+    clone_fd = open("/net/tcp/clone", O_RDWR);
     if (clone_fd < 0)
         die("clone: open");
     if (read(clone_fd, buffer, sizeof (buffer)) < 0)

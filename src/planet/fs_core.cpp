@@ -172,10 +172,10 @@ namespace planet {
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const
     {
-        return (path == "/" ? root : get_entry_of__(root, path));
+        return (path == "/" ? root : get_entry_of(root, path));
     }
 
-    shared_ptr<fs_entry> core_file_system::get_entry_of__(shared_ptr<dentry> root, path_type const& path) const
+    shared_ptr<fs_entry> core_file_system::get_entry_of(shared_ptr<dentry> root, path_type const& path)
     {
         if (path.empty() || path.is_relative() || !root)
             throw std::runtime_error{"detect null parent dir or relative path"};
@@ -186,7 +186,7 @@ namespace planet {
         // Get parent directory from filename
         auto dir_entry = root->search_entries(p.substr(1, pos - 1));
         return (!dir_entry || dir_entry->type() != file_type::directory) ? detail::shared_null_ptr
-            : get_entry_of__(directory_cast(dir_entry), "/" + p.substr(pos + 1));
+            : get_entry_of(directory_cast(dir_entry), "/" + p.substr(pos + 1));
     }
 
 

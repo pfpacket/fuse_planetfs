@@ -10,10 +10,9 @@ namespace planet {
 
 class exception_errno : public std::exception {
 public:
-    exception_errno(int err, const char *pre = "", const char *post = "")
-        : errno_(err)
+    exception_errno(int err, string_type const& pre = "", string_type const& post = "")
+        : errno_(err), msg_{pre + std::strerror(err) + post}
     {
-        ((msg_ += pre) += std::strerror(err)) += post;
     }
 
     virtual ~exception_errno() = default;
