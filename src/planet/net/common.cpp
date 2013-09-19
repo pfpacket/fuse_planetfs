@@ -34,6 +34,7 @@ namespace net {
         {
             if (auto fd = find(k))
                 ::close(*fd);
+            ::syslog(LOG_NOTICE, "fdtable.erase(): unregisteting KEY=%s", k.c_str());
             return table_.erase(k);
         }
 

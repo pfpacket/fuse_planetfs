@@ -19,7 +19,7 @@ private:
     static int do_raw_open(int sock_type, int protocol, std::string const& ifname);
 
 public:
-    raw_op()
+    raw_op(shared_ptr<core_file_system>)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }

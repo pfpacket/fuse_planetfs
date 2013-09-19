@@ -14,10 +14,10 @@ namespace tcp {
 
 class session_dir_op final : public fs_operation {
 private:
-    core_file_system& fs_root_;
+    shared_ptr<core_file_system> fs_root_;
 
 public:
-    session_dir_op(core_file_system& fs_root) : fs_root_(fs_root)
+    session_dir_op(shared_ptr<core_file_system> fs_root) : fs_root_(fs_root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }

@@ -8,6 +8,7 @@ namespace planet {
 
 class fs_entry;
 class file_entry;
+class core_file_system;
 
 //
 // planet core handler
@@ -58,6 +59,20 @@ public:
     {
         return 0;
     }
+
+    // This function is called when installing the type of operation
+    int install(shared_ptr<core_file_system>)
+    {
+        ::syslog(LOG_NOTICE, "fs_operation::install() called");
+        return 0;
+    }
+
+    // This function is called when installing the type of operation
+    int uninstall(shared_ptr<core_file_system>)
+    {
+        ::syslog(LOG_NOTICE, "fs_operation::uninstall() called");
+        return 0;
+    }
 };
 
 
@@ -70,6 +85,9 @@ public:
 // default file operation which is used if no other operations match the target path
 class default_file_op : public fs_operation {
 public:
+    default_file_op(shared_ptr<core_file_system>)
+    {
+    }
     virtual ~default_file_op() = default;
 
     virtual shared_ptr<fs_operation> new_instance() override;
@@ -85,7 +103,7 @@ public:
 // default dir operation which is used if no other operations match the target path
 class default_dir_op : public fs_operation {
 public:
-    default_dir_op()
+    default_dir_op(shared_ptr<core_file_system>)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }

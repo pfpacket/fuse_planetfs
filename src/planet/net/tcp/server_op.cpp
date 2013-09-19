@@ -15,7 +15,7 @@ namespace tcp {
 
     shared_ptr<fs_operation> server_op::new_instance()
     {
-        return std::make_shared<server_op, core_file_system&>(fs_root_);
+        return std::make_shared<server_op>(fs_root_);
     }
 
     int server_op::establish_server(std::string const& host, int port)

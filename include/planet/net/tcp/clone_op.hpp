@@ -14,7 +14,7 @@ namespace tcp {
 
 class clone_op : public fs_operation {
 private:
-    core_file_system& fs_root_;
+    shared_ptr<core_file_system> fs_root_;
     int current_fd_;
     handle_t ctl_handle_;
 
@@ -23,7 +23,7 @@ private:
 public:
 
     //clone_op() = default;
-    clone_op(core_file_system& root, int current)
+    clone_op(shared_ptr<core_file_system> root, int current)
         : fs_root_(root), current_fd_(current)
     {
         // fs_root_.install_op<ctl_op>(fs_root_);

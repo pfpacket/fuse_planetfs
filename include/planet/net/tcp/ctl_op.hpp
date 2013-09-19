@@ -14,7 +14,7 @@ namespace tcp {
 
 class ctl_op : public fs_operation {
 private:
-    core_file_system& fs_root_;
+    shared_ptr<core_file_system> fs_root_;
     int current_fd_;
     bool fd_number_already_read_ = false;
     int interpret_request(string_type const& request);
@@ -22,7 +22,7 @@ private:
 public:
 
     //ctl_op() = default;
-    ctl_op(core_file_system& root)
+    ctl_op(shared_ptr<core_file_system> root)
         : fs_root_(root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);

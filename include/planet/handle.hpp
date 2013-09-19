@@ -37,8 +37,11 @@ public:
     }
 
     entry_type const& get_operation_entry(handle_t ph)
-    {
+    try {
         return ops_.at(ph);
+    } catch (...) {
+        ::syslog(LOG_NOTICE, "handle_manager::get_operation_entry: std::map::at thrown at %s:%d", __FILE__, __LINE__);
+        throw;
     }
 
     template<typename ...Types>

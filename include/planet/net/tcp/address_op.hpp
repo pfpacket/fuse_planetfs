@@ -14,11 +14,11 @@ namespace tcp {
 
 class local_op : public default_file_op {
 private:
-    core_file_system& fs_root_;
+    shared_ptr<core_file_system> fs_root_;
 
 public:
-    local_op(core_file_system& fs_root)
-        :   fs_root_(fs_root)
+    local_op(shared_ptr<core_file_system> fs_root)
+        :   default_file_op(fs_root), fs_root_(fs_root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
@@ -39,11 +39,11 @@ public:
 
 class remote_op : public default_file_op {
 private:
-    core_file_system& fs_root_;
+    shared_ptr<core_file_system> fs_root_;
 
 public:
-    remote_op(core_file_system& fs_root)
-        :   fs_root_(fs_root)
+    remote_op(shared_ptr<core_file_system> fs_root)
+        :   default_file_op(fs_root), fs_root_(fs_root)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }

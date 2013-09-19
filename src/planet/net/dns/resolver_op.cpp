@@ -14,7 +14,7 @@ namespace dns {
 
     shared_ptr<fs_operation> resolver_op::new_instance()
     {
-        return std::make_shared<resolver_op>();
+        return std::make_shared<resolver_op>(::planet::detail::shared_null_ptr);
     }
 
     int resolver_op::forward_lookup(std::string const& host, int family, std::vector<std::string>& store)

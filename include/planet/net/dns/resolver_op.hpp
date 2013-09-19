@@ -22,7 +22,7 @@ private:
 
 public:
     //resolver_op() = default;
-    resolver_op()
+    resolver_op(shared_ptr<core_file_system>)
     {
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }

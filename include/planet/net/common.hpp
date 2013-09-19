@@ -2,7 +2,7 @@
 #define PLANET_NET_COMMON_HPP
 
 #include <planet/common.hpp>
-#include <unordered_map>
+#include <map>
 #include <boost/regex.hpp>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -22,7 +22,7 @@ namespace net {
         public:
             typedef string_type key_type;
             typedef int mapped_type;
-            typedef std::unordered_map<key_type, mapped_type> map_type;
+            typedef std::map<key_type, mapped_type> map_type;
             typedef map_type::iterator iterator;
             typedef map_type::const_iterator const_iterator;
             template<typename T1, typename T2>

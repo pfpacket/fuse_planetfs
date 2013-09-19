@@ -16,7 +16,7 @@ namespace tcp {
 
     shared_ptr<fs_operation> client_op::new_instance()
     {
-        return std::make_shared<client_op>();
+        return std::make_shared<client_op>(::planet::detail::shared_null_ptr);
     }
 
     int client_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)

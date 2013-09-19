@@ -1,7 +1,7 @@
 
 #include <planet/common.hpp>
-#include <planet/fs_core.hpp>
 #include <planet/utils.hpp>
+#include <planet/fs_core.hpp>
 
 namespace planet {
 
