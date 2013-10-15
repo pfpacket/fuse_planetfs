@@ -25,13 +25,14 @@ namespace planet {
 
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
-        if (auto fs_ent = get_entry_of(path)) {
+        if (auto fs_ent = this->get_entry_of(path)) {
+            stbuf.st_dev   = fs_ent->inode().dev;
+            stbuf.st_mode  = fs_ent->inode().mode;
             stbuf.st_nlink = fs_ent.use_count();
+            stbuf.st_size  = fs_ent->size();
             stbuf.st_atime = st_inode::to_time_t(fs_ent->inode().atime);
             stbuf.st_mtime = st_inode::to_time_t(fs_ent->inode().mtime);
             stbuf.st_ctime = st_inode::to_time_t(fs_ent->inode().ctime);
-            stbuf.st_mode  = fs_ent->inode().mode;
-            stbuf.st_size  = fs_ent->size();
         } else
             throw exception_errno(ENOENT);
         return 0;
