@@ -14,7 +14,7 @@ namespace planet {
     {
         st_inode new_inode;
         new_inode.mode = root_mode | S_IFDIR;
-        root = std::make_shared<dentry>("/", op_type_code(typeid(default_dir_op)), new_inode);
+        root = std::make_shared<dentry>("/", op_type_code::get<default_dir_op>(), new_inode);
     }
 
     core_file_system::~core_file_system()

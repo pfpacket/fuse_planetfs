@@ -26,7 +26,7 @@ public:
     template<typename OpType>
     void add_new_type(priority_type priority)
     {
-        add_new_type<OpType>(priority, index_type(typeid(OpType)), &OpType::is_matching_path);
+        add_new_type<OpType>(priority, index_type::get<OpType>(), &OpType::is_matching_path);
     }
 
     template<typename OpType, typename Callable>
@@ -47,7 +47,7 @@ public:
     template<typename OpType>
     void remove_type()
     {
-        remove_type(index_type(typeid(OpType)));
+        remove_type(index_type::get<OpType>());
     }
 
     void remove_type(index_type const& op_code)
@@ -108,7 +108,7 @@ public:
     void add_new_op(Types&& ...args)
     {
         type2op_.insert(
-            std::make_pair(index_type(typeid(OpType)),
+            std::make_pair(index_type::get<OpType>(),
                 std::make_shared<OpType>(std::forward<Types>(args)...)
             )
         );
@@ -117,7 +117,7 @@ public:
     template<typename OpType>
     void remove_op()
     {
-        remove_op(index_type(typeid(OpType)));
+        remove_op(index_type::get<OpType>());
     }
 
     void remove_op(index_type const& op_code)
@@ -206,7 +206,7 @@ public:
         ops_mgr->add_new_op<OperationType>(
             this->shared_from_this(), std::forward<Types>(args)...
         );
-        ops_mgr->matching_op(op_type_code(typeid(OperationType)))->install(this->shared_from_this());
+        ops_mgr->matching_op(op_type_code::get<OperationType>())->install(this->shared_from_this());
     }
 
     template<typename OperationType>
@@ -217,7 +217,7 @@ public:
         // First, do not create new operation of this type
         path_mgr->remove_type<OperationType>();
         // Call uninstaller
-        ops_mgr->matching_op(op_type_code(typeid(OperationType)))->uninstall(this->shared_from_this());
+        ops_mgr->matching_op(op_type_code::get<OperationType>())->uninstall(this->shared_from_this());
         // Remove operations of this type
         ops_mgr->remove_op<OperationType>();
     }
