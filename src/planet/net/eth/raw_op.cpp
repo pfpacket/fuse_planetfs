@@ -21,7 +21,7 @@ namespace eth {
 
     void raw_op::bind_to_interface(int fd, std::string const& ifname, int protocol)
     {
-        sockaddr_ll sll = {};
+        sockaddr_ll sll{};
         sll.sll_family      = AF_PACKET;
         sll.sll_halen       = IFHWADDRLEN;
         sll.sll_protocol    = protocol;

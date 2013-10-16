@@ -16,7 +16,7 @@ namespace tcp {
     //
     void local_op::update_address(int sock, shared_ptr<fs_entry> file)
     {
-        struct sockaddr_storage peer = {};
+        struct sockaddr_storage peer{};
         socklen_t len = sizeof (peer);
         if (getsockname(sock, (sockaddr *)&peer, &len) < 0)
             throw exception_errno(errno, "getpeername: ", str(format(": fd=%1%") % sock).c_str());
@@ -54,7 +54,7 @@ namespace tcp {
     //
     void remote_op::update_address(int sock, shared_ptr<fs_entry> file)
     {
-        struct sockaddr_storage peer = {};
+        struct sockaddr_storage peer{};
         socklen_t len = sizeof (peer);
         if (getpeername(sock, (sockaddr *)&peer, &len) < 0)
             throw exception_errno(errno, "getpeername: ", str(format(": fd=%1%") % sock).c_str());
