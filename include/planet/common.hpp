@@ -12,6 +12,7 @@
 #include <memory>
 #include <functional>
 #include <typeindex>
+#include <type_traits>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
