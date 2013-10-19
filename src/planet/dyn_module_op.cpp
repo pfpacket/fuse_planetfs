@@ -68,23 +68,16 @@ namespace planet {
 
     void dyn_module_op::load_all_functions()
     {
-        init_           = reinterpret_cast<mod_init_t>(loader_.load_symbol("planet_mod_init"));
-        fin_            = reinterpret_cast<mod_fin_t>(loader_.load_symbol("planet_mod_fin"));
-        new_instance_   = reinterpret_cast<mod_new_instance_t>(loader_.load_symbol("planet_mod_new_instance"));
-        open_           = reinterpret_cast<mod_open_t>(loader_.load_symbol("planet_mod_open"));
-        read_           = reinterpret_cast<mod_read_t>(loader_.load_symbol("planet_mod_read"));
-        write_          = reinterpret_cast<mod_write_t>(loader_.load_symbol("planet_mod_write"));
-        release_        = reinterpret_cast<mod_release_t>(loader_.load_symbol("planet_mod_release"));
-        mknod_          = reinterpret_cast<mod_mknod_t>(loader_.load_symbol("planet_mod_mknod"));
-        rmnod_          = reinterpret_cast<mod_rmnod_t>(loader_.load_symbol("planet_mod_rmnod"));
-        matching_path_  = reinterpret_cast<mod_matching_path_t>(loader_.load_symbol("planet_mod_is_matching_path"));
-        //
-        // install_     = reinterpret_cast<mod_matching_path_t>(::dlsym(handle_, "planet_mod_install"));
-        // if (auto err = dlerror())
-        //     throw exception_errno(ELIBACC, str(format("%1%: ") % err));
-        // uninstall_   = reinterpret_cast<mod_matching_path_t>(::dlsym(handle_, "planet_mod_uninstall"));
-        // if (auto err = dlerror())
-        //     throw exception_errno(ELIBACC, str(format("%1%: ") % err));
+        init_           = loader_.load_func_ptr<mod_init_t>("planet_mod_init");
+        fin_            = loader_.load_func_ptr<mod_fin_t>("planet_mod_fin");
+        new_instance_   = loader_.load_func_ptr<mod_new_instance_t>("planet_mod_new_instance");
+        open_           = loader_.load_func_ptr<mod_open_t>("planet_mod_open");
+        read_           = loader_.load_func_ptr<mod_read_t>("planet_mod_read");
+        write_          = loader_.load_func_ptr<mod_write_t>("planet_mod_write");
+        release_        = loader_.load_func_ptr<mod_release_t>("planet_mod_release");
+        mknod_          = loader_.load_func_ptr<mod_mknod_t>("planet_mod_mknod");
+        rmnod_          = loader_.load_func_ptr<mod_rmnod_t>("planet_mod_rmnod");
+        matching_path_  = loader_.load_func_ptr<mod_matching_path_t>("planet_mod_is_matching_path");
     }
 
 

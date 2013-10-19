@@ -24,7 +24,7 @@ namespace planet {
 
         static lt_dlhandle ltdl_open(string_type const& dl_name)
         {
-            auto handle = ::lt_dlopen(dl_name.c_str());
+            auto handle = ::lt_dlopenext(dl_name.c_str());
             if (!handle)
                 throw_ltdl_error<>();
             return handle;
@@ -110,13 +110,27 @@ namespace planet {
             return sym_addr;
         }
 
+        template<typename FuncPtrType>
+        FuncPtrType load_func_ptr(
+            string_type const& funcname,
+            typename std::enable_if<std::is_pointer<FuncPtrType>::value>::type* = 0) const
+        {
+            return reinterpret_cast<FuncPtrType>(this->load_symbol(funcname));
+        }
+
+        template<typename FunctionType,
+            typename FuncPtrType = typename std::add_pointer<FunctionType>::type>
+        FuncPtrType load_func_ptr(
+            string_type const& funcname,
+            typename std::enable_if<!std::is_pointer<FunctionType>::value>::type* = 0) const
+        {
+            return this->load_func_ptr<FuncPtrType>(funcname);
+        }
+
         template<typename FunctionType>
         std::function<FunctionType> load_function(string_type const& funcname) const
         {
-            auto *sym_addr
-                = reinterpret_cast<typename std::add_pointer<FunctionType>::type>
-                    (this->load_symbol(funcname));
-            return sym_addr;
+            return this->load_func_ptr<FunctionType>(funcname);
         }
 
         ::lt_dlinfo const& info() const
