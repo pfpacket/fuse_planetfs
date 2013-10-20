@@ -63,14 +63,12 @@ public:
     // This function is called when installing the type of operation
     int install(shared_ptr<core_file_system>)
     {
-        ::syslog(LOG_NOTICE, "fs_operation::install() called");
         return 0;
     }
 
     // This function is called when installing the type of operation
     int uninstall(shared_ptr<core_file_system>)
     {
-        ::syslog(LOG_NOTICE, "fs_operation::uninstall() called");
         return 0;
     }
 };

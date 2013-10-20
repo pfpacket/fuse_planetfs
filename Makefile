@@ -4,7 +4,7 @@ CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
 LDFLAGS    = -rdynamic
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ./include
-LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lboost_regex -lfuse -ldl
+LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lboost_regex -lfuse -ldl -lltdl
 OBJS       = src/planet/common.o \
              src/planet/fs_core.o \
              src/planet/utils.o \
