@@ -14,7 +14,7 @@ namespace planet {
         static void ltdl_init()
         {
             if (::lt_dlinit())
-                throw_ltdl_error<>();
+                throw_ltdl_error();
         }
 
         static void ltdl_exit() noexcept
@@ -26,7 +26,7 @@ namespace planet {
         {
             auto handle = ::lt_dlopenext(dl_name.c_str());
             if (!handle)
-                throw_ltdl_error<>();
+                throw_ltdl_error(dl_name);
             return handle;
         }
 
@@ -49,10 +49,14 @@ namespace planet {
                 throw std::runtime_error("dl_loader: module not loaded");
         }
 
-        template<typename Exception = exception_errno>
         static void throw_ltdl_error()
         {
-            throw Exception{ELIBACC, str(format("%1%: ") % ::lt_dlerror())};
+            throw_system_error(ELIBACC, ::lt_dlerror());
+        }
+
+        static void throw_ltdl_error(string_type const& prefix)
+        {
+            throw_system_error(ELIBACC, prefix + ": " + ::lt_dlerror());
         }
 
     public:
@@ -106,7 +110,7 @@ namespace planet {
             this->make_sure_module_loaded();
             void *sym_addr = ::lt_dlsym(handle_, symname.c_str());
             if (!sym_addr)
-                throw_ltdl_error<>();
+                throw_ltdl_error();
             return sym_addr;
         }
 

@@ -32,7 +32,7 @@ namespace tcp {
     {
         int bytes = ::recv(fd_, buf, size, 0);
         if (bytes < 0)
-            throw exception_errno(errno);
+            throw_system_error(errno);
         return bytes;
     }
 
@@ -40,7 +40,7 @@ namespace tcp {
     {
         int bytes = ::send(fd_, buf, size, 0);
         if (bytes < 0)
-            throw exception_errno(errno);
+            throw_system_error(errno);
         return bytes;
     }
 
