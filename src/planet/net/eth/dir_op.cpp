@@ -20,7 +20,7 @@ namespace eth {
         auto ifnames = make_unique_ptr(
             if_nameindex(), [](struct if_nameindex *p){ if_freenameindex(p); });
         if (!ifnames)
-            throw exception_errno(errno);
+            throw_system_error(errno);
         for (auto *i = ifnames.get(); !(i->if_index == 0 && i->if_name == NULL); i++)
             fs_root_->mknod(path.string() + "/" + i->if_name, S_IRUSR | S_IWUSR, 0);
         return 0;
@@ -29,7 +29,7 @@ namespace eth {
     int dir_op::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
         ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
-        throw exception_errno(EPERM);
+        throw_system_error(EPERM);
         return -EPERM;
     }
 

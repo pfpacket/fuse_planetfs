@@ -19,11 +19,13 @@ int planet_getattr(char const *path, struct stat *stbuf)
     try {
         std::memset(stbuf, 0, sizeof (struct stat));
         ret = fs.root()->getattr(path, *stbuf);
+        stbuf->st_uid = ::getuid();
+        stbuf->st_gid = ::getgid();
         ::syslog(LOG_INFO, "getattr: path=%s size=%llu mode=%o nlink=%d",
             path, stbuf->st_size, stbuf->st_mode, stbuf->st_nlink);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -37,9 +39,9 @@ int planet_mknod(char const *path, mode_t mode, dev_t device)
     int ret = 0;
     try {
         ret = fs.root()->mknod(path, mode, device);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -53,9 +55,9 @@ int planet_unlink(char const *path)
     int ret = 0;
     try {
         ret = fs.root()->unlink(path);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -69,9 +71,9 @@ int planet_mkdir(char const *path, mode_t mode)
     int ret = 0;
     try {
         ret = fs.root()->mkdir(path, 0755);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -85,9 +87,9 @@ int planet_rmdir(char const *path)
     int ret = 0;
     try {
         ret = fs.root()->rmdir(path);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -114,9 +116,9 @@ int planet_truncate(char const *path, off_t offset)
             planet::file_cast(entry)->data().resize(offset);
         else
             ret = -ENOENT;
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -141,9 +143,9 @@ int planet_utimens(char const* path, struct timespec const tv[2])
             entry->inode(new_inode);
         } else
             ret = -ENOENT;
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -159,9 +161,9 @@ int planet_open(char const *path, struct fuse_file_info *fi)
         planet::handle_t ph = fs.root()->open(path);
         planet::set_handle_to(*fi, ph);
         ::syslog(LOG_INFO, "%s: handle=%d", __func__, ph);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -177,9 +179,9 @@ int planet_read(char const *path, char *buf, size_t size, off_t offset, struct f
         planet::handle_t ph = planet::get_handle_from(*fi);
         bytes_received = planet::read(ph, buf, size, offset);
         ::syslog(LOG_INFO, "%s: handle=%d bytes_received=%d", __func__, ph, bytes_received);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        bytes_received = -e.get_errno();
+        bytes_received = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         bytes_received = -EIO;
@@ -195,9 +197,9 @@ int planet_write(char const *path, const char *buf, size_t size, off_t offset, s
         planet::handle_t ph = planet::get_handle_from(*fi);
         bytes_transferred = planet::write(ph, buf, size, offset);
         ::syslog(LOG_INFO, "%s: handle=%d bytes_transferred=%d", __func__, ph, bytes_transferred);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        bytes_transferred = -e.get_errno();
+        bytes_transferred = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         bytes_transferred = -EIO;
@@ -215,9 +217,9 @@ int planet_readdir(char const *path, void *buf, fuse_fill_dir_t filler, off_t of
         for (auto const& entry_name : fs.root()->readdir(path))
             if (filler(buf, entry_name.c_str(), nullptr, 0))
                 break;
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;
@@ -233,9 +235,9 @@ int planet_release(char const *path, struct fuse_file_info *fi)
         planet::handle_t ph = planet::get_handle_from(*fi);
         ::syslog(LOG_INFO, "%s: handle=%d", __func__, ph);
         ret = planet::close(ph);
-    } catch (planet::exception_errno& e) {
+    } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
-        ret = -e.get_errno();
+        ret = -e.code().value();
     } catch (std::exception& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -EIO;

@@ -12,6 +12,8 @@
 #include <memory>
 #include <functional>
 #include <typeindex>
+#include <type_traits>
+#include <system_error>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
@@ -20,6 +22,7 @@
 
 // namespace for planetfs
 namespace planet {
+
 
     // planet shared_ptr
     template<typename T>
@@ -39,10 +42,7 @@ namespace planet {
     private:
         string_type name_;
     public:
-        template<typename OperationType>
-        op_type_code() : name_(typeid(OperationType).name())
-        {
-        }
+        op_type_code() = delete;
 
         explicit op_type_code(string_type const& type_name)
             :   name_(type_name)
@@ -52,6 +52,12 @@ namespace planet {
         explicit op_type_code(std::type_info const& typeinfo)
             :   name_(typeinfo.name())
         {
+        }
+
+        template<typename OperationType>
+        static op_type_code get(void)
+        {
+            return op_type_code(typeid(OperationType));
         }
 
         string_type const& name() const
@@ -121,9 +127,10 @@ namespace planet {
 
     char const *get_errmsg(detail::errmsg_number num) noexcept;
 
+    [[noreturn]] extern void throw_system_error(int);
+
+    [[noreturn]] extern void throw_system_error(int, std::string const&);
+
 }   // namespace planet
-
-
-#include <planet/exception.hpp>
 
 #endif  // PLANET_COMMON_HPP

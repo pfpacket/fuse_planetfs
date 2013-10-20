@@ -1,6 +1,6 @@
 CXX        = g++
 CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O2 -march=native
-LDFLAGS    = -shared -fPIC
+LDFLAGS    = -shared -fPIC -rdynamic
 BOOST_ROOT = /usr
 INCLUDES   = -I $(BOOST_ROOT)/include -I ../../../../../include
 LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lboost_regex -lfuse

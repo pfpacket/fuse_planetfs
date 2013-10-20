@@ -23,7 +23,7 @@ namespace tcp {
     int dir_op::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
         ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
-        throw exception_errno(EPERM);
+        throw_system_error(EPERM);
         return -EPERM;
     }
 

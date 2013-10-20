@@ -14,7 +14,7 @@ namespace planet {
     {
         st_inode new_inode;
         new_inode.mode = root_mode | S_IFDIR;
-        root = std::make_shared<dentry>("/", op_type_code(typeid(default_dir_op)), new_inode);
+        root = std::make_shared<dentry>("/", op_type_code::get<default_dir_op>(), new_inode);
     }
 
     core_file_system::~core_file_system()
@@ -25,15 +25,16 @@ namespace planet {
 
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
-        if (auto fs_ent = get_entry_of(path)) {
+        if (auto fs_ent = this->get_entry_of(path)) {
+            stbuf.st_dev   = fs_ent->inode().dev;
+            stbuf.st_mode  = fs_ent->inode().mode;
             stbuf.st_nlink = fs_ent.use_count();
+            stbuf.st_size  = fs_ent->size();
             stbuf.st_atime = st_inode::to_time_t(fs_ent->inode().atime);
             stbuf.st_mtime = st_inode::to_time_t(fs_ent->inode().mtime);
             stbuf.st_ctime = st_inode::to_time_t(fs_ent->inode().ctime);
-            stbuf.st_mode  = fs_ent->inode().mode;
-            stbuf.st_size  = fs_ent->size();
         } else
-            throw exception_errno(ENOENT);
+            throw_system_error(ENOENT);
         return 0;
     }
 
@@ -59,7 +60,7 @@ namespace planet {
                 throw;
             }
         } else
-            throw exception_errno(ENOENT);
+            throw_system_error(ENOENT);
         return 0;
     }
 
@@ -74,7 +75,7 @@ namespace planet {
                 return ret;
             parent_dir->remove_entry(path.filename().string());
         } else
-            throw exception_errno(ENOENT);
+            throw_system_error(ENOENT);
         return ret;
     }
 
@@ -98,7 +99,7 @@ namespace planet {
                 throw;
             }
         } else
-            throw exception_errno(ENOENT);
+            throw_system_error(ENOENT);
         return 0;
     }
 
@@ -113,7 +114,7 @@ namespace planet {
                 return ret;
             parent_dir->remove_entry(path.filename().string());
         } else
-            throw exception_errno(ENOENT);
+            throw_system_error(ENOENT);
         return ret;
     }
 
@@ -124,7 +125,7 @@ namespace planet {
             for (auto entry : dir_ent->entries())
                 store.push_back(entry->name());
         else
-            throw exception_errno(ENOENT);
+            throw_system_error(ENOENT);
         return store;
     }
 
@@ -133,7 +134,7 @@ namespace planet {
         handle_t new_handle;
         if (auto entry = get_entry_of(path)) {
             if (entry->type() != file_type::regular_file)
-                throw exception_errno(EISDIR);
+                throw_system_error(EISDIR);
             auto fentry = file_cast(entry);
             auto ops_mgr = ops_mgr_.lock();
             new_handle = handle_mgr.register_op((*ops_mgr)[fentry->get_op()]->new_instance(), fentry);
@@ -141,13 +142,13 @@ namespace planet {
                 auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
                 int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
                 if (open_ret < 0)
-                    throw exception_errno(-open_ret);
+                    throw_system_error(-open_ret);
             } catch (...) {
                 handle_mgr.unregister_op(new_handle);
                 throw;
             }
         } else
-            throw exception_errno(ENOENT);
+            throw_system_error(ENOENT);
         return new_handle;
     }
 

@@ -16,10 +16,10 @@ namespace tcp {
     //
     void local_op::update_address(int sock, shared_ptr<fs_entry> file)
     {
-        struct sockaddr_storage peer = {};
+        struct sockaddr_storage peer{};
         socklen_t len = sizeof (peer);
         if (getsockname(sock, (sockaddr *)&peer, &len) < 0)
-            throw exception_errno(errno, "getpeername: ", str(format(": fd=%1%") % sock).c_str());
+            throw_system_error(errno, str(format("getpeername: fd=%1%") % sock));
         std::string hostname, servname;
         get_name_info((sockaddr *)&peer, len, hostname, servname);
         auto local_addr = str(format("%1%!%2%") % hostname % servname);
@@ -54,10 +54,10 @@ namespace tcp {
     //
     void remote_op::update_address(int sock, shared_ptr<fs_entry> file)
     {
-        struct sockaddr_storage peer = {};
+        struct sockaddr_storage peer{};
         socklen_t len = sizeof (peer);
         if (getpeername(sock, (sockaddr *)&peer, &len) < 0)
-            throw exception_errno(errno, "getpeername: ", str(format(": fd=%1%") % sock).c_str());
+            throw_system_error(errno, str(format("getpeername: fd=%1%") % sock));
         std::string hostname, servname;
         get_name_info((sockaddr *)&peer, len, hostname, servname);
         auto local_addr = str(format("%1%!%2%") % hostname % servname);

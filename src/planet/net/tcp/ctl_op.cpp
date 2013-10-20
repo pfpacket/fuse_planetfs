@@ -67,11 +67,11 @@ namespace tcp {
             if (socket) {
                 int optvalue = 1;
                 if (::setsockopt(*socket, SOL_SOCKET, SO_KEEPALIVE, &optvalue, sizeof (optvalue)) < 0)
-                    throw exception_errno(errno);
+                    throw_system_error(errno);
                 if (m[3].length()) {
                     optvalue = lexical_cast<int>(m[3]);
                     if (::setsockopt(*socket, IPPROTO_TCP, TCP_KEEPIDLE, &optvalue, sizeof (optvalue)) < 0)
-                        throw exception_errno(errno);
+                        throw_system_error(errno);
                 }
                 ret = 0;
             }
