@@ -23,9 +23,9 @@ namespace tcp {
         int fd = ::socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in sin = {AF_INET, htons(port), {INADDR_ANY}, {0}};
         if (::bind(fd, reinterpret_cast<sockaddr *>(&sin), sizeof (sin)) < 0)
-            throw planet::exception_errno(errno);
+            throw_system_error(errno);
         if (::listen(fd, 5) < 0)
-            throw planet::exception_errno(errno);
+            throw_system_error(errno);
         return fd;
     }
 
@@ -39,7 +39,7 @@ namespace tcp {
         socklen_t len = sizeof (client);
         client_fd_ = accept(server_fd_, reinterpret_cast<sockaddr *>(&client), &len);
         if (client_fd_ < 0)
-            throw planet::exception_errno(errno);
+            throw_system_error(errno);
         return 0;
     }
 
@@ -47,7 +47,7 @@ namespace tcp {
     {
         int bytes = ::recv(client_fd_, buf, size, 0);
         if (bytes < 0)
-            throw exception_errno(errno);
+            throw_system_error(errno);
         return bytes;
     }
 
@@ -55,7 +55,7 @@ namespace tcp {
     {
         int bytes = ::send(client_fd_, buf, size, 0);
         if (bytes < 0)
-            throw exception_errno(errno);
+            throw_system_error(errno);
         return bytes;
     }
 

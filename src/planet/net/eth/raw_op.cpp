@@ -27,16 +27,16 @@ namespace eth {
         sll.sll_protocol    = protocol;
         sll.sll_ifindex     = if_nametoindex(ifname.c_str());
         if (!sll.sll_ifindex)
-            throw planet::exception_errno(errno);
+            throw_system_error(errno);
         if (::bind(fd, reinterpret_cast<sockaddr *>(&sll), sizeof (sll)) < 0)
-            throw planet::exception_errno(errno);
+            throw_system_error(errno);
     }
 
     int raw_op::do_raw_open(int sock_type, int protocol, std::string const& ifname)
     {
         int fd = socket(AF_PACKET, sock_type, protocol);
         if (fd < 0)
-            throw planet::exception_errno(errno);
+            throw_system_error(errno);
         bind_to_interface(fd, ifname, protocol);
         return fd;
     }
@@ -58,7 +58,7 @@ namespace eth {
     {
         int bytes = ::recv(fd_, buf, size, 0);
         if (bytes < 0)
-            throw exception_errno(errno);
+            throw_system_error(errno);
         return bytes;
     }
 
@@ -66,7 +66,7 @@ namespace eth {
     {
         int bytes = ::send(fd_, buf, size, 0);
         if (bytes < 0)
-            throw exception_errno(errno);
+            throw_system_error(errno);
         return bytes;
     }
 

@@ -17,10 +17,14 @@
 void planetfs_install_fs_operations()
 {
     typedef planet::core_file_system::priority priority;
+
     // static module loading
     //fs.root()->install_op<planet::net::dns::installer>(priority::normal);
+
     // dynamic module loading
-    fs.root()->install_module(priority::normal, "mod_net_dns.so");
+    // TODO: FIX BUGS HERE:
+    fs.root()->install_module(priority::normal, "mod_dummy__");
+
     fs.root()->install_op<planet::net::tcp::installer>(priority::normal);
     fs.root()->install_op<planet::net::eth::installer>(priority::normal);
 }
@@ -47,16 +51,15 @@ static struct fuse_operations planetfs_ops{};
 int main(int argc, char **argv)
 {
     int exit_code = EXIT_SUCCESS;
-    if (signal(SIGABRT, &planetfs_sig_handler) == SIG_ERR) {
-        perror("signal registering: ");
-        std::exit(EXIT_FAILURE);
-    }
     try {
         openlog(PLANETFS_NAME, LOG_CONS | LOG_PID, LOG_USER);
         ::syslog(LOG_INFO, "%s daemon started", PLANETFS_NAME);
+
+        // Initialize filesystem
         planetfs_install_fs_operations();
         planetfs_create_initial_fs_structure();
-        //fs.root()->uninstall_op<planet::net::eth::installer>();
+
+        // Set system call functions
         planetfs_ops.getattr    =   planet_getattr;
         planetfs_ops.mknod      =   planet_mknod;
         planetfs_ops.unlink     =   planet_unlink;
@@ -71,12 +74,15 @@ int main(int argc, char **argv)
         planetfs_ops.write      =   planet_write;
         planetfs_ops.readdir    =   planet_readdir;
         planetfs_ops.release    =   planet_release;
-        exit_code = fuse_main(argc, argv, &planetfs_ops, nullptr);
+
+        // Start userspace filesystem
+        exit_code = ::fuse_main(argc, argv, &planetfs_ops, nullptr);
+
     } catch (std::exception& e) {
-        ::syslog(LOG_ERR, "fatal error occurred: %s", e.what());
+        ::syslog(LOG_ERR, "fatal error: %s", e.what());
         exit_code = EXIT_FAILURE;
     } catch (...) {
-        ::syslog(LOG_ERR, "unknown fatal error occurred");
+        ::syslog(LOG_ERR, "unknown fatal error");
         exit_code = EXIT_FAILURE;
     }
     ::syslog(LOG_INFO, "%s daemon finished", PLANETFS_NAME);

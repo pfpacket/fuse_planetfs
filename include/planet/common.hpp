@@ -12,6 +12,8 @@
 #include <memory>
 #include <functional>
 #include <typeindex>
+#include <type_traits>
+#include <system_error>
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
@@ -20,6 +22,7 @@
 
 // namespace for planetfs
 namespace planet {
+
 
     // planet shared_ptr
     template<typename T>
@@ -124,9 +127,10 @@ namespace planet {
 
     char const *get_errmsg(detail::errmsg_number num) noexcept;
 
+    [[noreturn]] extern void throw_system_error(int);
+
+    [[noreturn]] extern void throw_system_error(int, std::string const&);
+
 }   // namespace planet
-
-
-#include <planet/exception.hpp>
 
 #endif  // PLANET_COMMON_HPP

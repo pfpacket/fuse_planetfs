@@ -3,7 +3,7 @@
 
 #include <planet/common.hpp>
 #include <planet/fs_core.hpp>
-#include <dlfcn.h>
+#include <planet/dl_loader.hpp>
 
 namespace planet {
 
@@ -22,7 +22,7 @@ namespace planet {
         typedef bool (*mod_matching_path_t)(path_type const&, file_type);
 
         string_type mod_name_;
-        void *handle_;
+        dl_loader loader_;
 
         // loaded module's functions
         mod_init_t          init_;
@@ -57,7 +57,7 @@ namespace planet {
 
         bool is_matching_path(path_type const& path, file_type type);
 
-        void reload();
+        void load_all_functions();
     };
 
 

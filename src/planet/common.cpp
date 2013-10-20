@@ -3,6 +3,7 @@
 
 namespace planet {
 
+
     namespace detail {
 
         char const * const errmsg[] = {
@@ -19,5 +20,15 @@ namespace planet {
         return num >= detail::pe_end ? nullptr : detail::errmsg[num];
     }
 
-}   // namespace planet
+    void throw_system_error(int err)
+    {
+        throw std::system_error(err, std::system_category());
+    }
 
+    void throw_system_error(int err, std::string const& errmsg)
+    {
+        throw std::system_error(err, std::system_category(), errmsg);
+    }
+
+
+}   // namespace planet

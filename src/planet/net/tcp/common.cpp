@@ -32,12 +32,12 @@ namespace tcp {
         for (struct addrinfo *ai = result.get(); ai; ai = ai->ai_next) {
             sock = ::socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
             if (sock < 0)
-                throw exception_errno(errno);
+                throw_system_error(errno);
             if (connect(sock, ai->ai_addr, ai->ai_addrlen) < 0 && ai->ai_next == nullptr)
-                throw exception_errno(errno);
+                throw_system_error(errno);
         }
         if (sock < 0)
-            throw exception_errno(EHOSTUNREACH);
+            throw_system_error(EHOSTUNREACH);
         return sock;
     }
 
@@ -46,7 +46,7 @@ namespace tcp {
         struct tcp_info info;
         socklen_t info_length = sizeof (info);
         if (getsockopt(sock, SOL_TCP, TCP_INFO, &info, &info_length) != 0)
-            throw exception_errno(errno);
+            throw_system_error(errno);
         return info;
     }
 
