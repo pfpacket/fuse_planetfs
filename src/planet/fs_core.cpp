@@ -64,14 +64,14 @@ namespace planet {
         return 0;
     }
 
-    int core_file_system::unlink(path_type const& path)
+    int core_file_system::unlink(path_type const& path, bool force)
     {
         int ret = 0;
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             auto fentry = file_cast(parent_dir->search_entries(path.filename().string()));
             auto ops_mgr = ops_mgr_.lock();
             ret = (*ops_mgr)[fentry->get_op()]->rmnod(fentry, path);
-            if (ret < 0)
+            if (ret < 0 && !force)
                 return ret;
             parent_dir->remove_entry(path.filename().string());
         } else
@@ -103,14 +103,14 @@ namespace planet {
         return 0;
     }
 
-    int core_file_system::rmdir(path_type const& path)
+    int core_file_system::rmdir(path_type const& path, bool force)
     {
         int ret = 0;
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             auto dir_entry = directory_cast(parent_dir->search_entries(path.filename().string()));
             auto ops_mgr = ops_mgr_.lock();
             ret = (*ops_mgr)[dir_entry->get_op()]->rmnod(dir_entry, path);
-            if (ret < 0)
+            if (ret < 0 && !force)
                 return ret;
             parent_dir->remove_entry(path.filename().string());
         } else

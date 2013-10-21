@@ -184,12 +184,12 @@ public:
     int mknod(path_type const& path, mode_t mode, dev_t device);
     int mknod(path_type const& path, mode_t, dev_t, op_type_code);
 
-    int unlink(path_type const& path);
+    int unlink(path_type const& path, bool force = false);
 
     int mkdir(path_type const& path, mode_t mode);
     int mkdir(path_type const& path, mode_t mode, op_type_code);
 
-    int rmdir(path_type const& path);
+    int rmdir(path_type const& path, bool force = false);
 
     std::vector<std::string> readdir(path_type const& path) const;
 
