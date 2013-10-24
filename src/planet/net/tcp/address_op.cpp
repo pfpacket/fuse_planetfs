@@ -2,8 +2,6 @@
 #include <planet/common.hpp>
 #include <planet/net/tcp/address_op.hpp>
 #include <planet/utils.hpp>
-#include <boost/regex.hpp>
-#include <boost/format.hpp>
 #include <sys/socket.h>
 
 namespace planet {
@@ -46,7 +44,7 @@ namespace tcp {
     bool local_op::is_matching_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file &&
-            boost::regex_match(path.string(), path_reg::local);
+            xpv::regex_match(path.string(), path_reg::local);
     }
 
     //
@@ -84,7 +82,7 @@ namespace tcp {
     bool remote_op::is_matching_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file &&
-            boost::regex_match(path.string(), path_reg::remote);
+            xpv::regex_match(path.string(), path_reg::remote);
     }
 
 }   // namespace tcp

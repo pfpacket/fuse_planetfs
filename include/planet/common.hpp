@@ -18,6 +18,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/xpressive/xpressive.hpp>
 #include <syslog.h>
 
 // namespace for planetfs
@@ -95,6 +96,8 @@ namespace planet {
     using boost::str;
 
     using boost::lexical_cast;
+
+    namespace xpv = boost::xpressive;
 
     // file type number
     enum file_type {

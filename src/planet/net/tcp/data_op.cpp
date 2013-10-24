@@ -4,8 +4,6 @@
 #include <planet/net/tcp/data_op.hpp>
 #include <planet/utils.hpp>
 #include <syslog.h>
-#include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace planet {
 namespace net {
@@ -62,7 +60,7 @@ namespace tcp {
     {
         return
             type == file_type::regular_file
-            && boost::regex_match(
+            && xpv::regex_match(
                 path.string(),
                 path_reg::data
             );

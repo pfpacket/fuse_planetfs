@@ -3,7 +3,6 @@
 
 #include <planet/common.hpp>
 #include <map>
-#include <boost/regex.hpp>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -12,8 +11,9 @@
 namespace planet {
 namespace net {
 
+
     namespace path_reg {
-        extern boost::regex dir_num;
+        extern xpv::sregex dir_num;
     }   // namespace path_reg
 
     namespace detail {
