@@ -48,6 +48,7 @@ public:
 //
 class fs_entry {
 public:
+    virtual ~fs_entry() = default;
     // Entry name not a path
     virtual string_type const& name() const = 0;
     // Entry type code

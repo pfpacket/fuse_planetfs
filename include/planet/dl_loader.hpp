@@ -94,6 +94,16 @@ namespace planet {
             ltdl_exit();
         }
 
+        dl_loader& operator=(dl_loader const& dl)
+        {
+            if (dl.handle_) {
+                if (this->handle_)
+                    ltdl_close(this->handle_);
+                this->handle_ = ltdl_open(dl.info().name);
+            }
+            return *this;
+        }
+
         void add_searchdir(std::vector<string_type> const& path_list)
         {
             ltdl_add_searchdir(path_list);
