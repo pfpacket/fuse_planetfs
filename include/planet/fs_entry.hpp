@@ -59,8 +59,7 @@ public:
     virtual void inode(st_inode const&) = 0;
 };
 
-class file_entry : public fs_entry,
-  public std::enable_shared_from_this<file_entry> {
+class file_entry : public fs_entry {
     typedef char value_type;
     typedef std::vector<value_type> buffer_type;
     typedef default_file_op default_op_type;
