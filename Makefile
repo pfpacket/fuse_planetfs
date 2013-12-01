@@ -22,7 +22,9 @@ TARGET     := mount.planetfs
 #              src/planet/net/eth/dir_op.o \
 #              src/planetfs_operations.o \
 #              src/planetfs_main.o
-OBJS       := src/planetfs_operations.o \
+OBJS       := src/planet/net/common.o \
+              src/planet/net/dns/resolver_op.o \
+              src/planetfs_operations.o \
               src/planetfs_main.o
 LIBPLANET_OBJS = \
               src/planet/common.o \
@@ -30,19 +32,19 @@ LIBPLANET_OBJS = \
               src/planet/utils.o \
               src/planet/handle.o \
               src/planet/operation_layer.o \
-              src/planet/basic_operation.o
+              src/planet/basic_operation.o \
+              src/planet/module_ops_type.o
 
-DEPS       := $(OBJS:%.o=%.d)
+DEPS       := $(OBJS:%.o=%.d) $(LIBPLANET_OBJS:%.o=%.d)
 MNTDIR     := /net
 MNTOPT     := -o direct_io -o intr -o allow_other
 MNTDBGOPT  := $(MNTOPT) -d -f
 EXEC_ENV   := MALLOC_CHECK_=3 LD_LIBRARY_PATH=./
 
-all: $(TARGET)
-
-rebuild: clean all
+all: $(TARGET) modules
 
 -include $(DEPS)
+rebuild: clean all
 
 $(TARGET): libplanet $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) libplanet.so $(LIBS)
@@ -51,10 +53,9 @@ libplanet: $(LIBPLANET_OBJS)
 	$(CXX) $(LDFLAGS) -shared -fPIC -o $@.so $(LIBPLANET_OBJS) $(LIBS)
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
-#	$(CXX) -MM -MP $(CXXFLAGS) $(INCLUDES) $*.cpp > $*.d
+	$(CXX) -MMD -MP -MT $@ $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-modules:
+modules: $(TARGET)
 	@$(MAKE) -C src/planet/net/dns/module/
 	@$(MAKE) -C src/planet/dummy_mod/
 	find src/ -type f -name "*.so" -exec cp {} . \;
