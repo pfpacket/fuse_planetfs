@@ -19,7 +19,7 @@ namespace net {
 namespace tcp {
 
 
-class installer : public fs_operation {
+class installer : public entry_op {
 private:
     shared_ptr<core_file_system> fs_root_;
 public:
@@ -56,7 +56,7 @@ public:
         //}
     }
 
-    static bool is_matching_path(path_type const&, file_type)
+    static bool match_path(path_type const&, file_type)
     {
         return false;
     }

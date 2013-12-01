@@ -11,7 +11,7 @@ namespace net {
 namespace eth {
 
 
-class raw_op : public fs_operation {
+class raw_op : public entry_op {
 private:
     int fd_;
 
@@ -28,14 +28,14 @@ public:
         ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
     }
 
-    shared_ptr<fs_operation> new_instance() override;
+    shared_ptr<entry_op> create_op() override;
     int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
     int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
     int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
     int release(shared_ptr<fs_entry> file_ent) override;
     int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
     int rmnod(shared_ptr<fs_entry>, path_type const&) override;
-    static bool is_matching_path(path_type const&, file_type);
+    static bool match_path(path_type const&, file_type);
 };
 
 

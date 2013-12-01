@@ -25,7 +25,7 @@ namespace tcp {
         this->write(file, local_addr.c_str(), local_addr.length(), 0);
     }
 
-    shared_ptr<fs_operation> local_op::new_instance()
+    shared_ptr<entry_op> local_op::create_op()
     {
         return std::make_shared<local_op>(fs_root_);
     }
@@ -41,7 +41,7 @@ namespace tcp {
         return ret;
     }
 
-    bool local_op::is_matching_path(path_type const& path, file_type type)
+    bool local_op::match_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file &&
             xpv::regex_match(path.string(), path_reg::local);
@@ -63,7 +63,7 @@ namespace tcp {
         this->write(file, local_addr.c_str(), local_addr.length(), 0);
     }
 
-    shared_ptr<fs_operation> remote_op::new_instance()
+    shared_ptr<entry_op> remote_op::create_op()
     {
         return std::make_shared<remote_op>(fs_root_);
     }
@@ -79,7 +79,7 @@ namespace tcp {
         return ret;
     }
 
-    bool remote_op::is_matching_path(path_type const& path, file_type type)
+    bool remote_op::match_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file &&
             xpv::regex_match(path.string(), path_reg::remote);

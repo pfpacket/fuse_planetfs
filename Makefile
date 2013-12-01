@@ -7,20 +7,22 @@ BOOST_ROOT := /usr
 INCLUDES   := -I $(BOOST_ROOT)/include -I ./include
 LIBS       := -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse -lltdl
 TARGET     := mount.planetfs
-OBJS       := src/planet/net/common.o \
-              src/planet/net/dns/resolver_op.o \
-              src/planet/net/tcp/common.o \
-              src/planet/net/tcp/dir_op.o \
-              src/planet/net/tcp/clone_op.o \
-              src/planet/net/tcp/ctl_op.o \
-              src/planet/net/tcp/data_op.o \
-              src/planet/net/tcp/address_op.o \
-              src/planet/net/tcp/session_dir_op.o \
-              src/planet/net/tcp/client_op.o \
-              src/planet/net/tcp/server_op.o \
-              src/planet/net/eth/raw_op.o \
-              src/planet/net/eth/dir_op.o \
-              src/planetfs_operations.o \
+#OBJS       := src/planet/net/common.o \
+#              src/planet/net/dns/resolver_op.o \
+#              src/planet/net/tcp/common.o \
+#              src/planet/net/tcp/dir_op.o \
+#              src/planet/net/tcp/clone_op.o \
+#              src/planet/net/tcp/ctl_op.o \
+#              src/planet/net/tcp/data_op.o \
+#              src/planet/net/tcp/address_op.o \
+#              src/planet/net/tcp/session_dir_op.o \
+#              src/planet/net/tcp/client_op.o \
+#              src/planet/net/tcp/server_op.o \
+#              src/planet/net/eth/raw_op.o \
+#              src/planet/net/eth/dir_op.o \
+#              src/planetfs_operations.o \
+#              src/planetfs_main.o
+OBJS       := src/planetfs_operations.o \
               src/planetfs_main.o
 LIBPLANET_OBJS = \
               src/planet/common.o \
@@ -28,8 +30,7 @@ LIBPLANET_OBJS = \
               src/planet/utils.o \
               src/planet/handle.o \
               src/planet/operation_layer.o \
-              src/planet/basic_operation.o \
-              src/planet/dyn_module_op.o
+              src/planet/basic_operation.o
 
 DEPS       := $(OBJS:%.o=%.d)
 MNTDIR     := /net
@@ -37,7 +38,7 @@ MNTOPT     := -o direct_io -o intr -o allow_other
 MNTDBGOPT  := $(MNTOPT) -d -f
 EXEC_ENV   := MALLOC_CHECK_=3 LD_LIBRARY_PATH=./
 
-all: $(TARGET) modules
+all: $(TARGET)
 
 rebuild: clean all
 
@@ -58,11 +59,11 @@ modules:
 	@$(MAKE) -C src/planet/dummy_mod/
 	find src/ -type f -name "*.so" -exec cp {} . \;
 
-mount: $(TARGET) modules
+mount: all
 	mkdir -p $(MNTDIR)
 	$(EXEC_ENV) ./$(TARGET) $(MNTOPT) $(MNTDIR)
 
-debug_mount: $(TARGET)
+debug_mount: all
 	mkdir -p $(MNTDIR)
 	$(EXEC_ENV) ./$(TARGET) $(MNTDBGOPT) $(MNTDIR)
 

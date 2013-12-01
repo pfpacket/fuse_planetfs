@@ -32,6 +32,8 @@ namespace planet {
     template<typename T>
     using weak_ptr = std::weak_ptr<T>;
 
+    using std::make_shared;
+
     // planet string type
     typedef std::string string_type;
 

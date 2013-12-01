@@ -10,7 +10,7 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<fs_operation> data_op::new_instance()
+    shared_ptr<entry_op> data_op::create_op()
     {
         return std::make_shared<data_op>(fs_root_);
     }
@@ -56,7 +56,7 @@ namespace tcp {
         return -EPERM;
     }
 
-    bool data_op::is_matching_path(path_type const& path, file_type type)
+    bool data_op::match_path(path_type const& path, file_type type)
     {
         return
             type == file_type::regular_file

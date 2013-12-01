@@ -12,7 +12,7 @@ namespace net {
 namespace tcp {
 
 
-class dir_op final : public fs_operation {
+class dir_op final : public entry_op {
 private:
     shared_ptr<core_file_system> fs_root_;
 public:
@@ -26,10 +26,10 @@ public:
         ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
     }
 
-    shared_ptr<fs_operation> new_instance() override;
+    shared_ptr<entry_op> create_op() override;
     int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
     int rmnod(shared_ptr<fs_entry>, path_type const&) override;
-    static bool is_matching_path(path_type const&, file_type);
+    static bool match_path(path_type const&, file_type);
 };
 
 

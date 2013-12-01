@@ -9,32 +9,36 @@ namespace planet {
 
     class filesystem {
     private:
-        shared_ptr<path_manager>        path_mgr_;
-        shared_ptr<operation_manager>   ops_mgr_;
+        shared_ptr<ops_type_db>         ops_db_;
         shared_ptr<core_file_system>    root_;
 
     public:
-        typedef path_manager::priority priority;
+        typedef ops_type_db::priority priority;
 
         template<typename ...Types>
-        filesystem(Types&& ...args)
-            : path_mgr_{std::make_shared<path_manager>()},
-              ops_mgr_{std::make_shared<operation_manager>()}
+        filesystem(mode_t root_mode)
         {
-            std::weak_ptr<path_manager>      path_mgr = path_mgr_;
-            std::weak_ptr<operation_manager> ops_mgr  = ops_mgr_;
-            root_ = core_file_system::create(
-                std::forward<Types>(args)..., path_mgr, ops_mgr
-            );
+            root_   = shared_ptr<core_file_system>(new core_file_system());
+            ops_db_ = make_shared<ops_type_db>(root_);
+
+            // This is not circular reference of shared_ptr
+            root_->ops_db_ = ops_db_;    // root_.ops_db_ is a weak_ptr
+
+            // Create root directory of this filesystem
+            st_inode new_inode;
+            new_inode.mode = root_mode | S_IFDIR;
+            root_->root = std::make_shared<dentry>("/", "dir_ops_type", new_inode);
+
+            // Install default file and directory operation
+            root_-> template install_op<file_ops_type>(priority::low);
+            root_-> template install_op<dir_ops_type>(priority::low);
         }
 
         ~filesystem()
         {
-            // Destroy them before
-            //  destructing core_file_system
-            path_mgr_->clear();
-            ops_mgr_->clear(root_);
-            ::syslog(LOG_NOTICE, "filesystem: dtor: detroyed path_mgr_ and ops_mgr_");
+            // Destroy ops_db_ first because ops_db_ has a reference to root_
+            ops_db_->clear();
+            ops_db_.reset();
             ::syslog(LOG_NOTICE, "filesystem: dtor: core_file_system: use_count=%ld", root_.use_count());
         }
 

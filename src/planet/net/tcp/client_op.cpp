@@ -14,7 +14,7 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<fs_operation> client_op::new_instance()
+    shared_ptr<entry_op> client_op::create_op()
     {
         return std::make_shared<client_op>(::planet::detail::shared_null_ptr);
     }
@@ -68,7 +68,7 @@ namespace tcp {
         return 0;
     }
 
-    bool client_op::is_matching_path(path_type const& path, file_type type)
+    bool client_op::match_path(path_type const& path, file_type type)
     {
         return  type == file_type::regular_file &&
                 path.parent_path() == "/tcp" &&

@@ -8,7 +8,7 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<fs_operation> session_dir_op::new_instance()
+    shared_ptr<entry_op> session_dir_op::create_op()
     {
         return std::make_shared<session_dir_op>(fs_root_);
     }
@@ -31,7 +31,7 @@ namespace tcp {
         return 0;
     }
 
-    bool session_dir_op::is_matching_path(path_type const& path, file_type type)
+    bool session_dir_op::match_path(path_type const& path, file_type type)
     {
         return type == file_type::directory
             && xpv::regex_match(

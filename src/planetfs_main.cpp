@@ -4,9 +4,9 @@
 #include <fuse.h>
 #include <iostream>
 #include <cstdlib>
-#include <planet/net/dns/installer.hpp>
-#include <planet/net/tcp/installer.hpp>
-#include <planet/net/eth/installer.hpp>
+//#include <planet/net/dns/installer.hpp>
+//#include <planet/net/tcp/installer.hpp>
+//#include <planet/net/eth/installer.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
 #include <signal.h>
@@ -14,7 +14,7 @@
 #define PLANETFS_NAME "fuse_planetfs"
 
 // Install certain file operations
-void planetfs_install_fs_operations()
+void planetfs_install_entry_ops()
 {
     typedef planet::core_file_system::priority priority;
 
@@ -23,10 +23,10 @@ void planetfs_install_fs_operations()
 
     // dynamic module loading
     // TODO: FIX BUGS HERE:
-    fs.root()->install_module(priority::normal, "mod_net_dns");
+    //fs.root()->install_module(priority::normal, "mod_net_dns");
 
-    fs.root()->install_op<planet::net::tcp::installer>(priority::normal);
-    fs.root()->install_op<planet::net::eth::installer>(priority::normal);
+    //fs.root()->install_op<planet::net::tcp::installer>(priority::normal);
+    //fs.root()->install_op<planet::net::eth::installer>(priority::normal);
 }
 
 // Create initial filesystem structure
@@ -38,7 +38,7 @@ void planetfs_create_initial_fs_structure()
     fs.root()->mknod("/dns",   S_IRUSR | S_IWUSR, 0);
 }
 
-static struct fuse_operations planetfs_ops{};
+static struct fuse_operations planetentry_op{};
 
 int main(int argc, char **argv)
 {
@@ -48,27 +48,27 @@ int main(int argc, char **argv)
         ::syslog(LOG_INFO, "%s daemon started", PLANETFS_NAME);
 
         // Initialize filesystem
-        planetfs_install_fs_operations();
+        planetfs_install_entry_ops();
         planetfs_create_initial_fs_structure();
 
         // Set system call functions
-        planetfs_ops.getattr    =   planet_getattr;
-        planetfs_ops.mknod      =   planet_mknod;
-        planetfs_ops.unlink     =   planet_unlink;
-        planetfs_ops.mkdir      =   planet_mkdir;
-        planetfs_ops.rmdir      =   planet_rmdir;
-        planetfs_ops.chmod      =   planet_chmod;
-        planetfs_ops.chown      =   planet_chown;
-        planetfs_ops.truncate   =   planet_truncate;
-        planetfs_ops.utimens    =   planet_utimens;
-        planetfs_ops.open       =   planet_open;
-        planetfs_ops.read       =   planet_read;
-        planetfs_ops.write      =   planet_write;
-        planetfs_ops.readdir    =   planet_readdir;
-        planetfs_ops.release    =   planet_release;
+        planetentry_op.getattr    =   planet_getattr;
+        planetentry_op.mknod      =   planet_mknod;
+        planetentry_op.unlink     =   planet_unlink;
+        planetentry_op.mkdir      =   planet_mkdir;
+        planetentry_op.rmdir      =   planet_rmdir;
+        planetentry_op.chmod      =   planet_chmod;
+        planetentry_op.chown      =   planet_chown;
+        planetentry_op.truncate   =   planet_truncate;
+        planetentry_op.utimens    =   planet_utimens;
+        planetentry_op.open       =   planet_open;
+        planetentry_op.read       =   planet_read;
+        planetentry_op.write      =   planet_write;
+        planetentry_op.readdir    =   planet_readdir;
+        planetentry_op.release    =   planet_release;
 
         // Start userspace filesystem
-        exit_code = ::fuse_main(argc, argv, &planetfs_ops, nullptr);
+        exit_code = ::fuse_main(argc, argv, &planetentry_op, nullptr);
 
     } catch (std::exception& e) {
         ::syslog(LOG_ERR, "fatal error: %s", e.what());

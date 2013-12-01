@@ -37,7 +37,7 @@ namespace tcp {
         return ret != -ENOTCONN;
     }
 
-    shared_ptr<fs_operation> clone_op::new_instance()
+    shared_ptr<entry_op> clone_op::create_op()
     {
         auto next_ctl_path = str(format("/tcp/%1%/ctl") % current_fd_);
         // If current_fd_ ctl file isn't created, we have to create it first
@@ -92,7 +92,7 @@ namespace tcp {
         return -EPERM;
     }
 
-    bool clone_op::is_matching_path(path_type const& path, file_type type)
+    bool clone_op::match_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file && path == "/tcp/clone";
     }

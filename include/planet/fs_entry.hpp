@@ -58,6 +58,8 @@ public:
     // Inode of this entry
     virtual st_inode const& inode() const = 0;
     virtual void inode(st_inode const&) = 0;
+    // Operations name
+    virtual string_type const& ops_name() const = 0;
 };
 
 class file_entry : public fs_entry {
@@ -65,14 +67,13 @@ class file_entry : public fs_entry {
     typedef std::vector<value_type> buffer_type;
     typedef default_file_op default_op_type;
 
-    std::string name_;
-    op_type_code op_type_index_{typeid(default_op_type)};
+    std::string name_, ops_name_;
     st_inode inode_;
     std::vector<value_type> data_;
 
 public:
-    file_entry(string_type const& name, op_type_code ti, st_inode const& sti)
-        : name_(name), op_type_index_(ti), inode_(sti)
+    file_entry(string_type name, string_type ops_name, st_inode const& sti)
+        : name_(std::move(name)), ops_name_(std::move(ops_name)), inode_(sti)
     {
     }
 
@@ -80,29 +81,34 @@ public:
     {
     }
 
-    string_type const& name() const
+    string_type const& name() const override
     {
         return name_;
     }
 
-    file_type type() const noexcept
+    file_type type() const noexcept override
     {
         return file_type::regular_file;
     }
 
-    size_t size() const noexcept
+    size_t size() const noexcept override
     {
         return data_.size();
     }
 
-    st_inode const& inode() const
+    st_inode const& inode() const override
     {
         return inode_;
     }
 
-    void inode(st_inode const& inode)
+    void inode(st_inode const& inode) override
     {
         inode_ = inode;
+    }
+
+    string_type const& ops_name() const override
+    {
+        return ops_name_;
     }
 
     decltype(data_)& data()
@@ -119,11 +125,6 @@ public:
     {
         return data_.data();
     }
-
-    op_type_code get_op() const
-    {
-        return op_type_index_;
-    }
 };
 
 class dentry : public fs_entry {
@@ -133,14 +134,13 @@ public:
 private:
     enum {default_vector_size = 512};
 
-    string_type name_;
-    op_type_code op_type_index_{typeid(default_op_type)};
+    string_type name_, ops_name_;
     st_inode inode_;
     std::vector<entry_type> entries_;
 
 public:
-    dentry(string_type const& name, op_type_code op, st_inode const& sti = {})
-        : name_(name), op_type_index_(op), inode_(sti)
+    dentry(string_type name, string_type ops_name, st_inode const& sti = {})
+        : name_(std::move(name)), ops_name_(std::move(ops_name)), inode_(sti)
     {
         entries_.reserve(default_vector_size);
     }
@@ -149,34 +149,34 @@ public:
     {
     }
 
-    string_type const& name() const
+    string_type const& name() const override
     {
         return name_;
     }
 
-    file_type type() const noexcept
+    file_type type() const noexcept override
     {
         return file_type::directory;
     }
 
-    size_t size() const noexcept
+    size_t size() const noexcept override
     {
         return sizeof (dentry);
     }
 
-    st_inode const& inode() const
+    st_inode const& inode() const override
     {
         return inode_;
     }
 
-    void inode(st_inode const& inode)
+    void inode(st_inode const& inode) override
     {
         inode_ = inode;
     }
 
-    op_type_code get_op() const
+    string_type const& ops_name() const override
     {
-        return op_type_index_;
+        return ops_name_;
     }
 
     decltype(entries_) const& entries() const

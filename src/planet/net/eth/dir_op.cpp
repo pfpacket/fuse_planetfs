@@ -9,7 +9,7 @@ namespace net {
 namespace eth {
 
 
-    shared_ptr<fs_operation> dir_op::new_instance()
+    shared_ptr<entry_op> dir_op::create_op()
     {
         return std::make_shared<dir_op>(fs_root_);
     }
@@ -33,7 +33,7 @@ namespace eth {
         return -EPERM;
     }
 
-    bool dir_op::is_matching_path(path_type const& path, file_type type)
+    bool dir_op::match_path(path_type const& path, file_type type)
     {
         return type == file_type::directory && (path == "/eth" || path == "/ip");
     }

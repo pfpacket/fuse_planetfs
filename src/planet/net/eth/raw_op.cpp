@@ -14,7 +14,7 @@ namespace net {
 namespace eth {
 
 
-    shared_ptr<fs_operation> raw_op::new_instance()
+    shared_ptr<entry_op> raw_op::create_op()
     {
         return std::make_shared<raw_op>(::planet::detail::shared_null_ptr);
     }
@@ -85,7 +85,7 @@ namespace eth {
         return -EPERM;
     }
 
-    bool raw_op::is_matching_path(path_type const& path, file_type type)
+    bool raw_op::match_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file &&
             (path.parent_path() == "/eth" || path.parent_path() == "/ip");

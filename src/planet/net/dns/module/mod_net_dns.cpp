@@ -10,7 +10,7 @@ using planet::detail::shared_null_ptr;
 using planet::path_type;
 using planet::file_type;
 using planet::fs_entry;
-using planet::fs_operation;
+using planet::entry_op;
 using resolver_type = planet::net::dns::resolver_op;
 
 static shared_ptr<resolver_type> resolver = shared_null_ptr;
@@ -28,10 +28,10 @@ extern "C" {
         ::syslog(LOG_NOTICE, "module=%s: %s: module uninstalled", MODULE_NAME, __PRETTY_FUNCTION__);
     }
 
-    shared_ptr<fs_operation> planet_mod_new_instance()
+    shared_ptr<entry_op> planet_mod_create_op()
     {
         ::syslog(LOG_NOTICE, "module=%s: %s: called", MODULE_NAME, __PRETTY_FUNCTION__);
-        return resolver->new_instance();
+        return resolver->create_op();
     }
 
     int planet_mod_open(shared_ptr<fs_entry> file_ent, path_type const& path)
@@ -70,10 +70,10 @@ extern "C" {
         return resolver->rmnod(file_ent, path);
     }
 
-    bool planet_mod_is_matching_path(path_type const& path, file_type type)
+    bool planet_mod_match_path(path_type const& path, file_type type)
     {
         ::syslog(LOG_NOTICE, "module=%s: %s: path=%s", MODULE_NAME, __PRETTY_FUNCTION__, path.string().c_str());
-        return resolver->is_matching_path(path, type);
+        return resolver->match_path(path, type);
     }
 
 }   // extern "C"
