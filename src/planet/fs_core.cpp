@@ -140,15 +140,26 @@ namespace planet {
         return new_handle;
     }
 
+    void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)
+    {
+        ops_db_.lock()->register_ops(p, ops);
+    }
+
+    void core_file_system::uninstall_op(string_type const& name)
+    {
+        ops_db_.lock()->unregister_type(name);
+    }
+
     void core_file_system::install_module(priority p, string_type const& mod_name)
     {
-        auto mod_ops = make_shared<module_ops_type>(mod_name);
-        ops_db_.lock()->register_type(p, mod_ops);
+        ops_db_.lock()->register_ops(
+            p, make_shared<module_ops_type>(mod_name)
+        );
     }
 
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
-        ops_db_.lock()->unregister_type(mod_name);
+        this->uninstall_op(mod_name);
     }
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const

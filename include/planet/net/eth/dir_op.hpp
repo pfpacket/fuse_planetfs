@@ -11,25 +11,26 @@ namespace net {
 namespace eth {
 
 
-class dir_op final : public entry_op {
-private:
-    shared_ptr<core_file_system> fs_root_;
-public:
-    dir_op(shared_ptr<core_file_system> fs_root) : fs_root_(fs_root)
-    {
-        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
-    }
-
-    ~dir_op()
-    {
-        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
-    }
-
-    shared_ptr<entry_op> create_op() override;
-    int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
-    int rmnod(shared_ptr<fs_entry>, path_type const&) override;
-    static bool match_path(path_type const&, file_type);
-};
+    class dir_type final : public dir_ops_type {
+    private:
+        shared_ptr<core_file_system> fs_root_;
+    public:
+        dir_type() : dir_ops_type("planet.net.eth.dir")
+        {
+            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
+        }
+    
+        ~dir_type()
+        {
+            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
+        }
+    
+        shared_ptr<entry_op> create_op(shared_ptr<core_file_system>) override;
+        int install(shared_ptr<core_file_system> fs) override;
+        int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
+        int rmnod(shared_ptr<fs_entry>, path_type const&) override;
+        bool match_path(path_type const&, file_type) override;
+    };
 
 
 }   // namespace eth

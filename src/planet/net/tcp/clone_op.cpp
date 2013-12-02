@@ -28,32 +28,9 @@ namespace tcp {
     // hello
     //
 
-    bool clone_op::target_ctl_is_connected(string_type const& ctl_path)
-    {
-        const char *request = "is_connected";
-        auto handle = fs_root_->open(ctl_path);
-        raii_wrapper raii([handle](){ planet::close(handle); });
-        int ret = planet::write(handle, request, strlen(request), 0);
-        return ret != -ENOTCONN;
-    }
-
-    shared_ptr<entry_op> clone_op::create_op()
-    {
-        auto next_ctl_path = str(format("/tcp/%1%/ctl") % current_fd_);
-        // If current_fd_ ctl file isn't created, we have to create it first
-        if (!fs_root_->get_entry_of(next_ctl_path))
-            return std::make_shared<clone_op>(fs_root_, current_fd_);
-        // Else, we confirm current ctl file is connected-state
-        bool is_connected = target_ctl_is_connected(next_ctl_path);
-        raii_wrapper finalizer([is_connected, this]()
-                {
-                    if (is_connected && std::uncaught_exception())
-                        --current_fd_;
-                });
-        current_fd_ = is_connected ? current_fd_ + 1 : current_fd_;
-        return std::make_shared<clone_op>(fs_root_, current_fd_);
-    }
-
+    //
+    // clone_op
+    //
     int clone_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         auto session_dir_path = str(format("/tcp/%1%") % current_fd_);
@@ -82,20 +59,51 @@ namespace tcp {
         return ret;
     }
 
-    int clone_op::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
+    //
+    // clone_type
+    //
+    bool clone_type::target_ctl_is_connected(string_type const& ctl_path,
+            shared_ptr<core_file_system> fs_root)
+    {
+        const char *request = "is_connected";
+        auto handle = fs_root->open(ctl_path);
+        raii_wrapper raii([handle](){ planet::close(handle); });
+        int ret = planet::write(handle, request, strlen(request), 0);
+        return ret != -ENOTCONN;
+    }
+
+    shared_ptr<entry_op> clone_type::create_op(shared_ptr<core_file_system> fs_root)
+    {
+        auto next_ctl_path = str(format("/tcp/%1%/ctl") % current_fd_);
+        // If current_fd_ ctl file isn't created, we have to create it first
+        if (!fs_root->get_entry_of(next_ctl_path))
+            return std::make_shared<clone_op>(fs_root, current_fd_);
+        // Else, we confirm current ctl file is connected-state
+        bool is_connected = target_ctl_is_connected(next_ctl_path, fs_root);
+        raii_wrapper finalizer([is_connected, this]()
+                {
+                    if (is_connected && std::uncaught_exception())
+                        --current_fd_;
+                });
+        current_fd_ = is_connected ? current_fd_ + 1 : current_fd_;
+        return std::make_shared<clone_op>(fs_root, current_fd_);
+    }
+
+    int clone_type::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
     {
         return 0;
     }
 
-    int clone_op::rmnod(shared_ptr<fs_entry> file_ent, path_type const&)
+    int clone_type::rmnod(shared_ptr<fs_entry> file_ent, path_type const&)
     {
         return -EPERM;
     }
 
-    bool clone_op::match_path(path_type const& path, file_type type)
+    bool clone_type::match_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file && path == "/tcp/clone";
     }
+
 
 
 }   // namespace tcp

@@ -1,11 +1,11 @@
 
 #include <planet/common.hpp>
-#include <planet/net/dns/resolver_op.hpp>
-#include <planet/utils.hpp>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <netdb.h>
 #include <syslog.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <planet/utils.hpp>
+#include <planet/net/dns/resolver_op.hpp>
 
 namespace planet {
 namespace net {

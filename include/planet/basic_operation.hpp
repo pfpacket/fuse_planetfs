@@ -15,6 +15,8 @@ namespace planet {
     //
     class entry_op {
     public:
+        entry_op() = default;
+
         virtual ~entry_op() noexcept
         {
         }
@@ -48,6 +50,7 @@ namespace planet {
     // default file operation which is used if no other operations match the target path
     class default_file_op : public entry_op {
     public:
+        default_file_op() = default;
         default_file_op(shared_ptr<core_file_system>)
         {
         }
@@ -62,6 +65,7 @@ namespace planet {
     // default dir operation which is used if no other operations match the target path
     class default_dir_op : public entry_op {
     public:
+        default_dir_op() = default;
         default_dir_op(shared_ptr<core_file_system>)
         {
             ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);

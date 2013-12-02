@@ -10,11 +10,6 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<entry_op> data_op::create_op()
-    {
-        return std::make_shared<data_op>(fs_root_);
-    }
-
     int data_op::open(shared_ptr<fs_entry> fs_ent, path_type const& path)
     {
         int ret = 0;
@@ -46,29 +41,7 @@ namespace tcp {
         return 0;
     }
 
-    int data_op::mknod(shared_ptr<fs_entry> fs_ent, path_type const& path, mode_t, dev_t)
-    {
-        return 0;
-    }
-
-    int data_op::rmnod(shared_ptr<fs_entry> fs_ent, path_type const&)
-    {
-        return -EPERM;
-    }
-
-    bool data_op::match_path(path_type const& path, file_type type)
-    {
-        return
-            type == file_type::regular_file
-            && xpv::regex_match(
-                path.string(),
-                path_reg::data
-            );
-
-    }
-
 
 }   // namespace tcp
 }   // namespace net
 }   // namespace planet
-

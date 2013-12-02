@@ -3,9 +3,9 @@ CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
               -std=c++0x -O2 -g -D_FILE_OFFSET_BITS=64 -fstack-protector-all -fstack-check #-D_FORTIFY_SOURCE=1
 LDFLAGS    = -shared -fPIC -rdynamic
 BOOST_ROOT = /usr
-INCLUDES   = -I $(BOOST_ROOT)/include -I ../../../../../include
-LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lboost_regex -lfuse
 ROOT       = ../../../../..
+INCLUDES   = -I $(BOOST_ROOT)/include -I $(PWD)/include
+LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lboost_regex -lfuse
 OBJS       = ./mod_net_dns.o
 LIBRARY    = $(PWD)/src/planet/net/common.o \
              $(PWD)/src/planet/net/dns/resolver_op.o \

@@ -74,13 +74,11 @@ namespace planet {
     public:
         typedef default_file_op op_type;
 
-        file_ops_type()
-            :   fs_ops_type("file_ops_type")
+        file_ops_type() : fs_ops_type("planet.file_ops_type")
         {
         }
 
-        file_ops_type(string_type name)
-            :   fs_ops_type(name)
+        file_ops_type(string_type name) : fs_ops_type(name)
         {
         }
 
@@ -101,13 +99,11 @@ namespace planet {
     public:
         typedef default_dir_op op_type;
 
-        dir_ops_type()
-            :   fs_ops_type("dir_ops_type")
+        dir_ops_type() : fs_ops_type("planet.dir_ops_type")
         {
         }
 
-        dir_ops_type(string_type name)
-            :   fs_ops_type(name)
+        dir_ops_type(string_type name) : fs_ops_type(name)
         {
         }
 

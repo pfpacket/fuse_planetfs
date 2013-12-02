@@ -14,11 +14,6 @@ namespace tcp {
 
     xpv::sregex reg_connect_req = xpv::sregex::compile(R"(^connect ((\d{1,3}\.){3}\d{1,3})\!(\d{1,6}))");
 
-    shared_ptr<entry_op> ctl_op::create_op()
-    {
-        return std::make_shared<ctl_op>(fs_root_);
-    }
-
     int ctl_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         xpv::smatch m;
@@ -88,27 +83,6 @@ namespace tcp {
     int ctl_op::release(shared_ptr<fs_entry> file_ent)
     {
         return 0;
-    }
-
-    int ctl_op::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
-    {
-        return 0;
-    }
-
-    int ctl_op::rmnod(shared_ptr<fs_entry> file_ent, path_type const&)
-    {
-        return -EPERM;
-    }
-
-    bool ctl_op::match_path(path_type const& path, file_type type)
-    {
-        return
-            type == file_type::regular_file
-            && xpv::regex_match(
-                path.string(),
-                path_reg::ctl
-            );
-
     }
 
 

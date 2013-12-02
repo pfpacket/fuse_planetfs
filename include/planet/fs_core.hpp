@@ -18,8 +18,10 @@ namespace planet {
         enum priority : priority_type {
             high    = std::numeric_limits<priority_type>::max(),
             normal  = high / 2,
-            low     = std::numeric_limits<priority_type>::min(),
+            low     = std::numeric_limits<priority_type>::min() + 1,
         };
+
+        typedef std::tuple<string_type, priority> info_type;
 
         ops_type_db(shared_ptr<core_file_system> fs_root)
             :   fs_root_(fs_root)
@@ -35,7 +37,7 @@ namespace planet {
             }
         }
 
-        void register_type(priority p, shared_ptr<fs_ops_type> ops)
+        void register_ops(priority p, shared_ptr<fs_ops_type> ops)
         {
             ops_types_.push_back(std::make_tuple(ops, p));
             std::stable_sort(ops_types_.begin(), ops_types_.end(),
@@ -49,18 +51,17 @@ namespace planet {
 
         void unregister_type(string_type const& ops_name)
         {
+            syslog(LOG_NOTICE, "register_ops: ops_name=%s", ops_name.c_str());
+            for (auto&& i : ops_types_)
+                if (std::get<info_index::ops>(i)->name() == ops_name)
+                    std::get<info_index::ops>(i)->uninstall(this->fs_root_);
             auto it = std::remove_if(
                 ops_types_.begin(), ops_types_.end(),
                 [&ops_name](ops_info_t const& t) {
                     return std::get<info_index::ops>(t)->name() == ops_name;
                 });
-            if (it != ops_types_.end()) {
-                std::for_each(it, ops_types_.end(),
-                    [this](ops_info_t const& i) {
-                        std::get<info_index::ops>(i)->uninstall(this->fs_root_);
-                    });
+            if (it != ops_types_.end())
                 ops_types_.erase(it, ops_types_.end());
-            }
         }
 
         // TODO: Why do I receive file_type? fs_entry should be received, not file_type
@@ -92,16 +93,24 @@ namespace planet {
             return (this->get_info_by_name(name) != ops_types_.end());
         }
 
-        void init(shared_ptr<core_file_system> fs)
+        std::vector<info_type> info() const
         {
-            fs_root_ = fs;
+            std::vector<info_type> result;
+            for (auto&& i : ops_types_)
+                result.push_back(
+                    std::make_tuple(
+                        std::get<info_index::ops>(i)->name(),
+                        std::get<info_index::prio>(i)
+                    )
+                );
+            return result;
         }
 
         void clear()
         {
             for (auto&& i : ops_types_)
                 std::get<info_index::ops>(i)->uninstall(fs_root_);
-            fs_root_.reset();
+            ops_types_.clear();
         }
 
     private:
@@ -149,24 +158,18 @@ namespace planet {
 
         shared_ptr<fs_entry> get_entry_of(path_type const& path) const;
 
-        void install_op(priority p, shared_ptr<fs_ops_type> ops)
-        {
-            ops_db_.lock()->register_type(p, ops);
-        }
+        void install_ops(priority p, shared_ptr<fs_ops_type> ops);
 
         template<typename OperationType, typename ...Types>
-        void install_op(priority p, Types&& ...args)
+        void install_ops(priority p, Types&& ...args)
         {
-            ops_db_.lock()->register_type(
-                p, make_shared<OperationType>(std::forward<Types>(args)...)
-            );
+            if (auto ops_db = ops_db_.lock())
+                ops_db->register_ops(
+                    p, make_shared<OperationType>(std::forward<Types>(args)...)
+                );
         }
 
-        template<typename OperationType>
-        void uninstall_op(string_type name)
-        {
-            ops_db_.lock()->unregister_type(std::move(name));
-        }
+        void uninstall_op(string_type const& name);
 
         void install_module(priority, string_type const&);
 

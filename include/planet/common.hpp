@@ -40,7 +40,7 @@ namespace planet {
     // entry path type (better string class)
     typedef boost::filesystem::path path_type;
 
-    // Operation index code
+    // Operation index code (deprecated)
     class op_type_code {
     private:
         string_type name_;

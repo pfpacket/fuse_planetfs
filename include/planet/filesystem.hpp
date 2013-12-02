@@ -30,14 +30,13 @@ namespace planet {
             root_->root = std::make_shared<dentry>("/", "dir_ops_type", new_inode);
 
             // Install default file and directory operation
-            root_-> template install_op<file_ops_type>(priority::low);
-            root_-> template install_op<dir_ops_type>(priority::low);
+            root_-> template install_ops<file_ops_type>(priority::low);
+            root_-> template install_ops<dir_ops_type>(priority::low);
         }
 
         ~filesystem()
         {
             // Destroy ops_db_ first because ops_db_ has a reference to root_
-            ops_db_->clear();
             ops_db_.reset();
             ::syslog(LOG_NOTICE, "filesystem: dtor: core_file_system: use_count=%ld", root_.use_count());
         }
@@ -45,6 +44,11 @@ namespace planet {
         shared_ptr<core_file_system> root()
         {
             return root_;
+        }
+
+        std::vector<ops_type_db::info_type> info() const
+        {
+            return ops_db_->info();
         }
     };
 

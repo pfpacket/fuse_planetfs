@@ -14,11 +14,9 @@ namespace net {
 namespace eth {
 
 
-    shared_ptr<entry_op> raw_op::create_op()
-    {
-        return std::make_shared<raw_op>(::planet::detail::shared_null_ptr);
-    }
-
+    //
+    // raw_op
+    //
     void raw_op::bind_to_interface(int fd, std::string const& ifname, int protocol)
     {
         sockaddr_ll sll{};
@@ -70,27 +68,35 @@ namespace eth {
         return bytes;
     }
 
+
+    //
+    // raw_type
+    //
     int raw_op::release(shared_ptr<fs_entry> file_ent)
     {
         return close(fd_);
     }
 
-    int raw_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
+    shared_ptr<entry_op> raw_type::create_op(shared_ptr<core_file_system> fs_root)
+    {
+        return make_shared<raw_op>(fs_root);
+    }
+
+    int raw_type::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
     {
         return 0;
     }
 
-    int raw_op::rmnod(shared_ptr<fs_entry>, path_type const&)
+    int raw_type::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
         return -EPERM;
     }
 
-    bool raw_op::match_path(path_type const& path, file_type type)
+    bool raw_type::match_path(path_type const& path, file_type type)
     {
         return type == file_type::regular_file &&
             (path.parent_path() == "/eth" || path.parent_path() == "/ip");
     }
-
 
 }   // namespace eth
 }   // namespace net
