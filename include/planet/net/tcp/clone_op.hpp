@@ -28,12 +28,10 @@ namespace tcp {
         {
             // fs_root_.install_ops<ctl_op>(fs_root_);
             // fs_root_.install_ops<status_op>(fs_root_);
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
             //fs_root_.install_ops<dir_op>(fs_root_);
         }
         ~clone_op() noexcept
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;

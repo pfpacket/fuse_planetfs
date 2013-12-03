@@ -21,7 +21,6 @@ namespace planet {
         loader_.add_searchdir({"./"});
         loader_.load_module(module_name);
         load_all_functions();
-        ::syslog(LOG_NOTICE, "module_ops_type: ctor: installed module: %s", module_name.c_str());
     }
 
     int module_ops_type::install(shared_ptr<core_file_system> fs_root)

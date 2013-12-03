@@ -17,12 +17,10 @@ namespace eth {
     public:
         dir_type() : dir_ops_type("planet.net.eth.dir")
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
     
         ~dir_type()
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
     
         shared_ptr<entry_op> create_op(shared_ptr<core_file_system>) override;

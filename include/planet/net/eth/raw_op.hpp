@@ -21,12 +21,10 @@ namespace eth {
     public:
         raw_op(shared_ptr<core_file_system>)
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
 
         ~raw_op() noexcept
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
@@ -40,12 +38,10 @@ namespace eth {
     public:
         raw_type() : file_ops_type("planet.net.eth.raw")
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
 
         ~raw_type() noexcept
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         shared_ptr<entry_op> create_op(shared_ptr<core_file_system> fs_root) override;

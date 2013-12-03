@@ -21,12 +21,10 @@ namespace tcp {
         //client_op() = default;
         client_op(shared_ptr<core_file_system>)
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
 
         ~client_op() noexcept
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;

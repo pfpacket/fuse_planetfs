@@ -25,11 +25,10 @@ namespace tcp {
         ctl_op(shared_ptr<core_file_system> root)
             : fs_root_(root)
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
+
         ~ctl_op()
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;

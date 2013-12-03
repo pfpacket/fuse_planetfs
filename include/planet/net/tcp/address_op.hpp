@@ -23,12 +23,10 @@ namespace tcp {
         local_op(shared_ptr<core_file_system> fs_root)
             :   default_file_op(fs_root), fs_root_(fs_root)
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
 
         ~local_op()
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         void update_address(int, shared_ptr<fs_entry>);
@@ -67,12 +65,10 @@ namespace tcp {
         remote_op(shared_ptr<core_file_system> fs_root)
             :   default_file_op(fs_root), fs_root_(fs_root)
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
 
         ~remote_op()
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         void update_address(int, shared_ptr<fs_entry>);

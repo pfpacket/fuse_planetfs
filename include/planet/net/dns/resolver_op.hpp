@@ -24,12 +24,10 @@ namespace dns {
         resolver_op() = default;
         resolver_op(shared_ptr<core_file_system>)
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
 
         ~resolver_op() noexcept
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
@@ -43,12 +41,10 @@ namespace dns {
     public:
         resolver_type() : file_ops_type("planet.net.dns.resolver")
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
 
         ~resolver_type() noexcept
         {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
         }
 
         shared_ptr<entry_op> create_op(shared_ptr<core_file_system> fs) override

@@ -22,7 +22,6 @@ namespace eth {
 
     int dir_type::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
     {
-        ::syslog(LOG_NOTICE, "%s: path=%s", __PRETTY_FUNCTION__, path.string().c_str());
         auto ifnames = make_unique_ptr(
             if_nameindex(), [](struct if_nameindex *p){ if_freenameindex(p); });
         if (!ifnames)
@@ -34,7 +33,6 @@ namespace eth {
 
     int dir_type::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
-        ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
         throw_system_error(EPERM);
         return -EPERM;
     }

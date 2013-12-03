@@ -19,12 +19,10 @@ namespace tcp {
     public:
         session_dir_type() : fs_ops_type("planet.net.tcp.session_dir")
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
     
         ~session_dir_type()
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
     
         shared_ptr<entry_op> create_op(shared_ptr<core_file_system> fs_root) override;

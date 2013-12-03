@@ -41,6 +41,8 @@ namespace planet {
             auto fentry =
                 parent_dir->add_entry<file_entry>(path.filename().string(), ops_name, new_inode);
             try {
+                ::syslog(LOG_NOTICE, "mknod: Creating \'%s\' type=%s",
+                    path.string().data(), ops_name.data());
                 ops_db_.lock()->
                     get_ops(ops_name)->mknod(fentry, path, mode, device);
             } catch (...) {
@@ -142,16 +144,19 @@ namespace planet {
 
     void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)
     {
+        ::syslog(LOG_NOTICE, "Installing ops: %s", ops->name().c_str());
         ops_db_.lock()->register_ops(p, ops);
     }
 
     void core_file_system::uninstall_ops(string_type const& name)
     {
+        ::syslog(LOG_NOTICE, "Uninstalling ops: %s", name.c_str());
         ops_db_.lock()->unregister_type(name);
     }
 
     void core_file_system::install_module(priority p, string_type const& mod_name)
     {
+        ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
         ops_db_.lock()->register_ops(
             p, make_shared<module_ops_type>(mod_name)
         );
@@ -159,6 +164,7 @@ namespace planet {
 
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
+        ::syslog(LOG_NOTICE, "Uninstalling module: %s", mod_name.c_str());
         this->uninstall_ops(mod_name);
     }
 

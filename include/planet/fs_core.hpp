@@ -51,7 +51,6 @@ namespace planet {
 
         void unregister_type(string_type const& ops_name)
         {
-            syslog(LOG_NOTICE, "register_ops: ops_name=%s", ops_name.c_str());
             for (auto&& i : ops_types_)
                 if (std::get<info_index::ops>(i)->name() == ops_name)
                     std::get<info_index::ops>(i)->uninstall(this->fs_root_);
@@ -163,10 +162,9 @@ namespace planet {
         template<typename OperationType, typename ...Types>
         void install_ops(priority p, Types&& ...args)
         {
-            if (auto ops_db = ops_db_.lock())
-                ops_db->register_ops(
-                    p, make_shared<OperationType>(std::forward<Types>(args)...)
-                );
+            this->install_ops(
+                p, make_shared<OperationType>(std::forward<Types>(args)...)
+            );
         }
 
         void uninstall_ops(string_type const& name);

@@ -74,7 +74,7 @@ debug_mount: all
 	mkdir -p $(MNTDIR)
 	$(EXEC_ENV) ./$(TARGET) $(MNTDBGOPT) $(MNTDIR)
 
-remount: $(TARGET) umount mount
+remount: umount mount
 
 umount:
 	fusermount -u $(MNTDIR)

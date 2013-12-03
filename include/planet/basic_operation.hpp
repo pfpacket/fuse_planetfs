@@ -54,6 +54,7 @@ namespace planet {
         default_file_op(shared_ptr<core_file_system>)
         {
         }
+
         virtual ~default_file_op() = default;
 
         virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
@@ -68,13 +69,9 @@ namespace planet {
         default_dir_op() = default;
         default_dir_op(shared_ptr<core_file_system>)
         {
-            ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
         }
-        //~default_dir_op() = default;
-        virtual ~default_dir_op()
-        {
-            ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
-        }
+
+        virtual ~default_dir_op() = default;
 
         virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
         virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;

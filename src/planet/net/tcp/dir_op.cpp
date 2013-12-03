@@ -22,13 +22,11 @@ namespace tcp {
 
     int dir_type::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
     {
-        ::syslog(LOG_NOTICE, "%s: dir=%s", __PRETTY_FUNCTION__, path.string().c_str());
         return fs_root_->mknod("/tcp/clone", S_IRUSR | S_IWUSR, 0);
     }
 
     int dir_type::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
-        ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
         throw_system_error(EPERM);
         return -EPERM;
     }
