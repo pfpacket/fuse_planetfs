@@ -39,6 +39,7 @@ MNTDIR     := /net
 MNTOPT     := -o direct_io -o intr -o allow_other
 MNTDBGOPT  := $(MNTOPT) -d -f
 EXEC_ENV   := MALLOC_CHECK_=3 LD_LIBRARY_PATH=./
+export
 
 all: prepare $(TARGET) modules
 
@@ -47,16 +48,19 @@ prepare:
 rebuild: clean all
 
 $(TARGET): libplanet $(OBJS)
+	@echo "[*] Linking $(TARGET) ..."
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) libplanet.so $(LIBS)
 
 libplanet: $(LIBPLANET_OBJS)
+	@echo "[*] Linking libplanet ..."
 	$(CXX) $(LDFLAGS) -shared -fPIC -o $@.so $(LIBPLANET_OBJS) $(LIBS)
 
 .cpp.o:
 	$(CXX) -MMD -MP -MT $@ $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 -include $(DEPS)
 
-modules: $(TARGET)
+modules: libplanet
+	@echo "[*] Building dynamic modules ..."
 	@$(MAKE) -C src/planet/net/dns/module/
 	@$(MAKE) -C src/planet/dummy_mod/
 	find src/ -type f -name "*.so" -exec cp {} . \;
@@ -69,10 +73,10 @@ debug_mount: all
 	mkdir -p $(MNTDIR)
 	$(EXEC_ENV) ./$(TARGET) $(MNTDBGOPT) $(MNTDIR)
 
+remount: $(TARGET) umount mount
+
 umount:
 	fusermount -u $(MNTDIR)
-
-remount: $(TARGET) umount mount
 
 examples:
 	@$(MAKE) -C example/
