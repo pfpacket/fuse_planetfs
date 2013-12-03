@@ -1,21 +1,16 @@
 
 #include <planet/common.hpp>
-#include <planet/net/dns/resolver_op.hpp>
-#include <planet/utils.hpp>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <netdb.h>
 #include <syslog.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <planet/utils.hpp>
+#include <planet/net/dns/resolver_op.hpp>
 
 namespace planet {
 namespace net {
 namespace dns {
 
-
-    shared_ptr<fs_operation> resolver_op::new_instance()
-    {
-        return std::make_shared<resolver_op>(::planet::detail::shared_null_ptr);
-    }
 
     int resolver_op::forward_lookup(std::string const& host, int family, std::vector<std::string>& store)
     {
@@ -77,21 +72,6 @@ namespace dns {
     int resolver_op::release(shared_ptr<fs_entry> file_ent)
     {
         return 0;
-    }
-
-    int resolver_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
-    {
-        return 0;
-    }
-
-    int resolver_op::rmnod(shared_ptr<fs_entry>, path_type const&)
-    {
-        return -EPERM;
-    }
-
-    bool resolver_op::is_matching_path(path_type const& path, file_type type)
-    {
-        return type == file_type::regular_file && path == "/dns";
     }
 
 

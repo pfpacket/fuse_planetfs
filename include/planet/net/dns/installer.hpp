@@ -4,38 +4,37 @@
 #include <planet/common.hpp>
 #include <planet/net/common.hpp>
 #include <planet/net/dns/resolver_op.hpp>
-#include <planet/fs_core.hpp>
+#include <planet/fs_ops_type.hpp>
 
 namespace planet {
 namespace net {
 namespace dns {
 
 
-class installer : public fs_operation {
-private:
-    shared_ptr<core_file_system> fs_root_;
-public:
-    installer(shared_ptr<core_file_system> fs_root) : fs_root_(fs_root)
-    {
-        typedef planet::core_file_system::priority priority;
-        fs_root->install_op<resolver_op>(priority::normal);
-    }
+    class installer final : public file_ops_type {
+    public:
+        installer() : file_ops_type("planet.net.dns.installer")
+        {
+        }
+    
+        virtual int install(shared_ptr<core_file_system> fs_root)
+        {
+            typedef planet::core_file_system::priority priority;
+            fs_root->install_ops<resolver_type>(priority::normal);
+            return 0;
+        }
 
-    //int uninstall(shared_ptr<core_file_system>)
-    //{
-    //    fs_root_->uninstall_op<resolver_op>();
-    //    return 0;
-    //}
-
-    ~installer()
-    {
-    }
-
-    static bool is_matching_path(path_type const&, file_type)
-    {
-        return false;
-    }
-};
+        int uninstall(shared_ptr<core_file_system> fs_root)
+        {
+            //fs_root->uninstall_ops("planet.net.dns.resolver");
+            return 0;
+        }
+    
+        bool match_path(path_type const&, file_type) override
+        {
+            return false;
+        }
+    };
 
 
 }   // namespace dns

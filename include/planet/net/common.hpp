@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <planet/fs_ops_type.hpp>
 
 namespace planet {
 namespace net {

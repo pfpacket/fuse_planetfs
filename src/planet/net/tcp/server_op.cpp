@@ -13,22 +13,9 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<fs_operation> server_op::new_instance()
-    {
-        return std::make_shared<server_op>(fs_root_);
-    }
-
-    int server_op::establish_server(std::string const& host, int port)
-    {
-        int fd = ::socket(AF_INET, SOCK_STREAM, 0);
-        struct sockaddr_in sin = {AF_INET, htons(port), {INADDR_ANY}, {0}};
-        if (::bind(fd, reinterpret_cast<sockaddr *>(&sin), sizeof (sin)) < 0)
-            throw_system_error(errno);
-        if (::listen(fd, 5) < 0)
-            throw_system_error(errno);
-        return fd;
-    }
-
+    //
+    // server_op
+    //
     int server_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         if (auto server_fd = detail::fdtable.find(path.string()))
@@ -64,26 +51,45 @@ namespace tcp {
         return ::close(client_fd_);
     }
 
-    int server_op::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
+    //
+    // server_type
+    //
+    int server_type::establish_server(std::string const& host, int port)
+    {
+        int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+        struct sockaddr_in sin = {AF_INET, htons(port), {INADDR_ANY}, {0}};
+        if (::bind(fd, reinterpret_cast<sockaddr *>(&sin), sizeof (sin)) < 0)
+            throw_system_error(errno);
+        if (::listen(fd, 5) < 0)
+            throw_system_error(errno);
+        return fd;
+    }
+
+    shared_ptr<entry_op> server_type::create_op(shared_ptr<core_file_system> fs_root)
+    {
+        return std::make_shared<server_op>(fs_root);
+    }
+
+    int server_type::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
     {
         auto filename   = path.filename().string();
         auto pos        = filename.find_first_of(host_port_delimiter);
         auto host       = filename.substr(0, pos);
         int port        = atoi(filename.substr(pos + 1).c_str());
-        syslog(LOG_INFO, "server_op::mknod: establishing server host=%s, port=%d", host.c_str(), port);
+        syslog(LOG_INFO, "server_type::mknod: establishing server host=%s, port=%d", host.c_str(), port);
         int serverfd    = establish_server(host, port);
-        syslog(LOG_NOTICE, "server_op::mknod: established server %s:%d fd=%d opened", host.c_str(), port, serverfd);
+        syslog(LOG_NOTICE, "server_type::mknod: established server %s:%d fd=%d opened", host.c_str(), port, serverfd);
         detail::fdtable.insert(path.string(), serverfd);
         return 0;
     }
 
-    int server_op::rmnod(shared_ptr<fs_entry> file_ent, path_type const& path)
+    int server_type::rmnod(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         detail::fdtable.erase(path.string());
         return 0;
     }
 
-    bool server_op::is_matching_path(path_type const& path, file_type type)
+    bool server_type::match_path(path_type const& path, file_type type)
     {
         return  type == file_type::regular_file &&
                 path.parent_path() == "/tcp" &&

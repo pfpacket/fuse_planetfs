@@ -2,10 +2,12 @@
 #define _FILE_OFFSET_BITS 64
 
 #include <fuse.h>
-#include <planetfs_operations.hpp>
-#include <planet/operation_layer.hpp>
-#include <planet/handle.hpp>
+#include <planet/common.hpp>
 #include <planet/utils.hpp>
+#include <planet/handle.hpp>
+#include <planet/operation_layer.hpp>
+#include <planet/filesystem.hpp>
+#include <planetfs_operations.hpp>
 #include <syslog.h>
 
 // Core filesystem object

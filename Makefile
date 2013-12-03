@@ -1,3 +1,6 @@
+#
+# Makefile
+#
 CXX        := g++
 #CXXFLAGS  := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
 CXXFLAGS   := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
@@ -25,51 +28,56 @@ OBJS       := src/planet/net/common.o \
 LIBPLANET_OBJS = \
               src/planet/common.o \
               src/planet/fs_core.o \
+              src/planet/fs_entry.o \
               src/planet/utils.o \
               src/planet/handle.o \
               src/planet/operation_layer.o \
               src/planet/basic_operation.o \
-              src/planet/dyn_module_op.o
+              src/planet/module_ops_type.o
 
-DEPS       := $(OBJS:%.o=%.d)
+DEPS       := $(OBJS:%.o=%.d) $(LIBPLANET_OBJS:%.o=%.d)
 MNTDIR     := /net
 MNTOPT     := -o direct_io -o intr -o allow_other
 MNTDBGOPT  := $(MNTOPT) -d -f
 EXEC_ENV   := MALLOC_CHECK_=3 LD_LIBRARY_PATH=./
+export
 
-all: $(TARGET) modules
+all: prepare $(TARGET) modules
+
+prepare:
 
 rebuild: clean all
 
--include $(DEPS)
-
 $(TARGET): libplanet $(OBJS)
+	@echo "[*] Linking $(TARGET) ..."
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) libplanet.so $(LIBS)
 
 libplanet: $(LIBPLANET_OBJS)
+	@echo "[*] Linking libplanet ..."
 	$(CXX) $(LDFLAGS) -shared -fPIC -o $@.so $(LIBPLANET_OBJS) $(LIBS)
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
-#	$(CXX) -MM -MP $(CXXFLAGS) $(INCLUDES) $*.cpp > $*.d
+	$(CXX) -MMD -MP -MT $@ $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+-include $(DEPS)
 
-modules:
+modules: libplanet
+	@echo "[*] Building dynamic modules ..."
 	@$(MAKE) -C src/planet/net/dns/module/
 	@$(MAKE) -C src/planet/dummy_mod/
 	find src/ -type f -name "*.so" -exec cp {} . \;
 
-mount: $(TARGET) modules
+mount: all
 	mkdir -p $(MNTDIR)
 	$(EXEC_ENV) ./$(TARGET) $(MNTOPT) $(MNTDIR)
 
-debug_mount: $(TARGET)
+debug_mount: all
 	mkdir -p $(MNTDIR)
 	$(EXEC_ENV) ./$(TARGET) $(MNTDBGOPT) $(MNTDIR)
 
+remount: $(TARGET) umount mount
+
 umount:
 	fusermount -u $(MNTDIR)
-
-remount: $(TARGET) umount mount
 
 examples:
 	@$(MAKE) -C example/
