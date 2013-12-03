@@ -1,15 +1,19 @@
 #
 # Makefile
 #
-ROOT        = ../../..
-CXXFLAGS   += -I $(ROOT)/include
-OBJS        = mod_dummy.o
-TARGET      = mod_dummy.so
+ROOT       = ../../..
+INCLUDES  += -I $(ROOT)/include
+LIBS      += -L ./ -lplanet
+OBJS       = mod_dummy.o
+TARGET     = mod_dummy.so
 
 all: $(TARGET)
 rebuild: clean all
 
-$(TARGET): $(OBJS)
+libplanet:
+	@ln -sf $(ROOT)/libplanet.so ./libplanet.so
+
+$(TARGET): libplanet $(OBJS)
 	$(CXX) $(LDFLAGS) -shared -fPIC -o $@ $(OBJS) $(LIBS)
 
 .cpp.o:
@@ -17,4 +21,4 @@ $(TARGET): $(OBJS)
 -include $(DEPS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(OBJS) ./libplanet.so
