@@ -169,7 +169,7 @@ namespace planet {
                 );
         }
 
-        void uninstall_op(string_type const& name);
+        void uninstall_ops(string_type const& name);
 
         void install_module(priority, string_type const&);
 

@@ -45,15 +45,15 @@ namespace tcp {
             //try {
             //    if (fs_root_) {
             //        ::syslog(LOG_NOTICE, "tcp::installer: dtor: fs_root use_count=%ld", fs_root_.use_count());
-            //        fs_root->uninstall_op<server_type>();
-            //        fs_root->uninstall_op<client_type>();
-            //        fs_root->uninstall_op<session_dir_type>();
-            //        fs_root->uninstall_op<local_type>();
-            //        fs_root->uninstall_op<remote_type>();
-            //        fs_root->uninstall_op<data_type>();
-            //        fs_root->uninstall_op<ctl_type>();
-            //        fs_root->uninstall_op<clone_type>();
-            //        fs_root->uninstall_op<dir_type>();
+            //        fs_root->uninstall_ops<server_type>();
+            //        fs_root->uninstall_ops<client_type>();
+            //        fs_root->uninstall_ops<session_dir_type>();
+            //        fs_root->uninstall_ops<local_type>();
+            //        fs_root->uninstall_ops<remote_type>();
+            //        fs_root->uninstall_ops<data_type>();
+            //        fs_root->uninstall_ops<ctl_type>();
+            //        fs_root->uninstall_ops<clone_type>();
+            //        fs_root->uninstall_ops<dir_type>();
             //    }
             //} catch (...) {
             //}

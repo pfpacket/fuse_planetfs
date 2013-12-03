@@ -2,7 +2,6 @@
 #define PLANET_FILESYSTEM_OPERATIONS_TYPE_HPP
 
 #include <planet/common.hpp>
-//#include <planet/fs_core.hpp>
 #include <planet/basic_operation.hpp>
 
 namespace planet {

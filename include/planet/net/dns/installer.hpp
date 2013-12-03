@@ -26,7 +26,7 @@ namespace dns {
 
         int uninstall(shared_ptr<core_file_system> fs_root)
         {
-            //fs_root->uninstall_op("net_dns_resolver");
+            //fs_root->uninstall_ops("planet.net.dns.resolver");
             return 0;
         }
     

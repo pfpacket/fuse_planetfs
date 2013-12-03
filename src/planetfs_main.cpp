@@ -31,7 +31,7 @@ void planetfs_install_file_operations()
     fs.root()->install_ops<planet::net::tcp::installer>(priority::low);
 
     // Uninstall operation
-    fs.root()->uninstall_op("planet.net.dns.installer");
+    fs.root()->uninstall_ops("planet.net.dns.installer");
 }
 
 // Create initial filesystem structure
