@@ -1,27 +1,13 @@
 
 #include <planet/common.hpp>
-#include <planet/fs_core.hpp>
 #include <planet/utils.hpp>
-#include <planet/dyn_module_op.hpp>
-#include <syslog.h>
+#include <planet/fs_core.hpp>
+#include <planet/fs_entry.hpp>
+#include <planet/fs_ops_type.hpp>
+#include <planet/module_ops_type.hpp>
 
 namespace planet {
 
-
-    core_file_system::core_file_system(
-        mode_t root_mode, weak_ptr<path_manager> path_mgr, weak_ptr<operation_manager> ops_mgr
-    )   :   path_mgr_(path_mgr), ops_mgr_(ops_mgr)
-    {
-        st_inode new_inode;
-        new_inode.mode = root_mode | S_IFDIR;
-        root = std::make_shared<dentry>("/", op_type_code::get<default_dir_op>(), new_inode);
-    }
-
-    core_file_system::~core_file_system()
-    {
-        ::syslog(LOG_NOTICE, "core_file_system: dtor: path_mgr: use_count=%ld", path_mgr_.use_count());
-        ::syslog(LOG_NOTICE, "core_file_system: dtor: ops_mgr : use_count=%ld", ops_mgr_.use_count());
-    }
 
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
@@ -40,21 +26,25 @@ namespace planet {
 
     int core_file_system::mknod(path_type const& path, mode_t mode, dev_t device)
     {
-        auto path_mgr = path_mgr_.lock();
-        return mknod(path, mode, device, path_mgr->matching_type(path, file_type::regular_file));
+        return this->mknod(path, mode, device,
+            ops_db_.lock()->get_name_by_path(path, file_type::regular_file)
+        );
     }
 
-    int core_file_system::mknod(path_type const& path, mode_t mode, dev_t device, op_type_code op_code)
+    int core_file_system::mknod(
+        path_type const& path, mode_t mode, dev_t device, string_type const& ops_name)
     {
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             st_inode new_inode;
             new_inode.dev  = device;
             new_inode.mode = mode | S_IFREG;
             auto fentry =
-                parent_dir->add_entry<file_entry>(path.filename().string(), op_code, new_inode);
+                parent_dir->add_entry<file_entry>(path.filename().string(), ops_name, new_inode);
             try {
-                auto ops_mgr = ops_mgr_.lock();
-                (*ops_mgr)[fentry->get_op()]->mknod(fentry, path, mode, device);
+                ::syslog(LOG_NOTICE, "mknod: Creating \'%s\' type=%s",
+                    path.string().data(), ops_name.data());
+                ops_db_.lock()->
+                    get_ops(ops_name)->mknod(fentry, path, mode, device);
             } catch (...) {
                 parent_dir->remove_entry(path.filename().string());
                 throw;
@@ -64,14 +54,13 @@ namespace planet {
         return 0;
     }
 
-    int core_file_system::unlink(path_type const& path)
+    int core_file_system::unlink(path_type const& path, bool force)
     {
         int ret = 0;
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             auto fentry = file_cast(parent_dir->search_entries(path.filename().string()));
-            auto ops_mgr = ops_mgr_.lock();
-            ret = (*ops_mgr)[fentry->get_op()]->rmnod(fentry, path);
-            if (ret < 0)
+            ret = ops_db_.lock()->get_ops(fentry->ops_name())->rmnod(fentry, path);
+            if (ret < 0 && !force)
                 return ret;
             parent_dir->remove_entry(path.filename().string());
         } else
@@ -81,19 +70,23 @@ namespace planet {
 
     int core_file_system::mkdir(path_type const& path, mode_t mode)
     {
-        auto path_mgr = path_mgr_.lock();
-        return mkdir(path, mode, path_mgr->matching_type(path, file_type::directory));
+        return this->mkdir(path, mode,
+            ops_db_.lock()->get_name_by_path(path, file_type::directory)
+        );
     }
 
-    int core_file_system::mkdir(path_type const& path, mode_t mode, op_type_code op)
+    int core_file_system::mkdir(
+        path_type const& path, mode_t mode, string_type const& ops_name)
     {
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             st_inode new_inode;
             new_inode.mode = mode | S_IFDIR;
-            auto dir_entry = parent_dir->add_entry<dentry>(path.filename().string(), op, new_inode);
+            auto dir_entry = parent_dir->add_entry<dentry>(path.filename().string(), ops_name, new_inode);
             try {
-                auto ops_mgr = ops_mgr_.lock();
-                (*ops_mgr)[dir_entry->get_op()]->mknod(dir_entry, path, mode, 0);
+                ::syslog(LOG_NOTICE, "mkdir: Creating \'%s\' type=%s",
+                    path.string().data(), ops_name.data());
+                ops_db_.lock()->
+                    get_ops(ops_name)->mknod(dir_entry, path, mode, 0);
             } catch (...) {
                 parent_dir->remove_entry(path.filename().string());
                 throw;
@@ -103,14 +96,13 @@ namespace planet {
         return 0;
     }
 
-    int core_file_system::rmdir(path_type const& path)
+    int core_file_system::rmdir(path_type const& path, bool force)
     {
         int ret = 0;
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             auto dir_entry = directory_cast(parent_dir->search_entries(path.filename().string()));
-            auto ops_mgr = ops_mgr_.lock();
-            ret = (*ops_mgr)[dir_entry->get_op()]->rmnod(dir_entry, path);
-            if (ret < 0)
+            ret = ops_db_.lock()->get_ops(dir_entry->ops_name())->rmnod(dir_entry, path);
+            if (ret < 0 && !force)
                 return ret;
             parent_dir->remove_entry(path.filename().string());
         } else
@@ -136,15 +128,15 @@ namespace planet {
             if (entry->type() != file_type::regular_file)
                 throw_system_error(EISDIR);
             auto fentry = file_cast(entry);
-            auto ops_mgr = ops_mgr_.lock();
-            new_handle = handle_mgr.register_op((*ops_mgr)[fentry->get_op()]->new_instance(), fentry);
+            new_handle = g_open_handles.register_op(
+                ops_db_.lock()->get_ops(fentry->ops_name())->create_op(shared_from_this()), fentry);
             try {
-                auto& op_tuple = handle_mgr.get_operation_entry(new_handle);
+                auto& op_tuple = g_open_handles.get_operation_entry(new_handle);
                 int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
                 if (open_ret < 0)
                     throw_system_error(-open_ret);
             } catch (...) {
-                handle_mgr.unregister_op(new_handle);
+                g_open_handles.unregister_op(new_handle);
                 throw;
             }
         } else
@@ -152,28 +144,37 @@ namespace planet {
         return new_handle;
     }
 
+    void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)
+    {
+        ::syslog(LOG_NOTICE, "Installing ops: %s", ops->name().c_str());
+        ops_db_.lock()->register_ops(p, ops);
+    }
+
+    void core_file_system::uninstall_ops(string_type const& name)
+    {
+        ::syslog(LOG_NOTICE, "Uninstalling ops: %s", name.c_str());
+        ops_db_.lock()->unregister_type(name);
+    }
+
     void core_file_system::install_module(priority p, string_type const& mod_name)
     {
-        using namespace std::placeholders;
-        auto new_op = std::make_shared<dyn_module_op>(mod_name, this->shared_from_this());
-        auto functor = std::bind(&dyn_module_op::is_matching_path, new_op.get(), _1, _2);
-        auto path_mgr = path_mgr_.lock();
-        auto ops_mgr  = ops_mgr_.lock();
-        path_mgr->add_new_type<dyn_module_op>(p, op_type_code(mod_name), functor);
-        ops_mgr->add_new_op<dyn_module_op>(mod_name, new_op);
-        ops_mgr->matching_op(op_type_code(mod_name))->install(this->shared_from_this());
+        ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
+        ops_db_.lock()->register_ops(p, make_shared<module_ops_type>(mod_name));
+    }
+
+    void core_file_system::install_module(
+        priority p, string_type const& mod_name, std::vector<string_type> const& paths)
+    {
+        ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
+        ops_db_.lock()->register_ops(
+            p, make_shared<module_ops_type>(mod_name, paths)
+        );
     }
 
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
-        auto path_mgr = path_mgr_.lock();
-        auto ops_mgr  = ops_mgr_.lock();
-        // First, do not create new operation of this type
-        path_mgr->remove_type(op_type_code(mod_name));
-        // Call uninstaller
-        ops_mgr->matching_op(op_type_code(mod_name))->uninstall(this->shared_from_this());
-        // Remove operations of this type
-        ops_mgr->remove_op(op_type_code(mod_name));
+        ::syslog(LOG_NOTICE, "Uninstalling module: %s", mod_name.c_str());
+        ops_db_.lock()->unregister_type(mod_name);
     }
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const
@@ -193,6 +194,22 @@ namespace planet {
         auto dir_entry = root->search_entries(p.substr(1, pos - 1));
         return (!dir_entry || dir_entry->type() != file_type::directory) ? detail::shared_null_ptr
             : get_entry_of(directory_cast(dir_entry), "/" + p.substr(pos + 1));
+    }
+
+    ops_type_db& core_file_system::get_ops_db()
+    {
+        auto db = ops_db_.lock();
+        if (!db)
+            throw std::runtime_error("get_ops_db(): ops_db_ not available");
+        return *db;
+    }
+
+    ops_type_db const& core_file_system::get_ops_db() const
+    {
+        auto db = ops_db_.lock();
+        if (!db)
+            throw std::runtime_error("get_ops_db(): ops_db_ not available");
+        return *db;
     }
 
 

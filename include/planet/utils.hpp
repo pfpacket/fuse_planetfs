@@ -38,10 +38,22 @@ namespace planet {
         return *reinterpret_cast<Type *>(buffer.data());
     }
 
+    template<typename T, typename ...Types>
+    std::unique_ptr<T> make_unique_ptr(Types&& ...args)
+    {
+        return std::unique_ptr<T>(new T(std::forward<Types>(args)...));
+    }
+
     template<typename T, typename D>
     std::unique_ptr<T, D> make_unique_ptr(T *p, D d) noexcept
     {
         return std::unique_ptr<T, D>(p, std::forward<D>(d));
+    }
+
+    template<typename T, typename D, typename ...Types>
+    std::unique_ptr<T, D> make_unique_ptr(D d, Types&& ...args)
+    {
+        return std::unique_ptr<T, D>(new T(std::forward<Types>(args)...), std::forward<D>(d));
     }
 
     // Equivalent to `return file_cast(fs_root.get_entry_of())`

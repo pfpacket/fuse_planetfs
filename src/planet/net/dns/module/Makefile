@@ -1,28 +1,26 @@
-CXX        = g++
-CXXFLAGS   = -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -std=c++0x -O2 -march=native
-LDFLAGS    = -shared -fPIC -rdynamic
-BOOST_ROOT = /usr
-INCLUDES   = -I $(BOOST_ROOT)/include -I ../../../../../include
-LIBS       = -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lboost_regex -lfuse
-OBJS       = ../../../../../src/planet/common.o \
-             ../../../../../src/planet/fs_core.o \
-             ../../../../../src/planet/utils.o \
-             ../../../../../src/planet/handle.o \
-             ../../../../../src/planet/operation_layer.o \
-             ../../../../../src/planet/basic_operation.o \
-             ../../../../../src/planet/net/common.o \
-             ../../../../../src/planet/net/dns/resolver_op.o \
-             ./mod_net_dns.o
+#
+# Makefile
+#
+ROOT       = ../../../../..
+INCLUDES  += -I $(ROOT)/include
+LIBS      += -L ./ -lplanet
+OBJS       = mod_net_dns.o \
+             $(ROOT)/src/planet/net/common.o \
+             $(ROOT)/src/planet/net/dns/resolver_op.o
 TARGET     = mod_net_dns.so
 
 all: $(TARGET)
 rebuild: clean all
 
-$(TARGET): $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+libplanet:
+	@ln -sf $(ROOT)/libplanet.so ./libplanet.so
 
-.cpp.o: 
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+$(TARGET): libplanet $(OBJS)
+	$(CXX) $(LDFLAGS) -shared -fPIC -o $@ $(OBJS) $(LIBS)
+
+.cpp.o:
+	$(CXX) -MMD -MP -MT $@ $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+-include $(DEPS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET) $(OBJS) ./libplanet.so

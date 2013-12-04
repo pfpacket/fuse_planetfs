@@ -8,11 +8,11 @@ namespace tcp {
 
 
     namespace path_reg {
-        boost::regex ctl            {R"(/tcp/(\d+)/ctl)"};
-        boost::regex data           {R"(/tcp/(\d+)/data)"};
-        boost::regex local          {R"(/tcp/(\d+)/local)"};
-        boost::regex remote         {R"(/tcp/(\d+)/remote)"};
-        boost::regex session_dir    {R"(/tcp/(\d+))"};
+        xpv::sregex ctl         = xpv::sregex::compile(R"(/tcp/(\d+)/ctl)");
+        xpv::sregex data        = xpv::sregex::compile(R"(/tcp/(\d+)/data)");
+        xpv::sregex local       = xpv::sregex::compile(R"(/tcp/(\d+)/local)");
+        xpv::sregex remote      = xpv::sregex::compile(R"(/tcp/(\d+)/remote)");
+        xpv::sregex session_dir = xpv::sregex::compile(R"(/tcp/(\d+))");
     }   // namespace path_reg
 
     int sock_connect_to(string_type const& host, string_type const& port)

@@ -1,21 +1,16 @@
 
 #include <planet/common.hpp>
-#include <planet/net/dns/resolver_op.hpp>
-#include <planet/utils.hpp>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <netdb.h>
 #include <syslog.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <planet/utils.hpp>
+#include <planet/net/dns/resolver_op.hpp>
 
 namespace planet {
 namespace net {
 namespace dns {
 
-
-    shared_ptr<fs_operation> resolver_op::new_instance()
-    {
-        return std::make_shared<resolver_op>(::planet::detail::shared_null_ptr);
-    }
 
     int resolver_op::forward_lookup(std::string const& host, int family, std::vector<std::string>& store)
     {
@@ -45,14 +40,13 @@ namespace dns {
     {
         if (resolved_names_.empty())
             return 0;
-        std::string const& resolved = resolved_names_.front();
-        std::size_t length = resolved.length();
-        if (size <= length)
-            return -ENOBUFS;
-        std::copy(resolved.begin(), resolved.end(), buf);
-        buf[length] = '\0';
+        std::string line = resolved_names_.front();
+        if (line.length() + 1 > size)
+            return -ENAMETOOLONG;
+        std::copy_n(line.begin(), line.length(), buf);
+        buf[line.length()] = '\0';
         resolved_names_.erase(resolved_names_.begin());
-        return length + 1;
+        return line.length() + 1;
     }
 
     int resolver_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
@@ -77,21 +71,6 @@ namespace dns {
     int resolver_op::release(shared_ptr<fs_entry> file_ent)
     {
         return 0;
-    }
-
-    int resolver_op::mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
-    {
-        return 0;
-    }
-
-    int resolver_op::rmnod(shared_ptr<fs_entry>, path_type const&)
-    {
-        return -EPERM;
-    }
-
-    bool resolver_op::is_matching_path(path_type const& path, file_type type)
-    {
-        return type == file_type::regular_file && path == "/dns";
     }
 
 

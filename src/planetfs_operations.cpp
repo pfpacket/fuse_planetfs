@@ -2,10 +2,12 @@
 #define _FILE_OFFSET_BITS 64
 
 #include <fuse.h>
-#include <planetfs_operations.hpp>
-#include <planet/operation_layer.hpp>
-#include <planet/handle.hpp>
+#include <planet/common.hpp>
 #include <planet/utils.hpp>
+#include <planet/handle.hpp>
+#include <planet/operation_layer.hpp>
+#include <planet/filesystem.hpp>
+#include <planetfs_operations.hpp>
 #include <syslog.h>
 
 // Core filesystem object
@@ -173,10 +175,11 @@ int planet_open(char const *path, struct fuse_file_info *fi)
 
 int planet_read(char const *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    ::syslog(LOG_INFO, "%s: path=%s buf=%p size=%d offset=%llu", __func__, path, buf, size, offset);
     int bytes_received;
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
+        ::syslog(LOG_INFO,
+            "%s: handle=%d path=%s buf=%p size=%d offset=%llu", __func__, ph, path, buf, size, offset);
         bytes_received = planet::read(ph, buf, size, offset);
         ::syslog(LOG_INFO, "%s: handle=%d bytes_received=%d", __func__, ph, bytes_received);
     } catch (std::system_error& e) {
@@ -191,10 +194,11 @@ int planet_read(char const *path, char *buf, size_t size, off_t offset, struct f
 
 int planet_write(char const *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    ::syslog(LOG_INFO, "%s: path=%s buf=%p size=%d offset=%llu", __func__, path, buf, size, offset);
     int bytes_transferred;
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
+        ::syslog(LOG_INFO,
+            "%s: handle=%d path=%s buf=%p size=%d offset=%llu", __func__, ph, path, buf, size, offset);
         bytes_transferred = planet::write(ph, buf, size, offset);
         ::syslog(LOG_INFO, "%s: handle=%d bytes_transferred=%d", __func__, ph, bytes_transferred);
     } catch (std::system_error& e) {
@@ -229,11 +233,10 @@ int planet_readdir(char const *path, void *buf, fuse_fill_dir_t filler, off_t of
 
 int planet_release(char const *path, struct fuse_file_info *fi)
 {
-    ::syslog(LOG_INFO, "%s: path=%s fi=%p", __func__, path, fi);
     int ret = 0;
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
-        ::syslog(LOG_INFO, "%s: handle=%d", __func__, ph);
+        ::syslog(LOG_INFO, "%s: handle=%d path=%s fi=%p", __func__, ph, path, fi);
         ret = planet::close(ph);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);

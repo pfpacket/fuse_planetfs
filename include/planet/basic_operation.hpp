@@ -3,123 +3,81 @@
 
 #include <planet/common.hpp>
 
-
 namespace planet {
 
-class fs_entry;
-class file_entry;
-class core_file_system;
 
-//
-// planet core handler
-//
-class fs_operation {
-public:
-    virtual ~fs_operation() noexcept
-    {
-    }
+    class fs_entry;
+    class file_entry;
+    class core_file_system;
 
-    // Create new instance of this file operation
-    virtual shared_ptr<fs_operation> new_instance()
-    {
-        return detail::shared_null_ptr;
-    }
+    //
+    // planet core handler
+    //
+    class entry_op {
+    public:
+        entry_op() = default;
 
-    // Open, read, write and close hook functions
-    virtual int open(shared_ptr<fs_entry>, path_type const&)
-    {
-        return 0;
-    }
+        virtual ~entry_op() noexcept
+        {
+        }
 
-    virtual int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset)
-    {
-        return 0;
-    }
+        // Open, read, write and close hook functions
+        virtual int open(shared_ptr<fs_entry>, path_type const&)
+        {
+            return 0;
+        }
 
-    virtual int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset)
-    {
-        return 0;
-    }
+        virtual int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset)
+        {
+            return 0;
+        }
 
-    virtual int release(shared_ptr<fs_entry>)
-    {
-        return 0;
-    }
+        virtual int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset)
+        {
+            return 0;
+        }
 
-    // Initialize the first arguemnt of fs_entry
-    // shared_ptr<fs_entry> is the new file entry which a new file operation will use
-    virtual int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
-    {
-        return 0;
-    }
+        virtual int release(shared_ptr<fs_entry>)
+        {
+            return 0;
+        }
+    };
 
-    // Destoroy the first argument of fs_entry
-    // shared_ptr<fs_entry> was used by an other file operation, and now no one never uses it
-    virtual int rmnod(shared_ptr<fs_entry>, path_type const&)
-    {
-        return 0;
-    }
+    //
+    // Note: All of planetfs operations must inherit entry_op
+    //
 
-    // This function is called when installing the type of operation
-    int install(shared_ptr<core_file_system>)
-    {
-        return 0;
-    }
+    // default file operation which is used if no other operations match the target path
+    class default_file_op : public entry_op {
+    public:
+        default_file_op() = default;
+        default_file_op(shared_ptr<core_file_system>)
+        {
+        }
 
-    // This function is called when installing the type of operation
-    int uninstall(shared_ptr<core_file_system>)
-    {
-        return 0;
-    }
-};
+        virtual ~default_file_op() = default;
 
+        virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
+        virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
+        virtual int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
+        virtual int release(shared_ptr<fs_entry> file_ent) override;
+    };
 
-//
-// Note: All of planetfs operations must inherit fs_operation
-//       and implement static function named `is_matching_path()`
-//       which returns true if the given path is for the operation
-//
+    // default dir operation which is used if no other operations match the target path
+    class default_dir_op : public entry_op {
+    public:
+        default_dir_op() = default;
+        default_dir_op(shared_ptr<core_file_system>)
+        {
+        }
 
-// default file operation which is used if no other operations match the target path
-class default_file_op : public fs_operation {
-public:
-    default_file_op(shared_ptr<core_file_system>)
-    {
-    }
-    virtual ~default_file_op() = default;
+        virtual ~default_dir_op() = default;
 
-    virtual shared_ptr<fs_operation> new_instance() override;
-    virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-    virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
-    virtual int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
-    virtual int release(shared_ptr<fs_entry> file_ent) override;
-    virtual int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
-    virtual int rmnod(shared_ptr<fs_entry>, path_type const&) override;
-    static bool is_matching_path(path_type const&, file_type);
-};
-
-// default dir operation which is used if no other operations match the target path
-class default_dir_op : public fs_operation {
-public:
-    default_dir_op(shared_ptr<core_file_system>)
-    {
-        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
-    }
-    //~default_dir_op() = default;
-    virtual ~default_dir_op()
-    {
-        ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
-    }
-
-    virtual shared_ptr<fs_operation> new_instance() override;
-    virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-    virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
-    virtual int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
-    virtual int release(shared_ptr<fs_entry> file_ent) override;
-    virtual int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
-    virtual int rmnod(shared_ptr<fs_entry>, path_type const&) override;
-    static bool is_matching_path(path_type const&, file_type);
-};
+        virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
+        virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
+        virtual int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
+        virtual int release(shared_ptr<fs_entry> file_ent) override;
+    };
 
 
 }   //namespace planet

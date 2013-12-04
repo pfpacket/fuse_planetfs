@@ -6,7 +6,7 @@ namespace net {
 
 
     namespace path_reg {
-        boost::regex dir_num        {R"(/\w+/(\d+)[/\w]*)"};
+        xpv::sregex dir_num = xpv::sregex::compile(R"(/\w+/(\d+)[/\w]*)");
     }   // namespace path_reg
 
     namespace detail {
@@ -59,8 +59,8 @@ namespace net {
 
         fd_table::key_type fd_table::dir_number(fd_table::key_type const& path)
         {
-            boost::smatch m;
-            if (!boost::regex_match(path, m, path_reg::dir_num) || m.size() < 2)
+            xpv::smatch m;
+            if (!xpv::regex_match(path, m, path_reg::dir_num) || m.size() < 2)
                 throw std::runtime_error("fd_table::dir_number(): failed to parse directory number: " + path);
             syslog(LOG_NOTICE, "fdtable.dir_number(): path=%s,m[1]=%s", path.c_str(), m[1].str().c_str());
             return m[1];
@@ -78,8 +78,8 @@ namespace net {
         );
         if (r != 0)
             throw std::runtime_error(str(format("getnameinfo: %1%") % gai_strerror(r)));
-        node.assign(hostname);
-        serv.assign(servname);
+        node = hostname;
+        serv = servname;
     }
 
 

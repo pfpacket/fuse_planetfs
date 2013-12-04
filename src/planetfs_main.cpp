@@ -7,6 +7,7 @@
 #include <planet/net/dns/installer.hpp>
 #include <planet/net/tcp/installer.hpp>
 #include <planet/net/eth/installer.hpp>
+#include <planet/module_loader/module_loader.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
 #include <signal.h>
@@ -14,19 +15,25 @@
 #define PLANETFS_NAME "fuse_planetfs"
 
 // Install certain file operations
-void planetfs_install_fs_operations()
+void planetfs_install_file_operations()
 {
     typedef planet::core_file_system::priority priority;
 
-    // static module loading
-    //fs.root()->install_op<planet::net::dns::installer>(priority::normal);
-
     // dynamic module loading
-    // TODO: FIX BUGS HERE:
-    fs.root()->install_module(priority::normal, "mod_net_dns");
+    // TODO: FIX BUGS HERE: Maybe mod_net_dns causes this bug
+    //fs.root()->install_module(priority::normal, "mod_net_dns");
 
-    fs.root()->install_op<planet::net::tcp::installer>(priority::normal);
-    fs.root()->install_op<planet::net::eth::installer>(priority::normal);
+    // THERE SEEMS TO BE NO BUGS HERE
+    fs.root()->install_module(priority::normal, "mod_dummy");
+
+    // static module loading
+    //fs.root()->install_ops<planet::net::dns::installer>(priority::low);
+    fs.root()->install_ops<planet::net::eth::installer>(priority::low);
+    fs.root()->install_ops<planet::net::tcp::installer>(priority::low);
+    fs.root()->install_ops<planet::module_loader>(priority::normal);
+
+    // Uninstall operation
+    fs.root()->uninstall_ops("planet.net.dns.installer");
 }
 
 // Create initial filesystem structure
@@ -36,6 +43,13 @@ void planetfs_create_initial_fs_structure()
     fs.root()->mkdir("/tcp",   S_IRWXU);
     fs.root()->mkdir("/eth",   S_IRWXU);
     fs.root()->mknod("/dns",   S_IRUSR | S_IWUSR, 0);
+}
+
+void planetfs_print_installed_operations()
+{
+    std::cout << "Installed operations:" << std::endl;
+    for (auto&& info : fs.root()->get_ops_db().info())
+        std::cout << '\t' << std::get<0>(info) << " / priority=" << std::get<1>(info) << std::endl;
 }
 
 static struct fuse_operations planetfs_ops{};
@@ -48,8 +62,9 @@ int main(int argc, char **argv)
         ::syslog(LOG_INFO, "%s daemon started", PLANETFS_NAME);
 
         // Initialize filesystem
-        planetfs_install_fs_operations();
+        planetfs_install_file_operations();
         planetfs_create_initial_fs_structure();
+        planetfs_print_installed_operations();
 
         // Set system call functions
         planetfs_ops.getattr    =   planet_getattr;
@@ -67,7 +82,7 @@ int main(int argc, char **argv)
         planetfs_ops.readdir    =   planet_readdir;
         planetfs_ops.release    =   planet_release;
 
-        // Start userspace filesystem
+        // Start the userspace filesystem
         exit_code = ::fuse_main(argc, argv, &planetfs_ops, nullptr);
 
     } catch (std::exception& e) {

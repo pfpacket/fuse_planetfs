@@ -26,11 +26,11 @@ namespace tcp {
 
     // Regex for files
     namespace path_reg {
-        extern boost::regex ctl;
-        extern boost::regex data;
-        extern boost::regex local;
-        extern boost::regex remote;
-        extern boost::regex session_dir;
+        extern xpv::sregex ctl;
+        extern xpv::sregex data;
+        extern xpv::sregex local;
+        extern xpv::sregex remote;
+        extern xpv::sregex session_dir;
     }   // namespace path_reg
 
     extern int sock_connect_to(string_type const& host, string_type const& port);

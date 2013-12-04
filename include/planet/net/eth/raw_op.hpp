@@ -11,32 +11,44 @@ namespace net {
 namespace eth {
 
 
-class raw_op : public fs_operation {
-private:
-    int fd_;
+    class raw_op : public entry_op {
+    private:
+        int fd_;
 
-    static void bind_to_interface(int fd, std::string const& ifname, int protocol);
-    static int do_raw_open(int sock_type, int protocol, std::string const& ifname);
+        static void bind_to_interface(int fd, std::string const& ifname, int protocol);
+        static int do_raw_open(int sock_type, int protocol, std::string const& ifname);
 
-public:
-    raw_op(shared_ptr<core_file_system>)
-    {
-        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
-    }
-    ~raw_op() noexcept
-    {
-        ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
-    }
+    public:
+        raw_op(shared_ptr<core_file_system>)
+        {
+        }
 
-    shared_ptr<fs_operation> new_instance() override;
-    int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-    int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
-    int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
-    int release(shared_ptr<fs_entry> file_ent) override;
-    int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
-    int rmnod(shared_ptr<fs_entry>, path_type const&) override;
-    static bool is_matching_path(path_type const&, file_type);
-};
+        ~raw_op() noexcept
+        {
+        }
+
+        int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
+        int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
+        int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
+        int release(shared_ptr<fs_entry> file_ent) override;
+    };
+
+    class raw_type : public file_ops_type {
+    private:
+    public:
+        raw_type() : file_ops_type("planet.net.eth.raw")
+        {
+        }
+
+        ~raw_type() noexcept
+        {
+        }
+
+        shared_ptr<entry_op> create_op(shared_ptr<core_file_system> fs_root) override;
+        int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
+        int rmnod(shared_ptr<fs_entry>, path_type const&) override;
+        bool match_path(path_type const& path, file_type type) override;
+    };
 
 
 }   // namespace eth

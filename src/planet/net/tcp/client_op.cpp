@@ -14,11 +14,6 @@ namespace net {
 namespace tcp {
 
 
-    shared_ptr<fs_operation> client_op::new_instance()
-    {
-        return std::make_shared<client_op>(::planet::detail::shared_null_ptr);
-    }
-
     int client_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         if (auto fd = detail::fdtable.find(path.string()))
@@ -47,32 +42,6 @@ namespace tcp {
     int client_op::release(shared_ptr<fs_entry> file_ent)
     {
         return 0;
-    }
-
-    int client_op::mknod(shared_ptr<fs_entry> file_ent, path_type const& path, mode_t, dev_t)
-    {
-        auto filename   = path.filename().string();
-        auto pos        = filename.find_first_of(host_port_delimiter);
-        auto host       = filename.substr(0, pos);
-        auto port       = filename.substr(pos + 1);
-        syslog(LOG_INFO, "client_op::mknod: connecting to host=%s, port=%s", host.c_str(), port.c_str());
-        int sock = sock_connect_to(host, port);
-        syslog(LOG_NOTICE, "client_op::mknod: connection established %s!%s fd=%d opened", host.c_str(), port.c_str(), sock);
-        detail::fdtable.insert(path.string(), sock);
-        return 0;
-    }
-
-    int client_op::rmnod(shared_ptr<fs_entry> file_ent, path_type const& path)
-    {
-        detail::fdtable.erase(path.string());
-        return 0;
-    }
-
-    bool client_op::is_matching_path(path_type const& path, file_type type)
-    {
-        return  type == file_type::regular_file &&
-                path.parent_path() == "/tcp" &&
-                path.filename().string()[0] != '*';
     }
 
 

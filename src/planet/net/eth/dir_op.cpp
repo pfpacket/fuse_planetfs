@@ -9,14 +9,19 @@ namespace net {
 namespace eth {
 
 
-    shared_ptr<fs_operation> dir_op::new_instance()
+    shared_ptr<entry_op> dir_type::create_op(shared_ptr<core_file_system>)
     {
-        return std::make_shared<dir_op>(fs_root_);
+        return planet::detail::shared_null_ptr;
     }
 
-    int dir_op::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
+    int dir_type::install(shared_ptr<core_file_system> fs)
     {
-        ::syslog(LOG_NOTICE, "%s: path=%s", __PRETTY_FUNCTION__, path.string().c_str());
+        fs_root_ = fs;
+        return 0;
+    }
+
+    int dir_type::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
+    {
         auto ifnames = make_unique_ptr(
             if_nameindex(), [](struct if_nameindex *p){ if_freenameindex(p); });
         if (!ifnames)
@@ -26,14 +31,13 @@ namespace eth {
         return 0;
     }
 
-    int dir_op::rmnod(shared_ptr<fs_entry>, path_type const&)
+    int dir_type::rmnod(shared_ptr<fs_entry>, path_type const&)
     {
-        ::syslog(LOG_NOTICE, "%s: called", __PRETTY_FUNCTION__);
         throw_system_error(EPERM);
         return -EPERM;
     }
 
-    bool dir_op::is_matching_path(path_type const& path, file_type type)
+    bool dir_type::match_path(path_type const& path, file_type type)
     {
         return type == file_type::directory && (path == "/eth" || path == "/ip");
     }

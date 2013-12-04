@@ -11,32 +11,59 @@ namespace net {
 namespace tcp {
 
 
-class data_op : public fs_operation {
-private:
-    shared_ptr<core_file_system> fs_root_;
-    int socket_ = -1;
+    class data_op : public entry_op {
+    private:
+        shared_ptr<core_file_system> fs_root_;
+        int socket_ = -1;
 
-public:
-    data_op(shared_ptr<core_file_system> fs_root)
-        : fs_root_(fs_root)
-    {
-        ::syslog(LOG_NOTICE, "%s: ctor called", __PRETTY_FUNCTION__);
-    }
+    public:
+        data_op(shared_ptr<core_file_system> fs_root)
+            : fs_root_(fs_root)
+        {
+        }
 
-    ~data_op()
-    {
-        ::syslog(LOG_NOTICE, "%s: dtor called", __PRETTY_FUNCTION__);
-    }
+        ~data_op()
+        {
+        }
 
-    shared_ptr<fs_operation> new_instance() override;
-    int open(shared_ptr<fs_entry> fs_ent, path_type const& path) override;
-    int read(shared_ptr<fs_entry> fs_ent, char *buf, size_t size, off_t offset) override;
-    int write(shared_ptr<fs_entry> fs_ent, char const *buf, size_t size, off_t offset) override;
-    int release(shared_ptr<fs_entry> fs_ent) override;
-    int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override;
-    int rmnod(shared_ptr<fs_entry>, path_type const&) override;
-    static bool is_matching_path(path_type const&, file_type);
-};
+        int open(shared_ptr<fs_entry> fs_ent, path_type const& path) override;
+        int read(shared_ptr<fs_entry> fs_ent, char *buf, size_t size, off_t offset) override;
+        int write(shared_ptr<fs_entry> fs_ent, char const *buf, size_t size, off_t offset) override;
+        int release(shared_ptr<fs_entry> fs_ent) override;
+    };
+
+    class data_type : public file_ops_type {
+    public:
+        data_type() : file_ops_type("planet.net.tcp.data")
+        {
+        }
+
+        shared_ptr<entry_op> create_op(shared_ptr<core_file_system> fs_root) override
+        {
+            return std::make_shared<data_op>(fs_root);
+        }
+
+        int mknod(shared_ptr<fs_entry> fs_ent, path_type const& path, mode_t, dev_t) override
+        {
+            return 0;
+        }
+
+        int rmnod(shared_ptr<fs_entry> fs_ent, path_type const&) override
+        {
+            return -EPERM;
+        }
+
+        bool match_path(path_type const& path, file_type type) override
+        {
+            return
+                type == file_type::regular_file
+                && xpv::regex_match(
+                    path.string(),
+                    path_reg::data
+                );
+
+        }
+    };
 
 
 }   // namespace tcp
