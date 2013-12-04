@@ -179,8 +179,12 @@ namespace planet {
         void uninstall_ops(string_type const& name);
 
         void install_module(priority, string_type const&);
+        void install_module(priority, string_type const&, std::vector<string_type> const&);
 
         void uninstall_module(string_type const&);
+
+        ops_type_db& get_ops_db();
+        ops_type_db const& get_ops_db() const;
 
     private:
         shared_ptr<dentry>      root    = detail::shared_null_ptr;

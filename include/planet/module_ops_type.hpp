@@ -32,6 +32,8 @@ namespace planet {
 
     public:
         module_ops_type(string_type const& module_name);
+        // Load a module from library paths including `paths`
+        module_ops_type(string_type const& module_name, std::vector<string_type> const& paths);
 
         int install(shared_ptr<core_file_system> fs_root);
 

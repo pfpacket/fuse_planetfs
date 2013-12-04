@@ -16,9 +16,16 @@ namespace planet {
     }
 
     module_ops_type::module_ops_type(string_type const& module_name)
+        :   module_ops_type(module_name, {"./"})
+    {
+    }
+
+    module_ops_type::module_ops_type(
+        string_type const& module_name, std::vector<string_type> const& paths
+    )
         :   fs_ops_type(module_name)
     {
-        loader_.add_searchdir({"./"});
+        loader_.add_searchdir(paths);
         loader_.load_module(module_name);
         load_all_functions();
     }

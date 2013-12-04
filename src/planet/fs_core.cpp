@@ -83,6 +83,8 @@ namespace planet {
             new_inode.mode = mode | S_IFDIR;
             auto dir_entry = parent_dir->add_entry<dentry>(path.filename().string(), ops_name, new_inode);
             try {
+                ::syslog(LOG_NOTICE, "mkdir: Creating \'%s\' type=%s",
+                    path.string().data(), ops_name.data());
                 ops_db_.lock()->
                     get_ops(ops_name)->mknod(dir_entry, path, mode, 0);
             } catch (...) {
@@ -157,15 +159,22 @@ namespace planet {
     void core_file_system::install_module(priority p, string_type const& mod_name)
     {
         ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
+        ops_db_.lock()->register_ops(p, make_shared<module_ops_type>(mod_name));
+    }
+
+    void core_file_system::install_module(
+        priority p, string_type const& mod_name, std::vector<string_type> const& paths)
+    {
+        ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
         ops_db_.lock()->register_ops(
-            p, make_shared<module_ops_type>(mod_name)
+            p, make_shared<module_ops_type>(mod_name, paths)
         );
     }
 
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
         ::syslog(LOG_NOTICE, "Uninstalling module: %s", mod_name.c_str());
-        this->uninstall_ops(mod_name);
+        ops_db_.lock()->unregister_type(mod_name);
     }
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const
@@ -185,6 +194,22 @@ namespace planet {
         auto dir_entry = root->search_entries(p.substr(1, pos - 1));
         return (!dir_entry || dir_entry->type() != file_type::directory) ? detail::shared_null_ptr
             : get_entry_of(directory_cast(dir_entry), "/" + p.substr(pos + 1));
+    }
+
+    ops_type_db& core_file_system::get_ops_db()
+    {
+        auto db = ops_db_.lock();
+        if (!db)
+            throw std::runtime_error("get_ops_db(): ops_db_ not available");
+        return *db;
+    }
+
+    ops_type_db const& core_file_system::get_ops_db() const
+    {
+        auto db = ops_db_.lock();
+        if (!db)
+            throw std::runtime_error("get_ops_db(): ops_db_ not available");
+        return *db;
     }
 
 

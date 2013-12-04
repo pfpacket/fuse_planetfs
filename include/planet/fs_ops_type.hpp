@@ -115,13 +115,11 @@ namespace planet {
 
         int mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t) override
         {
-            ::syslog(LOG_NOTICE, "%s: path=%s", __PRETTY_FUNCTION__, path.string().c_str());
             return 0;
         }
 
         int rmnod(shared_ptr<fs_entry>, path_type const&) override
         {
-            ::syslog(LOG_NOTICE, "%s: removing directory", __PRETTY_FUNCTION__);
             return 0;
         }
 

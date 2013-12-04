@@ -23,6 +23,7 @@ OBJS       := src/planet/net/common.o \
               src/planet/net/tcp/server_op.o \
               src/planet/net/eth/raw_op.o \
               src/planet/net/eth/dir_op.o \
+              src/planet/module_loader/module_loader.o \
               src/planetfs_operations.o \
               src/planetfs_main.o
 LIBPLANET_OBJS = \

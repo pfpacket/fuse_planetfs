@@ -7,6 +7,7 @@
 #include <planet/net/dns/installer.hpp>
 #include <planet/net/tcp/installer.hpp>
 #include <planet/net/eth/installer.hpp>
+#include <planet/module_loader/module_loader.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
 #include <signal.h>
@@ -26,9 +27,10 @@ void planetfs_install_file_operations()
     fs.root()->install_module(priority::normal, "mod_dummy");
 
     // static module loading
-    fs.root()->install_ops<planet::net::dns::installer>(priority::low);
+    //fs.root()->install_ops<planet::net::dns::installer>(priority::low);
     fs.root()->install_ops<planet::net::eth::installer>(priority::low);
     fs.root()->install_ops<planet::net::tcp::installer>(priority::low);
+    fs.root()->install_ops<planet::module_loader>(priority::normal);
 
     // Uninstall operation
     fs.root()->uninstall_ops("planet.net.dns.installer");
@@ -46,7 +48,7 @@ void planetfs_create_initial_fs_structure()
 void planetfs_print_installed_operations()
 {
     std::cout << "Installed operations:" << std::endl;
-    for (auto&& info : fs.info())
+    for (auto&& info : fs.root()->get_ops_db().info())
         std::cout << '\t' << std::get<0>(info) << " / priority=" << std::get<1>(info) << std::endl;
 }
 

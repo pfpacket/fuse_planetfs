@@ -46,11 +46,6 @@ namespace planet {
         {
             return root_;
         }
-
-        std::vector<ops_type_db::info_type> info() const
-        {
-            return ops_db_->info();
-        }
     };
 
 
