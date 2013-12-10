@@ -27,7 +27,7 @@ void planetfs_install_file_operations()
     fs.root()->install_module(priority::normal, "mod_dummy");
 
     // static module loading
-    //fs.root()->install_ops<planet::net::dns::installer>(priority::low);
+    fs.root()->install_ops<planet::net::dns::installer>(priority::low);
     fs.root()->install_ops<planet::net::eth::installer>(priority::low);
     fs.root()->install_ops<planet::net::tcp::installer>(priority::low);
     fs.root()->install_ops<planet::module_loader>(priority::normal);

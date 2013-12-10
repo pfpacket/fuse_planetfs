@@ -64,6 +64,12 @@ namespace planet {
     //  with exception handling
     shared_ptr<dentry> search_dir_entry(core_file_system const&, path_type const&);
 
+    template<typename FmtType>
+    void syslog_fmt(int priority, FmtType const& fmt)
+    {
+        ::syslog(priority, "%s", fmt.str().c_str());
+    }
+
     class raii_wrapper {
     private:
         typedef std::function<void (void)> functor_t;

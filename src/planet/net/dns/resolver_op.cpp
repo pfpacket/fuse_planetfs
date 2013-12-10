@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <planet/utils.hpp>
 #include <planet/net/dns/resolver_op.hpp>
+#include <planet/request_parser.hpp>
 
 namespace planet {
 namespace net {
@@ -51,21 +52,18 @@ namespace dns {
 
     int resolver_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
-        std::string request(buf, size);
-        auto pos = request.find_first_of(' ');
-        if (pos == std::string::npos)
-            return -EINVAL;
-        std::string opecode = request.substr(0, pos), hostname_ = request.substr(pos + 1);
-        syslog(LOG_INFO, "resolver_op: write: opecode=%s / hostname=%s", opecode.c_str(), hostname_.c_str());
-
-        int family;
-        if (opecode == "resolve")            family = AF_UNSPEC;
-        else if (opecode == "resolve_inet")  family = AF_INET;
-        else if (opecode == "resolve_inet6") family = AF_INET6;
-        else return -EINVAL;
+        request_parser parser;
+        if (!parser.parse(string_type(buf, size)))
+            return -ENOTSUP;
+        static std::map<string_type, int> const families
+            = {{"resolve", AF_UNSPEC}, {"resolve_inet", AF_INET}, {"resolve_inet6", AF_INET6}};
+        auto&& args = parser.get_args();
+        if (args.empty() || args.size() >= 2)
+            return -ENOTSUP;
+        syslog_fmt(LOG_INFO, format("resolver_op: command=%s / hostname=%s") % parser.get_command() % args[0][0]);
         resolved_names_.clear();
-        forward_lookup(hostname_, family, resolved_names_);
-        return request.length();
+        forward_lookup(args[0][0], families.at(parser.get_command()), resolved_names_);
+        return size;
     }
 
     int resolver_op::release(shared_ptr<fs_entry> file_ent)

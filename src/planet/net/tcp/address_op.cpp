@@ -20,7 +20,7 @@ namespace tcp {
             throw_system_error(errno, str(format("getpeername: fd=%1%") % sock));
         std::string hostname, servname;
         get_name_info((sockaddr *)&peer, len, hostname, servname);
-        auto local_addr = str(format("%1%!%2%") % hostname % servname);
+        auto local_addr = str(format("%1%!%2%\n") % hostname % servname);
         file_cast(file)->data().clear();
         this->write(file, local_addr.c_str(), local_addr.length(), 0);
     }
@@ -47,7 +47,7 @@ namespace tcp {
             throw_system_error(errno, str(format("getpeername: fd=%1%") % sock));
         std::string hostname, servname;
         get_name_info((sockaddr *)&peer, len, hostname, servname);
-        auto local_addr = str(format("%1%!%2%") % hostname % servname);
+        auto local_addr = str(format("%1%!%2%\n") % hostname % servname);
         file_cast(file)->data().clear();
         this->write(file, local_addr.c_str(), local_addr.length(), 0);
     }

@@ -4,7 +4,7 @@
 CXX        := g++
 #CXXFLAGS  := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
 CXXFLAGS   := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
-              -std=c++0x -O2 -g $(shell pkg-config fuse --cflags) #-D_FORTIFY_SOURCE=1
+              -std=c++0x -O2 -g $(shell pkg-config fuse --cflags) -D_FORTIFY_SOURCE=2
 LDFLAGS    := -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all -fstack-check 
 BOOST_ROOT := /usr
 INCLUDES   := -I $(BOOST_ROOT)/include -I ./include
@@ -34,6 +34,7 @@ LIBPLANET_OBJS = \
               src/planet/handle.o \
               src/planet/operation_layer.o \
               src/planet/basic_operation.o \
+              src/planet/request_parser.o \
               src/planet/module_ops_type.o
 
 DEPS       := $(OBJS:%.o=%.d) $(LIBPLANET_OBJS:%.o=%.d)

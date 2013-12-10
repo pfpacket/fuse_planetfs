@@ -5,14 +5,12 @@
 #include <planet/operation_layer.hpp>
 #include <planet/net/tcp/ctl_op.hpp>
 #include <planet/utils.hpp>
-#include <syslog.h>
+#include <planet/request_parser.hpp>
 
 namespace planet {
 namespace net {
 namespace tcp {
 
-
-    xpv::sregex reg_connect_req = xpv::sregex::compile(R"(^connect ((\d{1,3}\.){3}\d{1,3})\!(\d{1,6}))");
 
     int ctl_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
@@ -37,37 +35,46 @@ namespace tcp {
         return ret;
     }
 
+    static xpv::sregex const reg_ipv4_addr_port =
+        (xpv::s1=(xpv::repeat<3>(xpv::repeat<1,3>(xpv::_d) >> '.') >> xpv::repeat<1,3>(xpv::_d)))
+            >> '!' >> (xpv::s2=xpv::repeat<1,6>(xpv::_d)) >> *xpv::as_xpr('\n');
+
     int ctl_op::interpret_request(string_type const& request)
     {
-        xpv::smatch m;
-        int ret = -ENOTCONN;
+        int ret = 0;
+        request_parser parser;
+        if (!parser.parse(request))
+            return -ENOTSUP;
+
         auto socket = detail::fdtable.find(lexical_cast<string_type>(current_fd_));
-        if (xpv::regex_search(request, xpv::sregex::compile("^is_connected"))) {
-            if (socket && sock_is_connected(*socket))
-                ret = 0;
-        } else if (xpv::regex_search(request, m, reg_connect_req)) {
+        if (parser.get_command() == "is_connected") {
+            if (!socket || !sock_is_connected(*socket))
+                ret = -ENOTCONN;
+        } else if (parser.get_command() == "connect") {
             if (socket && sock_is_connected(*socket))
                 return -EISCONN;
-            ::syslog(LOG_NOTICE, "%s: connecting to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
-            int new_sock = sock_connect_to(m[1], m[3]);
+            auto&& args = parser.get_filtered_args(reg_ipv4_addr_port);
+            if (args.empty())
+                return -ENOTSUP;
+            syslog_fmt(LOG_NOTICE, format("%s: connecting to %s!%s") % __func__ % args[0][1] % args[0][2]);
+            int new_sock = sock_connect_to(args[0][1], args[0][2]);
             detail::fdtable.insert(lexical_cast<string_type>(current_fd_), new_sock);
-            ret = 0;
-            ::syslog(LOG_NOTICE, "%s: connected to %s!%s", __PRETTY_FUNCTION__, m[1].str().c_str(), m[3].str().c_str());
-        } else if (xpv::regex_search(request, xpv::sregex::compile("^hangup"))) {
+            syslog_fmt(LOG_NOTICE, format("%s: connected to %s!%s") % __func__ % args[0][1] % args[0][2]);
+        } else if (parser.get_command() == "hangup") {
             detail::fdtable.erase(lexical_cast<string_type>(current_fd_));
-            ret = 0;
-        } else if (xpv::regex_search(request, xpv::sregex::compile(R"(^keepalive(|( (\d+))))"))) {
+        } else if (parser.get_command() == "keepalive") {
             if (socket) {
                 int optvalue = 1;
                 if (::setsockopt(*socket, SOL_SOCKET, SO_KEEPALIVE, &optvalue, sizeof (optvalue)) < 0)
                     throw_system_error(errno);
-                if (m[3].length()) {
-                    optvalue = lexical_cast<int>(m[3]);
+                auto&& args = parser.get_filtered_args(R"((\d)+)");
+                if (!args.empty()) {
+                    optvalue = lexical_cast<int>(args[0][0]);
                     if (::setsockopt(*socket, IPPROTO_TCP, TCP_KEEPIDLE, &optvalue, sizeof (optvalue)) < 0)
                         throw_system_error(errno);
                 }
-                ret = 0;
-            }
+            } else
+                ret = -ENOTCONN;
         } else
             ret = -ENOTSUP;
         return ret;

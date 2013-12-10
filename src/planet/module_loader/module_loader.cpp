@@ -5,6 +5,7 @@
 #include <planet/operation_layer.hpp>
 #include <planet/utils.hpp>
 #include <planet/module_loader/module_loader.hpp>
+#include <planet/request_parser.hpp>
 #include <mutex>
 
 namespace planet {
@@ -39,7 +40,7 @@ namespace planet {
         });
         if (it_ != info_.end()) {
             string_type line =
-                std::get<0>(*it_) + " " + lexical_cast<string_type>(std::get<1>(*it_));
+                std::get<0>(*it_) + '\t' + lexical_cast<string_type>(std::get<1>(*it_));
             ret = (line.length() + 2 > size) ? size : line.length() + 2;
             std::copy_n(line.begin(), ret - 2, buf);
             buf[ret - 2] = '\n';
@@ -51,11 +52,16 @@ namespace planet {
 
     int module_loader_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
-        xpv::smatch m;
         int ret = size;
-        if (xpv::regex_search(std::string(buf, size), m, xpv::sregex::compile(R"(^load (\w*))"))) {
+        request_parser parser;
+        if (parser.parse(string_type(buf, size))) {
             typedef core_file_system::priority priority;
-            fs_root_->install_module(priority::normal, m[1], paths_);
+            if (parser.get_command() == "load")
+                for (auto&& mod_name : parser.get_args())
+                    fs_root_->install_module(priority::normal, mod_name[0], paths_);
+            else if (parser.get_command() == "unload")
+                for (auto&& mod_name : parser.get_args())
+                    fs_root_->uninstall_module(mod_name[0]);
         } else
             ret = -ENOTSUP;
         return ret;
@@ -69,15 +75,26 @@ namespace planet {
     //
     // module_loader
     //
+    string_type const module_loader::file_path = "/modules";
+
+    module_loader::module_loader()
+        : file_ops_type("planet.module_loader")
+    {
+        char cwd[PATH_MAX];
+        if (!::getcwd(cwd, sizeof cwd))
+            throw_system_error(errno, "getting cwd");
+        cwd_ = cwd;
+    }
+
     int module_loader::install(shared_ptr<core_file_system> fs_root)
     {
-        fs_root->mknod("/module", 0666);
+        fs_root->mknod(module_loader::file_path, 0666);
         return 0;
     }
 
     int module_loader::uninstall(shared_ptr<core_file_system> fs_root)
     {
-        fs_root->unlink("/module");
+        fs_root->unlink(module_loader::file_path);
         return 0;
     }
 
@@ -88,7 +105,7 @@ namespace planet {
 
     bool module_loader::match_path(path_type const& path, file_type type)
     {
-        return path == "/module" && type == file_type::regular_file;
+        return path == module_loader::file_path && type == file_type::regular_file;
     }
 
 
