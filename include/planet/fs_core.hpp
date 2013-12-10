@@ -54,7 +54,7 @@ namespace planet {
             }
         }
 
-        void unregister_type(string_type const& ops_name)
+        void unregister_ops(string_type const& ops_name)
         {
             for (auto&& i : ops_types_)
                 if (std::get<info_index::ops>(i)->name() == ops_name)

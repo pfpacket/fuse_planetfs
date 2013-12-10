@@ -153,7 +153,7 @@ namespace planet {
     void core_file_system::uninstall_ops(string_type const& name)
     {
         ::syslog(LOG_NOTICE, "Uninstalling ops: %s", name.c_str());
-        ops_db_.lock()->unregister_type(name);
+        ops_db_.lock()->unregister_ops(name);
     }
 
     void core_file_system::install_module(priority p, string_type const& mod_name)
@@ -174,7 +174,7 @@ namespace planet {
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
         ::syslog(LOG_NOTICE, "Uninstalling module: %s", mod_name.c_str());
-        ops_db_.lock()->unregister_type(mod_name);
+        ops_db_.lock()->unregister_ops(mod_name);
     }
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const
