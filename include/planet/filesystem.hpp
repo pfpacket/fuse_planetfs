@@ -15,7 +15,6 @@ namespace planet {
     public:
         typedef ops_type_db::priority priority;
 
-        template<typename ...Types>
         filesystem(mode_t root_mode)
         {
             root_   = shared_ptr<core_file_system>(new core_file_system());
