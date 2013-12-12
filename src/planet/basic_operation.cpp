@@ -17,6 +17,8 @@ namespace planet {
 
     int default_file_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
+        if (offset > file_ent->size())
+            return 0;
         if (file_ent->size() < size + offset)
             size = file_ent->size() - offset;
         std::copy_n(file_cast(file_ent)->data().begin() + offset, size, buf);
