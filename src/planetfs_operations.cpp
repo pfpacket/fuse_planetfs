@@ -23,8 +23,6 @@ int planet_getattr(char const *path, struct stat *stbuf)
         ret = fs.root()->getattr(path, *stbuf);
         stbuf->st_uid = ::getuid();
         stbuf->st_gid = ::getgid();
-        ::syslog(LOG_INFO, "getattr: path=%s size=%llu mode=%o nlink=%d",
-            path, stbuf->st_size, stbuf->st_mode, stbuf->st_nlink);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();
@@ -101,7 +99,18 @@ int planet_rmdir(char const *path)
 
 int planet_chmod(char const *path, mode_t mode)
 {
-    return 0;
+    ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path, mode);
+    int ret = 0;
+    try {
+        ret = fs.root()->chmod(path, mode);
+    } catch (std::system_error& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.code().value();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
 }
 
 int planet_chown(char const *path, uid_t uid, gid_t gid)

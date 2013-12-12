@@ -156,6 +156,8 @@ namespace planet {
 
         int rmdir(path_type const& path, bool force = false);
 
+        int chmod(path_type const& path, mode_t mode);
+
         std::vector<std::string> readdir(path_type const& path) const;
 
         handle_t open(path_type const& path);

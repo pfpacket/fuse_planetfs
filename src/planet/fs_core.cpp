@@ -110,6 +110,18 @@ namespace planet {
         return ret;
     }
 
+    int core_file_system::chmod(path_type const& path, mode_t mode)
+    {
+        int ret = 0;
+        if (auto entry = this->get_entry_of(path)) {
+            auto new_inode = entry->inode();
+            new_inode.mode = mode;
+            entry->inode(new_inode);
+        } else
+            ret = -ENOENT;
+        return ret;
+    }
+
     std::vector<std::string> core_file_system::readdir(path_type const& path) const
     {
         std::vector<std::string> store;
