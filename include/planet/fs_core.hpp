@@ -158,6 +158,8 @@ namespace planet {
 
         int chmod(path_type const& path, mode_t mode);
 
+        int chown(path_type const& path, uid_t uid, gid_t gid);
+
         std::vector<std::string> readdir(path_type const& path) const;
 
         handle_t open(path_type const& path);

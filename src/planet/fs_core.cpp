@@ -12,13 +12,15 @@ namespace planet {
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
         if (auto fs_ent = this->get_entry_of(path)) {
-            stbuf.st_dev   = fs_ent->inode().dev;
-            stbuf.st_mode  = fs_ent->inode().mode;
-            stbuf.st_nlink = fs_ent.use_count();
-            stbuf.st_size  = fs_ent->size();
-            stbuf.st_atime = st_inode::to_time_t(fs_ent->inode().atime);
-            stbuf.st_mtime = st_inode::to_time_t(fs_ent->inode().mtime);
-            stbuf.st_ctime = st_inode::to_time_t(fs_ent->inode().ctime);
+            stbuf.st_dev    = fs_ent->inode().dev;
+            stbuf.st_mode   = fs_ent->inode().mode;
+            stbuf.st_uid    = fs_ent->inode().uid;
+            stbuf.st_gid    = fs_ent->inode().gid;
+            stbuf.st_nlink  = fs_ent.use_count() - 1;
+            stbuf.st_size   = fs_ent->size();
+            stbuf.st_atime  = st_inode::to_time_t(fs_ent->inode().atime);
+            stbuf.st_mtime  = st_inode::to_time_t(fs_ent->inode().mtime);
+            stbuf.st_ctime  = st_inode::to_time_t(fs_ent->inode().ctime);
         } else
             throw_system_error(ENOENT);
         return 0;
@@ -36,6 +38,7 @@ namespace planet {
     {
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             st_inode new_inode;
+            fill_st_inode(new_inode);
             new_inode.dev  = device;
             new_inode.mode = mode | S_IFREG;
             auto fentry =
@@ -80,6 +83,7 @@ namespace planet {
     {
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             st_inode new_inode;
+            fill_st_inode(new_inode);
             new_inode.mode = mode | S_IFDIR;
             auto dir_entry = parent_dir->add_entry<dentry>(path.filename().string(), ops_name, new_inode);
             try {
@@ -116,6 +120,19 @@ namespace planet {
         if (auto entry = this->get_entry_of(path)) {
             auto new_inode = entry->inode();
             new_inode.mode = mode;
+            entry->inode(new_inode);
+        } else
+            ret = -ENOENT;
+        return ret;
+    }
+
+    int core_file_system::chown(path_type const& path, uid_t uid, gid_t gid)
+    {
+        int ret = 0;
+        if (auto entry = this->get_entry_of(path)) {
+            auto new_inode = entry->inode();
+            new_inode.uid = uid;
+            new_inode.gid = gid;
             entry->inode(new_inode);
         } else
             ret = -ENOENT;

@@ -115,7 +115,19 @@ int planet_chmod(char const *path, mode_t mode)
 
 int planet_chown(char const *path, uid_t uid, gid_t gid)
 {
-    return 0;
+    planet::syslog_fmt(LOG_INFO, planet::format
+        ("%1%: path=%2% uid=%3% gid=%4%") % __func__ % path % uid % gid);
+    int ret = 0;
+    try {
+        ret = fs.root()->chown(path, uid, gid);
+    } catch (std::system_error& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.code().value();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
 }
 
 int planet_truncate(char const *path, off_t offset)

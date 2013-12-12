@@ -15,6 +15,8 @@ namespace planet {
     public:
         dev_t dev = 0;
         mode_t mode = 0;
+        uid_t uid = 0;
+        gid_t gid = 0;
         std::chrono::system_clock::time_point
             atime = std::chrono::system_clock::now(),
             mtime = std::chrono::system_clock::now(),
