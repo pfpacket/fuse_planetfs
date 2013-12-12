@@ -73,16 +73,12 @@ namespace planet {
             return std::get<info_index::ops>(*it)->name();
         }
 
-        shared_ptr<fs_ops_type> get_ops(string_type name)
+        shared_ptr<fs_ops_type> get_ops(string_type const& name)
         {
-            return std::get<info_index::ops>(*this->get_info_by_name(name));
-        }
-
-        shared_ptr<entry_op> get_entry_op(string_type name)
-        {
-            auto it = this->get_info_by_name(std::move(name));
-            return (it == ops_types_.end()) ? detail::shared_null_ptr
-                : std::get<info_index::ops>(*it)->create_op(fs_root_);
+            auto it = this->get_info_by_name(name);
+            if (it == ops_types_.end())
+                throw std::runtime_error("get_ops: No such ops: " + name);
+            return std::get<info_index::ops>(*it);
         }
 
         bool is_registered(string_type const& name)
