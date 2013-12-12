@@ -36,12 +36,13 @@ namespace planet {
         {
         }
 
-        entry_type const& get_operation_entry(handle_t ph)
+        entry_type const& get_op_entry(handle_t ph)
         try {
             return ops_.at(ph);
         } catch (...) {
-            ::syslog(LOG_NOTICE, "handle_manager::get_operation_entry: std::map::at thrown at %s:%d", __FILE__, __LINE__);
-            throw;
+            throw std::invalid_argument(
+                str(format("handle_manager: Invalid handle: %1%") % ph)
+            );
         }
 
         template<typename ...Types>

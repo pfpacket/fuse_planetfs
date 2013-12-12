@@ -131,7 +131,7 @@ namespace planet {
             new_handle = g_open_handles.register_op(
                 ops_db_.lock()->get_ops(fentry->ops_name())->create_op(shared_from_this()), fentry);
             try {
-                auto& op_tuple = g_open_handles.get_operation_entry(new_handle);
+                auto& op_tuple = g_open_handles.get_op_entry(new_handle);
                 int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
                 if (open_ret < 0)
                     throw_system_error(-open_ret);
