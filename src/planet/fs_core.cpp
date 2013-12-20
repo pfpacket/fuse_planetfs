@@ -1,9 +1,6 @@
 
 #include <planet/common.hpp>
 #include <planet/utils.hpp>
-#include <planet/fs_core.hpp>
-#include <planet/fs_entry.hpp>
-#include <planet/fs_ops_type.hpp>
 #include <planet/module_ops_type.hpp>
 
 namespace planet {

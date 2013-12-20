@@ -30,6 +30,7 @@ LIBPLANET_OBJS = \
               src/planet/common.o \
               src/planet/fs_core.o \
               src/planet/fs_entry.o \
+              src/planet/ops_type_db.o \
               src/planet/utils.o \
               src/planet/handle.o \
               src/planet/operation_layer.o \
