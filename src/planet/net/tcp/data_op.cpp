@@ -1,6 +1,5 @@
 
 #include <planet/common.hpp>
-#include <planet/operation_layer.hpp>
 #include <planet/net/tcp/data_op.hpp>
 #include <planet/utils.hpp>
 #include <syslog.h>

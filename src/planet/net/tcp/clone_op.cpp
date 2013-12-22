@@ -2,7 +2,6 @@
 #include <planet/common.hpp>
 #include <planet/fs_core.hpp>
 #include <planet/basic_operation.hpp>
-#include <planet/operation_layer.hpp>
 #include <planet/net/tcp/clone_op.hpp>
 #include <planet/utils.hpp>
 #include <netinet/in.h>
@@ -43,19 +42,19 @@ namespace tcp {
 
     int clone_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
     {
-        int bytes = planet::read(ctl_handle_, buf, size, offset);
+        int bytes = fs_root_->read(ctl_handle_, buf, size, offset);
         return bytes;
     }
 
     int clone_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
-        int bytes = planet::write(ctl_handle_, buf, size, offset);
+        int bytes = fs_root_->write(ctl_handle_, buf, size, offset);
         return bytes;
     }
 
     int clone_op::release(shared_ptr<fs_entry> file_ent)
     {
-        int ret = planet::close(ctl_handle_);
+        int ret = fs_root_->close(ctl_handle_);
         return ret;
     }
 
@@ -67,8 +66,8 @@ namespace tcp {
     {
         const char *request = "is_connected";
         auto handle = fs_root->open(ctl_path);
-        raii_wrapper raii([handle](){ planet::close(handle); });
-        int ret = planet::write(handle, request, strlen(request), 0);
+        raii_wrapper raii([&fs_root,handle](){ fs_root->close(handle); });
+        int ret = fs_root->write(handle, request, strlen(request), 0);
         return ret != -ENOTCONN;
     }
 

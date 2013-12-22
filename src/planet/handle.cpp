@@ -7,9 +7,6 @@
 namespace planet {
 
 
-    // Global planet handle manager
-    handle_manager g_open_handles;
-
     handle_t get_handle_from(struct fuse_file_info const& fi)
     {
         return static_cast<handle_t>(fi.fh);

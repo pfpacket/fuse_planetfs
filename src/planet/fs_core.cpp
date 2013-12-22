@@ -1,5 +1,6 @@
 
 #include <planet/common.hpp>
+#include <planet/fs_core.hpp>
 #include <planet/utils.hpp>
 #include <planet/module_ops_type.hpp>
 
@@ -168,6 +169,59 @@ namespace planet {
         } else
             throw_system_error(ENOENT);
         return new_handle;
+    }
+
+    int core_file_system::read(handle_t handle, char *buf, size_t size, off_t offset)
+    {
+        auto& op_tuple = g_open_handles.get_op_entry(handle);
+        return std::get<0>(op_tuple)->read(
+            std::get<1>(op_tuple), buf, size, offset
+        );
+    }
+
+    int core_file_system::write(handle_t handle, char const *buf, size_t size, off_t offset)
+    {
+        auto& op_tuple = g_open_handles.get_op_entry(handle);
+        return std::get<0>(op_tuple)->write(
+            std::get<1>(op_tuple), buf, size, offset
+        );
+    }
+
+    int core_file_system::close(handle_t handle)
+    {
+        auto& op_tuple = g_open_handles.get_op_entry(handle);
+        raii_wrapper raii([this, handle] {
+            this->g_open_handles.unregister_op(handle);
+            this->poller_.unregister(handle);
+        });
+        int ret = std::get<0>(op_tuple)->release(std::get<1>(op_tuple));
+        return ret;
+    }
+
+    int core_file_system::poll(handle_t handle, pollmask_t& pollmask)
+    {
+        auto& op_tuple = g_open_handles.get_op_entry(handle);
+        return std::get<0>(op_tuple)->poll(pollmask);
+    }
+
+    int core_file_system::poll(
+        path_type const& path, struct fuse_file_info *fi, struct fuse_pollhandle *ph, unsigned *reventsp
+    )
+    {
+        auto handle = get_handle_from(*fi);
+        std::call_once(invoke_poller_once_, [this]() {
+            this->poller_.poll(this->shared_from_this());
+        });
+
+        if (ph) {
+            //syslog_fmt(LOG_NOTICE, format("%s: handle=%d adding new handle") % __func__ % handle);
+            poller_.register_new(handle, ph);
+        }
+
+        *reventsp |= poller_.get_status(handle);
+        //syslog_fmt(LOG_NOTICE, format("%1%: handle=%2% polled=%3%") % __func__ % handle % *reventsp);
+        return 0;
+
     }
 
     void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)

@@ -16,6 +16,9 @@ namespace planet {
     // close(2) system call entry
     extern int close(handle_t);
 
+    // Poll handle
+    extern int poll(handle_t, pollmask_t& pollmask);
+
 
 }   // namespace planet
 

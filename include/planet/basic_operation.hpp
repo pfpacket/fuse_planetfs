@@ -41,6 +41,11 @@ namespace planet {
         {
             return 0;
         }
+
+        virtual int poll(pollmask_t& pollmask)
+        {
+            return 0;
+        }
     };
 
     //

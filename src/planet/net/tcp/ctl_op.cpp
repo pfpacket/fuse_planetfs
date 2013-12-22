@@ -2,7 +2,6 @@
 #include <planet/common.hpp>
 #include <planet/fs_core.hpp>
 #include <planet/basic_operation.hpp>
-#include <planet/operation_layer.hpp>
 #include <planet/net/tcp/ctl_op.hpp>
 #include <planet/utils.hpp>
 #include <planet/request_parser.hpp>

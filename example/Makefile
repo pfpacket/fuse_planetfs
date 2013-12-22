@@ -4,7 +4,8 @@ TARGETS    = dns_example \
 			 http_client_example \
 			 new_http_client \
 			 tcp_server_example \
-			 packet_recv_example
+			 packet_recv_example \
+			 netcat
 
 all: $(TARGETS)
 
@@ -18,6 +19,8 @@ tcp_server_example: tcp_server_example.o
 	$(CC) $(LDFLAGS) -o $@ tcp_server_example.o $(LIBS)
 packet_recv_example: packet_recv_example.o
 	$(CC) $(LDFLAGS) -o $@ packet_recv_example.o $(LIBS)
+netcat: netcat.o
+	$(CC) $(LDFLAGS) -o $@ netcat.o $(LIBS)
 
 clean:
 	rm -f $(TARGETS) *.o
