@@ -64,12 +64,12 @@ namespace planet {
         }
     }
 
-    inline raii_wrapper::functor_t const& raii_wrapper::get_finalizer() const
+    raii_wrapper::functor_t const& raii_wrapper::get_finalizer() const
     {
         return finalizer_;
     }
 
-    inline void raii_wrapper::finalize() const
+    void raii_wrapper::finalize() const
     {
         if (finalizer_)
             finalizer_();
