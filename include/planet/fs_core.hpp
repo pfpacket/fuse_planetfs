@@ -76,7 +76,7 @@ namespace planet {
         shared_ptr<dentry>      root    = detail::shared_null_ptr;
         weak_ptr<ops_type_db>   ops_db_;
 
-        handle_manager g_open_handles;
+        handle_manager open_handles_;
         std::once_flag invoke_poller_once_;
         fuse_poller poller_;
 

@@ -118,6 +118,7 @@ namespace planet {
         if (auto entry = this->get_entry_of(path)) {
             auto new_inode = entry->inode();
             new_inode.mode = mode;
+            new_inode.ctime = std::chrono::system_clock::now();
             entry->inode(new_inode);
         } else
             ret = -ENOENT;
@@ -155,15 +156,15 @@ namespace planet {
             if (entry->type() != file_type::regular_file)
                 throw_system_error(EISDIR);
             auto fentry = file_cast(entry);
-            new_handle = g_open_handles.register_op(
+            new_handle = open_handles_.register_op(
                 ops_db_.lock()->get_ops(fentry->ops_name())->create_op(shared_from_this()), fentry);
             try {
-                auto& op_tuple = g_open_handles.get_op_entry(new_handle);
+                auto& op_tuple = open_handles_.get_op_entry(new_handle);
                 int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
                 if (open_ret < 0)
                     throw_system_error(-open_ret);
             } catch (...) {
-                g_open_handles.unregister_op(new_handle);
+                open_handles_.unregister_op(new_handle);
                 throw;
             }
         } else
@@ -173,7 +174,7 @@ namespace planet {
 
     int core_file_system::read(handle_t handle, char *buf, size_t size, off_t offset)
     {
-        auto& op_tuple = g_open_handles.get_op_entry(handle);
+        auto& op_tuple = open_handles_.get_op_entry(handle);
         return std::get<0>(op_tuple)->read(
             std::get<1>(op_tuple), buf, size, offset
         );
@@ -181,7 +182,7 @@ namespace planet {
 
     int core_file_system::write(handle_t handle, char const *buf, size_t size, off_t offset)
     {
-        auto& op_tuple = g_open_handles.get_op_entry(handle);
+        auto& op_tuple = open_handles_.get_op_entry(handle);
         return std::get<0>(op_tuple)->write(
             std::get<1>(op_tuple), buf, size, offset
         );
@@ -189,9 +190,11 @@ namespace planet {
 
     int core_file_system::close(handle_t handle)
     {
-        auto& op_tuple = g_open_handles.get_op_entry(handle);
+        auto& op_tuple = open_handles_.get_op_entry(handle);
         raii_wrapper raii([this, handle] {
-            this->g_open_handles.unregister_op(handle);
+            raii_wrapper raii([this,handle] {
+                this->open_handles_.unregister_op(handle);
+            });
             this->poller_.unregister(handle);
         });
         int ret = std::get<0>(op_tuple)->release(std::get<1>(op_tuple));
@@ -200,7 +203,7 @@ namespace planet {
 
     int core_file_system::poll(handle_t handle, pollmask_t& pollmask)
     {
-        auto& op_tuple = g_open_handles.get_op_entry(handle);
+        auto& op_tuple = open_handles_.get_op_entry(handle);
         return std::get<0>(op_tuple)->poll(pollmask);
     }
 

@@ -31,7 +31,8 @@ namespace planet {
         if (it == phs_.end())
             phs_.emplace_back(handle, ph, 0);
         else {
-            ::fuse_pollhandle_destroy(std::get<1>(*it));
+            if (std::get<1>(*it))
+                ::fuse_pollhandle_destroy(std::get<1>(*it));
             std::get<1>(*it) = ph;
         }
         return it == phs_.end();
@@ -73,7 +74,7 @@ namespace planet {
         while (!poll_end_.load()) {
             try {
                 this->poll_handles(fs_root);
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             } catch (std::exception& e) {
                 syslog_fmt(LOG_ERR, format("poller: polling: Exception: %s") % e.what());
             } catch (...) {
@@ -88,8 +89,11 @@ namespace planet {
         for (auto&& pollinfo : phs_) {
             std::get<2>(pollinfo) = 0;
             fs_root->poll(std::get<0>(pollinfo), std::get<2>(pollinfo));
-            if (std::get<2>(pollinfo))
+            if (std::get<2>(pollinfo)) {
                 ::fuse_notify_poll(std::get<1>(pollinfo));
+                ::fuse_pollhandle_destroy(std::get<1>(pollinfo));
+                std::get<1>(pollinfo) = nullptr;
+            }
         }
     }
 

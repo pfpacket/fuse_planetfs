@@ -34,30 +34,6 @@ inline void display_usage(FILE *fout, const char *exec)
     fprintf(fout, "Usage: %s [OPTIONS] NET_PATH\n", exec);
 }
 
-int sock_connect_to(const char *host, const char *port)
-{
-    int s, sock = -1;
-    struct addrinfo hints, *ai, *res;
-    memset(&hints, 0, sizeof (hints));
-    hints.ai_family     = AF_UNSPEC;
-    hints.ai_socktype   = SOCK_STREAM;
-    hints.ai_flags      = AI_PASSIVE;
-
-    s = getaddrinfo(host, port, &hints, &res);
-    if (s != 0)
-        return -1;
-
-    for (ai = res; ai; ai = ai->ai_next) {
-        sock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-        if (sock < 0)
-            continue;
-        if (connect(sock, ai->ai_addr, ai->ai_addrlen) < 0)
-            continue;
-        break;
-    }
-    return sock;
-}
-
 void read_and_write(int in, int out)
 {
     char buf[buffer_size];
@@ -103,7 +79,6 @@ int main(int argc, char **argv)
         die(EXIT_FAILURE, "Too few arguments");
     }
     fd = open(argv[1], O_RDWR);
-    //fd = sock_connect_to(argv[1], "80");
     if (fd == -1)
         die(EXIT_FAILURE, strerror(errno));
     printf("Successfully connected to %s:80\n", argv[1]);
