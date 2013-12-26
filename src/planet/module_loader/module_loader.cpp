@@ -41,10 +41,9 @@ namespace planet {
         if (it_ != info_.end()) {
             string_type line =
                 std::get<0>(*it_) + '\t' + lexical_cast<string_type>(std::get<1>(*it_));
-            ret = (line.length() + 2 > size) ? size : line.length() + 2;
-            std::copy_n(line.begin(), ret - 2, buf);
-            buf[ret - 2] = '\n';
-            buf[ret - 1] = '\0';
+            ret = (line.length() + 1 > size) ? size : line.length() + 1;
+            std::copy_n(line.begin(), ret - 1, buf);
+            buf[ret - 1] = '\n';
             ++it_;
         }
         return ret;
