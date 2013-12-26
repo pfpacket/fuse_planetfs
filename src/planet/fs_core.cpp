@@ -7,6 +7,27 @@
 namespace planet {
 
 
+    static void update_last_access_time(shared_ptr<fs_entry> const& entry)
+    {
+        auto new_inode = entry->inode();
+        new_inode.atime = std::chrono::system_clock::now();
+        entry->inode(new_inode);
+    }
+
+    static void update_last_modified_time(shared_ptr<fs_entry> const& entry)
+    {
+        auto new_inode = entry->inode();
+        new_inode.mtime = std::chrono::system_clock::now();
+        entry->inode(new_inode);
+    }
+
+    static void update_last_stat_change_time(shared_ptr<fs_entry> const& entry)
+    {
+        auto new_inode = entry->inode();
+        new_inode.ctime = std::chrono::system_clock::now();
+        entry->inode(new_inode);
+    }
+
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
         if (auto fs_ent = this->get_entry_of(path)) {
@@ -132,6 +153,7 @@ namespace planet {
             auto new_inode = entry->inode();
             new_inode.uid = uid;
             new_inode.gid = gid;
+            new_inode.ctime = std::chrono::system_clock::now();
             entry->inode(new_inode);
         } else
             ret = -ENOENT;
@@ -163,6 +185,7 @@ namespace planet {
                 int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
                 if (open_ret < 0)
                     throw_system_error(-open_ret);
+                update_last_access_time(fentry);
             } catch (...) {
                 open_handles_.unregister_op(new_handle);
                 throw;
@@ -175,17 +198,21 @@ namespace planet {
     int core_file_system::read(handle_t handle, char *buf, size_t size, off_t offset)
     {
         auto& op_tuple = open_handles_.get_op_entry(handle);
-        return std::get<0>(op_tuple)->read(
+        int ret = std::get<0>(op_tuple)->read(
             std::get<1>(op_tuple), buf, size, offset
         );
+        update_last_modified_time(std::get<1>(op_tuple));
+        return ret;
     }
 
     int core_file_system::write(handle_t handle, char const *buf, size_t size, off_t offset)
     {
         auto& op_tuple = open_handles_.get_op_entry(handle);
-        return std::get<0>(op_tuple)->write(
+        int ret = std::get<0>(op_tuple)->write(
             std::get<1>(op_tuple), buf, size, offset
         );
+        update_last_modified_time(std::get<1>(op_tuple));
+        return ret;
     }
 
     int core_file_system::close(handle_t handle)
