@@ -52,14 +52,14 @@ namespace planet {
         // shared_ptr<fs_entry> is the new file entry which a new file operation will use
         virtual int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t)
         {
-            return 0;
+            return -EPERM;
         }
 
         // Destoroy the first argument of fs_entry
         // shared_ptr<fs_entry> was used by an other file operation, and now no one never uses it
         virtual int rmnod(shared_ptr<fs_entry>, path_type const&)
         {
-            return 0;
+            return -EPERM;
         }
 
         // Return true if the given path is for the operation
@@ -113,7 +113,7 @@ namespace planet {
             return make_shared<op_type>(fs_root);
         }
 
-        int mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t) override
+        int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override
         {
             return 0;
         }

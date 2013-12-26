@@ -5,7 +5,6 @@
 #include <planet/common.hpp>
 #include <planet/utils.hpp>
 #include <planet/handle.hpp>
-#include <planet/operation_layer.hpp>
 #include <planet/filesystem.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
@@ -23,8 +22,6 @@ int planet_getattr(char const *path, struct stat *stbuf)
         ret = fs.root()->getattr(path, *stbuf);
         stbuf->st_uid = ::getuid();
         stbuf->st_gid = ::getgid();
-        ::syslog(LOG_INFO, "getattr: path=%s size=%llu mode=%o nlink=%d",
-            path, stbuf->st_size, stbuf->st_mode, stbuf->st_nlink);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();
@@ -101,12 +98,35 @@ int planet_rmdir(char const *path)
 
 int planet_chmod(char const *path, mode_t mode)
 {
-    return 0;
+    ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path, mode);
+    int ret = 0;
+    try {
+        ret = fs.root()->chmod(path, mode);
+    } catch (std::system_error& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.code().value();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
 }
 
 int planet_chown(char const *path, uid_t uid, gid_t gid)
 {
-    return 0;
+    planet::syslog_fmt(LOG_INFO, planet::format
+        ("%1%: path=%2% uid=%3% gid=%4%") % __func__ % path % uid % gid);
+    int ret = 0;
+    try {
+        ret = fs.root()->chown(path, uid, gid);
+    } catch (std::system_error& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.code().value();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
 }
 
 int planet_truncate(char const *path, off_t offset)
@@ -180,7 +200,7 @@ int planet_read(char const *path, char *buf, size_t size, off_t offset, struct f
         planet::handle_t ph = planet::get_handle_from(*fi);
         ::syslog(LOG_INFO,
             "%s: handle=%d path=%s buf=%p size=%d offset=%llu", __func__, ph, path, buf, size, offset);
-        bytes_received = planet::read(ph, buf, size, offset);
+        bytes_received = fs.root()->read(ph, buf, size, offset);
         ::syslog(LOG_INFO, "%s: handle=%d bytes_received=%d", __func__, ph, bytes_received);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
@@ -199,7 +219,7 @@ int planet_write(char const *path, const char *buf, size_t size, off_t offset, s
         planet::handle_t ph = planet::get_handle_from(*fi);
         ::syslog(LOG_INFO,
             "%s: handle=%d path=%s buf=%p size=%d offset=%llu", __func__, ph, path, buf, size, offset);
-        bytes_transferred = planet::write(ph, buf, size, offset);
+        bytes_transferred = fs.root()->write(ph, buf, size, offset);
         ::syslog(LOG_INFO, "%s: handle=%d bytes_transferred=%d", __func__, ph, bytes_transferred);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
@@ -237,7 +257,24 @@ int planet_release(char const *path, struct fuse_file_info *fi)
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
         ::syslog(LOG_INFO, "%s: handle=%d path=%s fi=%p", __func__, ph, path, fi);
-        ret = planet::close(ph);
+        ret = fs.root()->close(ph);
+    } catch (std::system_error& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.code().value();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
+}
+
+int planet_poll(const char *path, struct fuse_file_info *fi, struct fuse_pollhandle *ph, unsigned *reventsp)
+{
+    int ret = 0;
+    //planet::syslog_fmt(LOG_NOTICE, planet::format(
+    //    "%s: handle=%d, fi=%p ph=%p reventsp=%p") % __func__ % planet::get_handle_from(*fi) % fi % ph % reventsp);
+    try {
+        ret = fs.root()->poll(path, fi, ph, reventsp);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();

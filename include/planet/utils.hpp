@@ -10,16 +10,17 @@ namespace planet {
     class file_entry;
     class dentry;
     class core_file_system;
+    class st_inode;
 
     // Cast entry to file_entry
     // Exception: If `entry` is not a type of file_entry
     //          : Also shared_ptr may throw exceptions
-    shared_ptr<file_entry> file_cast(shared_ptr<fs_entry> entry);
+    extern shared_ptr<file_entry> file_cast(shared_ptr<fs_entry> entry);
 
     // Cast entry to dentry
     // Exception: If `entry` is not a type of dentry
     //          : Also shared_ptr may throw exceptions
-    shared_ptr<dentry> directory_cast(shared_ptr<fs_entry> entry);
+    extern shared_ptr<dentry> directory_cast(shared_ptr<fs_entry> entry);
 
     template<typename Type, typename VecType>
     void store_data_to_vector(std::vector<VecType>& buffer, Type const& data)
@@ -58,11 +59,19 @@ namespace planet {
 
     // Equivalent to `return file_cast(fs_root.get_entry_of())`
     //  with exception handling
-    shared_ptr<file_entry> search_file_entry(core_file_system const&, path_type const&);
+    extern shared_ptr<file_entry> search_file_entry(core_file_system const&, path_type const&);
 
     // Equivalent to `return dir_cast(fs_root.get_entry_of())`
     //  with exception handling
-    shared_ptr<dentry> search_dir_entry(core_file_system const&, path_type const&);
+    extern shared_ptr<dentry> search_dir_entry(core_file_system const&, path_type const&);
+
+    extern void fill_st_inode(st_inode& inode);
+
+    template<typename FmtType>
+    void syslog_fmt(int priority, FmtType const& fmt)
+    {
+        ::syslog(priority, "%s", fmt.str().c_str());
+    }
 
     class raii_wrapper {
     private:
@@ -98,6 +107,7 @@ namespace planet {
 
         void finalize() const;
     };
+
 
 }   // namespace planet
 

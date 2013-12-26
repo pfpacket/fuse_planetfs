@@ -36,13 +36,9 @@ namespace planet {
         string_type cwd_;
 
     public:
-        module_loader()
-            : file_ops_type("planet.module_loader")
-        {
-            char cwd[PATH_MAX];
-            ::getcwd(cwd, sizeof cwd);
-            cwd_ = cwd;
-        }
+        static string_type const file_path;
+
+        module_loader();
 
         int install(shared_ptr<core_file_system> fs_root) override;
         int uninstall(shared_ptr<core_file_system> fs_root) override;

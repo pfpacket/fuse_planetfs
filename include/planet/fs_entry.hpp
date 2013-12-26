@@ -15,16 +15,21 @@ namespace planet {
     public:
         dev_t dev = 0;
         mode_t mode = 0;
+        uid_t uid = 0;
+        gid_t gid = 0;
         std::chrono::system_clock::time_point
             atime = std::chrono::system_clock::now(),
             mtime = std::chrono::system_clock::now(),
             ctime = std::chrono::system_clock::now();
 
-        decltype(atime) last_access_time() const;
+        decltype(atime)& last_access_time();
+        decltype(atime) const& last_access_time() const;
 
-        decltype(mtime) last_modified_time() const;
+        decltype(mtime)& last_modified_time();
+        decltype(mtime) const& last_modified_time() const;
 
-        decltype(ctime) last_stat_changed_time() const;
+        decltype(ctime)& last_stat_changed_time();
+        decltype(ctime) const& last_stat_changed_time() const;
 
         template<typename Clock, typename Duration>
         static std::time_t to_time_t(std::chrono::time_point<Clock, Duration> const& t)

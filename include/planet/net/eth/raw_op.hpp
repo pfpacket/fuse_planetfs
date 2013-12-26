@@ -31,6 +31,7 @@ namespace eth {
         int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
         int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
         int release(shared_ptr<fs_entry> file_ent) override;
+        int poll(pollmask_t&) override;
     };
 
     class raw_type : public file_ops_type {

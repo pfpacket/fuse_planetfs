@@ -2,6 +2,7 @@
 #include <planet/common.hpp>
 #include <planet/utils.hpp>
 #include <planet/fs_core.hpp>
+#include <fuse.h>
 
 namespace planet {
 
@@ -34,6 +35,12 @@ namespace planet {
             directory_cast(entry) : detail::shared_null_ptr);
     }
 
+    void fill_st_inode(st_inode& inode)
+    {
+        inode.uid = ::fuse_get_context()->uid;
+        inode.gid = ::fuse_get_context()->gid;
+    }
+
     //
     // raii_wrapper
     //
@@ -57,12 +64,12 @@ namespace planet {
         }
     }
 
-    inline raii_wrapper::functor_t const& raii_wrapper::get_finalizer() const
+    raii_wrapper::functor_t const& raii_wrapper::get_finalizer() const
     {
         return finalizer_;
     }
 
-    inline void raii_wrapper::finalize() const
+    void raii_wrapper::finalize() const
     {
         if (finalizer_)
             finalizer_();

@@ -68,15 +68,39 @@ namespace eth {
         return bytes;
     }
 
-
-    //
-    // raw_type
-    //
     int raw_op::release(shared_ptr<fs_entry> file_ent)
     {
         return close(fd_);
     }
 
+    int raw_op::poll(pollmask_t& pollmask)
+    {
+        // rfds, wfds, efds
+        std::vector<fd_set> fdsets(3);
+        for (auto&& fdset : fdsets) {
+            FD_ZERO(&fdset);
+            FD_SET(fd_, &fdset);
+        }
+        struct timespec no_wait = {};
+        int ret = pselect(fd_ + 1, &fdsets[0], &fdsets[1], &fdsets[2], &no_wait, nullptr);
+        if (ret == -1)
+            return -errno;
+        for (unsigned i = 0; i < fdsets.size(); ++i) {
+            if (FD_ISSET(fd_, &fdsets[i])) {
+                if (i == 0)
+                    pollmask |= POLLIN;
+                else if (i == 1)
+                    pollmask |= POLLOUT;
+                else if (i == 2)
+                    pollmask |= POLLERR;
+            }
+        }
+        return 0;
+    }
+
+    //
+    // raw_type
+    //
     shared_ptr<entry_op> raw_type::create_op(shared_ptr<core_file_system> fs_root)
     {
         return make_shared<raw_op>(fs_root);
@@ -97,6 +121,7 @@ namespace eth {
         return type == file_type::regular_file &&
             (path.parent_path() == "/eth" || path.parent_path() == "/ip");
     }
+
 
 }   // namespace eth
 }   // namespace net

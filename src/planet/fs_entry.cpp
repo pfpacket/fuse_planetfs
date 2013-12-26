@@ -7,15 +7,32 @@
 namespace planet {
 
 
-    decltype(st_inode::atime) st_inode::last_access_time() const
+    decltype(st_inode::atime)& st_inode::last_access_time()
     {
         return atime;
     }
-    decltype(st_inode::mtime) st_inode::last_modified_time() const
+
+    decltype(st_inode::atime) const& st_inode::last_access_time() const
+    {
+        return atime;
+    }
+
+    decltype(st_inode::mtime)& st_inode::last_modified_time()
     {
         return mtime;
     }
-    decltype(st_inode::ctime) st_inode::last_stat_changed_time() const
+
+    decltype(st_inode::mtime) const& st_inode::last_modified_time() const
+    {
+        return mtime;
+    }
+
+    decltype(st_inode::ctime)& st_inode::last_stat_changed_time()
+    {
+        return ctime;
+    }
+
+    decltype(st_inode::ctime) const& st_inode::last_stat_changed_time() const
     {
         return ctime;
     }

@@ -4,11 +4,11 @@
 CXX        := g++
 #CXXFLAGS  := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
 CXXFLAGS   := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
-              -std=c++0x -O2 -g $(shell pkg-config fuse --cflags) #-D_FORTIFY_SOURCE=1
+              -std=c++0x -O2 -g $(shell pkg-config fuse --cflags) -D_FORTIFY_SOURCE=2
 LDFLAGS    := -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all -fstack-check 
 BOOST_ROOT := /usr
 INCLUDES   := -I $(BOOST_ROOT)/include -I ./include
-LIBS       := -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse -lltdl
+LIBS       := -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse -lltdl -lpthread
 TARGET     := mount.planetfs
 OBJS       := src/planet/net/common.o \
               src/planet/net/dns/resolver_op.o \
@@ -30,10 +30,12 @@ LIBPLANET_OBJS = \
               src/planet/common.o \
               src/planet/fs_core.o \
               src/planet/fs_entry.o \
+              src/planet/ops_type_db.o \
               src/planet/utils.o \
               src/planet/handle.o \
-              src/planet/operation_layer.o \
+              src/planet/fuse_poller.o \
               src/planet/basic_operation.o \
+              src/planet/request_parser.o \
               src/planet/module_ops_type.o
 
 DEPS       := $(OBJS:%.o=%.d) $(LIBPLANET_OBJS:%.o=%.d)
