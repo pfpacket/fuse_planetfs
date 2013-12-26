@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         // Initialize filesystem
         planetfs_install_file_operations();
         planetfs_create_initial_fs_structure();
-        planetfs_print_installed_operations();
+        //planetfs_print_installed_operations();
 
         // Set system call functions
         planetfs_ops.getattr    =   planet_getattr;
@@ -81,6 +81,7 @@ int main(int argc, char **argv)
         planetfs_ops.write      =   planet_write;
         planetfs_ops.readdir    =   planet_readdir;
         planetfs_ops.release    =   planet_release;
+        planetfs_ops.poll       =   planet_poll;
 
         // Start the userspace filesystem
         exit_code = ::fuse_main(argc, argv, &planetfs_ops, nullptr);

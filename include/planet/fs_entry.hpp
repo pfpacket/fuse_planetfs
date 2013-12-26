@@ -22,10 +22,13 @@ namespace planet {
             mtime = std::chrono::system_clock::now(),
             ctime = std::chrono::system_clock::now();
 
+        decltype(atime)& last_access_time();
         decltype(atime) const& last_access_time() const;
 
+        decltype(mtime)& last_modified_time();
         decltype(mtime) const& last_modified_time() const;
 
+        decltype(ctime)& last_stat_changed_time();
         decltype(ctime) const& last_stat_changed_time() const;
 
         template<typename Clock, typename Duration>

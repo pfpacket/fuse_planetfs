@@ -5,7 +5,6 @@
 #include <planet/common.hpp>
 #include <planet/utils.hpp>
 #include <planet/handle.hpp>
-#include <planet/operation_layer.hpp>
 #include <planet/filesystem.hpp>
 #include <planetfs_operations.hpp>
 #include <syslog.h>
@@ -201,7 +200,7 @@ int planet_read(char const *path, char *buf, size_t size, off_t offset, struct f
         planet::handle_t ph = planet::get_handle_from(*fi);
         ::syslog(LOG_INFO,
             "%s: handle=%d path=%s buf=%p size=%d offset=%llu", __func__, ph, path, buf, size, offset);
-        bytes_received = planet::read(ph, buf, size, offset);
+        bytes_received = fs.root()->read(ph, buf, size, offset);
         ::syslog(LOG_INFO, "%s: handle=%d bytes_received=%d", __func__, ph, bytes_received);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
@@ -220,7 +219,7 @@ int planet_write(char const *path, const char *buf, size_t size, off_t offset, s
         planet::handle_t ph = planet::get_handle_from(*fi);
         ::syslog(LOG_INFO,
             "%s: handle=%d path=%s buf=%p size=%d offset=%llu", __func__, ph, path, buf, size, offset);
-        bytes_transferred = planet::write(ph, buf, size, offset);
+        bytes_transferred = fs.root()->write(ph, buf, size, offset);
         ::syslog(LOG_INFO, "%s: handle=%d bytes_transferred=%d", __func__, ph, bytes_transferred);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
@@ -258,7 +257,24 @@ int planet_release(char const *path, struct fuse_file_info *fi)
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
         ::syslog(LOG_INFO, "%s: handle=%d path=%s fi=%p", __func__, ph, path, fi);
-        ret = planet::close(ph);
+        ret = fs.root()->close(ph);
+    } catch (std::system_error& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -e.code().value();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = -EIO;
+    }
+    return ret;
+}
+
+int planet_poll(const char *path, struct fuse_file_info *fi, struct fuse_pollhandle *ph, unsigned *reventsp)
+{
+    int ret = 0;
+    //planet::syslog_fmt(LOG_NOTICE, planet::format(
+    //    "%s: handle=%d, fi=%p ph=%p reventsp=%p") % __func__ % planet::get_handle_from(*fi) % fi % ph % reventsp);
+    try {
+        ret = fs.root()->poll(path, fi, ph, reventsp);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();

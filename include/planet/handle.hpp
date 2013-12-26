@@ -65,8 +65,6 @@ namespace planet {
         }
     };
 
-    extern handle_manager g_open_handles;
-
     extern handle_t get_handle_from(struct fuse_file_info const& fi);
     extern void set_handle_to(struct fuse_file_info& fi, handle_t ph);
 

@@ -8,7 +8,7 @@ CXXFLAGS   := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializer
 LDFLAGS    := -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all -fstack-check 
 BOOST_ROOT := /usr
 INCLUDES   := -I $(BOOST_ROOT)/include -I ./include
-LIBS       := -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse -lltdl
+LIBS       := -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse -lltdl -lpthread
 TARGET     := mount.planetfs
 OBJS       := src/planet/net/common.o \
               src/planet/net/dns/resolver_op.o \
@@ -33,7 +33,7 @@ LIBPLANET_OBJS = \
               src/planet/ops_type_db.o \
               src/planet/utils.o \
               src/planet/handle.o \
-              src/planet/operation_layer.o \
+              src/planet/fuse_poller.o \
               src/planet/basic_operation.o \
               src/planet/request_parser.o \
               src/planet/module_ops_type.o

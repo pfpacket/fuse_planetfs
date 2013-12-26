@@ -24,6 +24,7 @@ extern int planet_read(char const *, char *, size_t, off_t, struct fuse_file_inf
 extern int planet_write(char const *, const char *, size_t, off_t, struct fuse_file_info *);
 extern int planet_readdir(char const *, void *, fuse_fill_dir_t, off_t, struct fuse_file_info *);
 extern int planet_release(char const *, struct fuse_file_info *);
+extern int planet_poll(const char *, struct fuse_file_info *, struct fuse_pollhandle *, unsigned *);
 
 
 #endif  // PLANETFS_OPERATIONS_HPP

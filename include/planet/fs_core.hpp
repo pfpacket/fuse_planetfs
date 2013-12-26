@@ -3,11 +3,11 @@
 
 #include <planet/common.hpp>
 #include <vector>
-#include <algorithm>
+#include <sys/poll.h>
 #include <planet/fs_entry.hpp>
 #include <planet/fs_ops_type.hpp>
 #include <planet/ops_type_db.hpp>
-#include <tuple>
+#include <planet/fuse_poller.hpp>
 
 namespace planet {
 
@@ -40,6 +40,16 @@ namespace planet {
 
         handle_t open(path_type const& path);
 
+        int read(handle_t, char *, size_t, off_t);
+
+        int write(handle_t, char const *, size_t, off_t);
+
+        int close(handle_t);
+
+        int poll(handle_t, pollmask_t&);
+
+        int poll(path_type const&, struct fuse_file_info *, struct fuse_pollhandle *, unsigned *);
+
         shared_ptr<fs_entry> get_entry_of(path_type const& path) const;
 
         void install_ops(priority p, shared_ptr<fs_ops_type> ops);
@@ -66,8 +76,13 @@ namespace planet {
         shared_ptr<dentry>      root    = detail::shared_null_ptr;
         weak_ptr<ops_type_db>   ops_db_;
 
+        handle_manager open_handles_;
+        std::once_flag invoke_poller_once_;
+        fuse_poller poller_;
+
         core_file_system() = default;
         static shared_ptr<fs_entry> get_entry_of(shared_ptr<dentry> root, path_type const& path);
+        void polling();
     };
 
 

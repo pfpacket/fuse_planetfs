@@ -24,22 +24,27 @@ namespace planet {
         // Open, read, write and close hook functions
         virtual int open(shared_ptr<fs_entry>, path_type const&)
         {
-            return 0;
+            return -EPERM;
         }
 
-        virtual int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset)
+        virtual int read(shared_ptr<fs_entry>, char *, size_t, off_t)
         {
-            return 0;
+            return -EPERM;
         }
 
-        virtual int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset)
+        virtual int write(shared_ptr<fs_entry>, char const *, size_t, off_t)
         {
-            return 0;
+            return -EPERM;
         }
 
         virtual int release(shared_ptr<fs_entry>)
         {
-            return 0;
+            return -EPERM;
+        }
+
+        virtual int poll(pollmask_t&)
+        {
+            return -EPERM;
         }
     };
 

@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <syslog.h>
+#include <sys/select.h>
 
 namespace planet {
 namespace net {
@@ -41,6 +41,31 @@ namespace tcp {
 
     int client_op::release(shared_ptr<fs_entry> file_ent)
     {
+        return 0;
+    }
+
+    int client_op::poll(pollmask_t& pollmask)
+    {
+        // rfds, wfds, efds
+        std::vector<fd_set> fdsets(3);
+        for (auto&& fdset : fdsets) {
+            FD_ZERO(&fdset);
+            FD_SET(fd_, &fdset);
+        }
+        struct timespec no_wait = {};
+        int ret = pselect(fd_ + 1, &fdsets[0], &fdsets[1], &fdsets[2], &no_wait, nullptr);
+        if (ret == -1)
+            return -errno;
+        for (unsigned i = 0; i < fdsets.size(); ++i) {
+            if (FD_ISSET(fd_, &fdsets[i])) {
+                if (i == 0)
+                    pollmask |= POLLIN;
+                else if (i == 1)
+                    pollmask |= POLLOUT;
+                else if (i == 2)
+                    pollmask |= POLLERR;
+            }
+        }
         return 0;
     }
 

@@ -2,7 +2,7 @@
 #include <planet/common.hpp>
 #include <planet/utils.hpp>
 #include <planet/basic_operation.hpp>
-#include <planet/fs_core.hpp>
+#include <planet/fs_entry.hpp>
 
 namespace planet {
 

@@ -1,10 +1,32 @@
 
 #include <planet/common.hpp>
+#include <planet/fs_core.hpp>
 #include <planet/utils.hpp>
 #include <planet/module_ops_type.hpp>
 
 namespace planet {
 
+
+    static void update_last_access_time(shared_ptr<fs_entry> const& entry)
+    {
+        auto new_inode = entry->inode();
+        new_inode.atime = std::chrono::system_clock::now();
+        entry->inode(new_inode);
+    }
+
+    static void update_last_modified_time(shared_ptr<fs_entry> const& entry)
+    {
+        auto new_inode = entry->inode();
+        new_inode.mtime = std::chrono::system_clock::now();
+        entry->inode(new_inode);
+    }
+
+    static void update_last_stat_change_time(shared_ptr<fs_entry> const& entry)
+    {
+        auto new_inode = entry->inode();
+        new_inode.ctime = std::chrono::system_clock::now();
+        entry->inode(new_inode);
+    }
 
     int core_file_system::getattr(path_type const& path, struct stat& stbuf) const
     {
@@ -117,6 +139,7 @@ namespace planet {
         if (auto entry = this->get_entry_of(path)) {
             auto new_inode = entry->inode();
             new_inode.mode = mode;
+            new_inode.ctime = std::chrono::system_clock::now();
             entry->inode(new_inode);
         } else
             ret = -ENOENT;
@@ -130,6 +153,7 @@ namespace planet {
             auto new_inode = entry->inode();
             new_inode.uid = uid;
             new_inode.gid = gid;
+            new_inode.ctime = std::chrono::system_clock::now();
             entry->inode(new_inode);
         } else
             ret = -ENOENT;
@@ -154,20 +178,80 @@ namespace planet {
             if (entry->type() != file_type::regular_file)
                 throw_system_error(EISDIR);
             auto fentry = file_cast(entry);
-            new_handle = g_open_handles.register_op(
+            new_handle = open_handles_.register_op(
                 ops_db_.lock()->get_ops(fentry->ops_name())->create_op(shared_from_this()), fentry);
             try {
-                auto& op_tuple = g_open_handles.get_op_entry(new_handle);
+                auto& op_tuple = open_handles_.get_op_entry(new_handle);
                 int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
                 if (open_ret < 0)
                     throw_system_error(-open_ret);
+                update_last_access_time(fentry);
             } catch (...) {
-                g_open_handles.unregister_op(new_handle);
+                open_handles_.unregister_op(new_handle);
                 throw;
             }
         } else
             throw_system_error(ENOENT);
         return new_handle;
+    }
+
+    int core_file_system::read(handle_t handle, char *buf, size_t size, off_t offset)
+    {
+        auto& op_tuple = open_handles_.get_op_entry(handle);
+        int ret = std::get<0>(op_tuple)->read(
+            std::get<1>(op_tuple), buf, size, offset
+        );
+        update_last_modified_time(std::get<1>(op_tuple));
+        return ret;
+    }
+
+    int core_file_system::write(handle_t handle, char const *buf, size_t size, off_t offset)
+    {
+        auto& op_tuple = open_handles_.get_op_entry(handle);
+        int ret = std::get<0>(op_tuple)->write(
+            std::get<1>(op_tuple), buf, size, offset
+        );
+        update_last_modified_time(std::get<1>(op_tuple));
+        return ret;
+    }
+
+    int core_file_system::close(handle_t handle)
+    {
+        auto& op_tuple = open_handles_.get_op_entry(handle);
+        raii_wrapper raii([this, handle] {
+            raii_wrapper raii([this,handle] {
+                this->open_handles_.unregister_op(handle);
+            });
+            this->poller_.unregister(handle);
+        });
+        int ret = std::get<0>(op_tuple)->release(std::get<1>(op_tuple));
+        return ret;
+    }
+
+    int core_file_system::poll(handle_t handle, pollmask_t& pollmask)
+    {
+        auto& op_tuple = open_handles_.get_op_entry(handle);
+        return std::get<0>(op_tuple)->poll(pollmask);
+    }
+
+    int core_file_system::poll(
+        path_type const& path, struct fuse_file_info *fi, struct fuse_pollhandle *ph, unsigned *reventsp
+    )
+    {
+        auto handle = get_handle_from(*fi);
+        std::call_once(invoke_poller_once_, [this]() {
+            this->poller_.poll(this->shared_from_this());
+        });
+
+        if (ph) {
+            //syslog_fmt(LOG_NOTICE, format("%s: handle=%d adding new handle") % __func__ % handle);
+            poller_.register_new(handle, ph);
+        }
+
+        *reventsp |= poller_.get_status(handle);
+        //syslog_fmt(LOG_NOTICE, format("%1%: handle=%2% polled=%3%") % __func__ % handle % *reventsp);
+        return 0;
+
     }
 
     void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)
