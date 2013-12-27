@@ -1,0 +1,27 @@
+#
+# module_loader.txt
+#
+This documents describes how module_loader services work.
+
+Install:
+  module_loader services will be pre-installed statically.
+ Once the services are installed, /net/modules will be
+  appeared.
+
+What is module_loader ?:
+  module_loader is to deal with dynamic modules.
+  For example:  loading and unload dynamic modules.
+                Get the list of installed modules
+
+Uses:
+  To load a dynamic module:
+   $ echo "load modules_name" > /net/modules
+   $ echo "load mod1,mod2" > /net/modules
+  To unload it:
+   $ echo "unload modules_name" > /net/modules
+   $ echo "unload mod1,mod2" > /net/modules
+  To get the list of all installed dynamic modules and their priorities:
+   $ cat /net/modules
+
+See also:
+ src/planet/module_loader/module_loader.cpp

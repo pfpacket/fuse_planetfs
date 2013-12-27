@@ -1,0 +1,21 @@
+#
+# tcp.txt
+#
+This documents describes how TCP services work.
+
+Install:
+  TCP services will be pre-installed statically.
+ Once the services are installed, /net/tcp/clone will be
+  appeared.
+
+Uses:
+  Work just like Plan 9.
+  Will be documented later...
+
+See also:
+ src/planet/net/tcp/*
+ example/get_google_page.sh
+ example/new_get_google_page.sh
+ example/tcp_echo_client.sh
+ example/tcp_server_example.c
+ example/http_client_example.c
