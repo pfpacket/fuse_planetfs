@@ -201,7 +201,7 @@ namespace planet {
         int ret = std::get<0>(op_tuple)->read(
             std::get<1>(op_tuple), buf, size, offset
         );
-        update_last_modified_time(std::get<1>(op_tuple));
+        update_last_access_time(std::get<1>(op_tuple));
         return ret;
     }
 
@@ -211,6 +211,7 @@ namespace planet {
         int ret = std::get<0>(op_tuple)->write(
             std::get<1>(op_tuple), buf, size, offset
         );
+        update_last_access_time(std::get<1>(op_tuple));
         update_last_modified_time(std::get<1>(op_tuple));
         return ret;
     }
