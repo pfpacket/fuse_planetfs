@@ -20,8 +20,6 @@ int planet_getattr(char const *path, struct stat *stbuf)
     try {
         std::memset(stbuf, 0, sizeof (struct stat));
         ret = fs.root()->getattr(path, *stbuf);
-        stbuf->st_uid = ::getuid();
-        stbuf->st_gid = ::getgid();
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();
@@ -134,10 +132,7 @@ int planet_truncate(char const *path, off_t offset)
     ::syslog(LOG_INFO, "%s: path=%s offset=%lld", __func__, path, offset);
     int ret = 0;
     try {
-        if (auto entry = fs.root()->get_entry_of(path))
-            planet::file_cast(entry)->data().resize(offset);
-        else
-            ret = -ENOENT;
+        ret = fs.root()->truncate(path, offset);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();
@@ -153,18 +148,7 @@ int planet_utimens(char const* path, struct timespec const tv[2])
     ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
     int ret = 0;
     try {
-        namespace ch = std::chrono;
-        if (auto entry = fs.root()->get_entry_of(path)) {
-            ch::nanoseconds nano_access(tv[0].tv_nsec), nano_mod(tv[1].tv_nsec);
-            ch::seconds sec_access(tv[0].tv_sec), sec_mod(tv[1].tv_sec);
-            planet::st_inode new_inode = entry->inode();
-            new_inode.atime = decltype(new_inode.atime)
-                (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_access + sec_access));
-            new_inode.mtime = decltype(new_inode.atime)
-                (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_mod + sec_mod));
-            entry->inode(new_inode);
-        } else
-            ret = -ENOENT;
+        ret = fs.root()->utimens(path, tv);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();

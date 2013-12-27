@@ -160,6 +160,34 @@ namespace planet {
         return ret;
     }
 
+    int core_file_system::truncate(path_type const& path, off_t offset)
+    {
+        int ret = 0;
+        if (auto entry = this->get_entry_of(path))
+            planet::file_cast(entry)->data().resize(offset);
+        else
+            ret = -ENOENT;
+        return ret;
+    }
+
+    int core_file_system::utimens(path_type const& path, struct timespec const tv[2])
+    {
+        int ret = 0;
+        namespace ch = std::chrono;
+        if (auto entry = this->get_entry_of(path)) {
+            ch::nanoseconds nano_access(tv[0].tv_nsec), nano_mod(tv[1].tv_nsec);
+            ch::seconds sec_access(tv[0].tv_sec), sec_mod(tv[1].tv_sec);
+            planet::st_inode new_inode = entry->inode();
+            new_inode.atime = decltype(new_inode.atime)
+                (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_access + sec_access));
+            new_inode.mtime = decltype(new_inode.atime)
+                (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_mod + sec_mod));
+            entry->inode(new_inode);
+        } else
+            ret = -ENOENT;
+        return ret;
+    }
+
     std::vector<std::string> core_file_system::readdir(path_type const& path) const
     {
         std::vector<std::string> store;

@@ -36,6 +36,10 @@ namespace planet {
 
         int chown(path_type const& path, uid_t uid, gid_t gid);
 
+        int truncate(path_type const&, off_t);
+
+        int utimens(path_type const&, struct timespec const [2]);
+
         std::vector<std::string> readdir(path_type const& path) const;
 
         handle_t open(path_type const& path);

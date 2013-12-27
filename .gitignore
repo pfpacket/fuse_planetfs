@@ -15,3 +15,6 @@ example/http_client_example
 example/new_http_client
 valgrind.log
 *.d
+*.log
+coredump
+core.*
