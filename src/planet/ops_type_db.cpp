@@ -31,7 +31,9 @@ namespace planet {
                             > std::get<info_index::prio>(r);
                 }
             );
-            ops->install(fs_root_);
+            int ret = ops->install(fs_root_);
+            if (ret < 0)
+                throw_system_error(-ret, "ops_info_db: registering ops");
         } catch (...) {
             this->remove_ops(ops->name());
             throw;
