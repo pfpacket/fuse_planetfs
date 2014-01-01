@@ -75,8 +75,6 @@ namespace planet {
     public:
         file_entry(string_type name, string_type ops_name, st_inode const& sti);
 
-        virtual ~file_entry() = default;
-
         string_type const& name() const override;
 
         file_type type() const noexcept override;
@@ -108,8 +106,6 @@ namespace planet {
 
     public:
         dentry(string_type name, string_type ops_name, st_inode const& sti = {});
-
-        virtual ~dentry();
 
         string_type const& name() const override;
 

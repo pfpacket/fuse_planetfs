@@ -60,8 +60,6 @@ namespace planet {
         {
         }
 
-        virtual ~default_file_op() = default;
-
         virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
         virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;
         virtual int write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset) override;
@@ -75,8 +73,6 @@ namespace planet {
         default_dir_op(shared_ptr<core_file_system>)
         {
         }
-
-        virtual ~default_dir_op() = default;
 
         virtual int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
         virtual int read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset) override;

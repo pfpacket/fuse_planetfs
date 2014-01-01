@@ -23,8 +23,6 @@ namespace planet {
         {
         }
 
-        virtual ~fs_ops_type() = default;
-
         string_type const& name() const
         {
             return op_name_;
@@ -81,8 +79,6 @@ namespace planet {
         {
         }
 
-        virtual ~file_ops_type() = default;
-
         shared_ptr<entry_op> create_op(shared_ptr<core_file_system> fs_root) override
         {
             return make_shared<op_type>(fs_root);
@@ -105,8 +101,6 @@ namespace planet {
         dir_ops_type(string_type name) : fs_ops_type(name)
         {
         }
-
-        virtual ~dir_ops_type() = default;
 
         shared_ptr<entry_op> create_op(shared_ptr<core_file_system> fs_root) override
         {
