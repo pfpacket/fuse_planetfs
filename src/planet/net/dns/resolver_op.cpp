@@ -45,7 +45,7 @@ namespace dns {
         if (line.length() + 1 > size)
             return -ENAMETOOLONG;
         std::copy_n(line.begin(), line.length(), buf);
-        buf[line.length()] = '\0';
+        buf[line.length()] = '\n';
         resolved_names_.erase(resolved_names_.begin());
         return line.length() + 1;
     }

@@ -24,11 +24,10 @@ namespace tcp {
         int ret = 0;
         if (!fd_number_already_read_) {
             std::string dir_number = str(format("%1%") % current_fd_);
-            if (dir_number.length() >= size)
+            if (dir_number.length() > size)
                 return -ENOBUFS;
             std::copy(dir_number.begin(), dir_number.end(), buf);
-            buf[dir_number.length()] = '\0';
-            ret = dir_number.length() + 1;
+            ret = dir_number.length();
             fd_number_already_read_ = true;
         }
         return ret;
