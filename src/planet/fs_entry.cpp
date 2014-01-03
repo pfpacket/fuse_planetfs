@@ -101,6 +101,10 @@ namespace planet {
         entries_.reserve(default_vector_size);
     }
 
+    dentry::~dentry()
+    {
+    }
+
     string_type const& dentry::name() const
     {
         return name_;
