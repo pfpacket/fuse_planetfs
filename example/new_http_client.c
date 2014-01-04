@@ -20,7 +20,7 @@ void die(const char *prefix)
 int main(int argc, char **argv)
 {
     int clone_fd, data_fd, size;
-    char data_file[256], buffer[1024];
+    char data_file[256], buffer[1024], clone_num[64] = {0};
     const char *ctl_request  = "connect 74.125.235.240!80",
                *http_request = "GET /index.html HTTP/1.1\r\n"
                                "Host: www.google.co.jp\r\n"
@@ -28,12 +28,12 @@ int main(int argc, char **argv)
     clone_fd = open("/net/tcp/clone", O_RDWR);
     if (clone_fd < 0)
         die("clone: open");
-    if (read(clone_fd, buffer, sizeof (buffer)) < 0)
+    if (read(clone_fd, clone_num, sizeof (clone_num)) < 0)
         die("clone: read");
     if (write(clone_fd, ctl_request, strlen(ctl_request)) < 0)
         die("clone: write");
 
-    snprintf(data_file, sizeof (data_file), "/net/tcp/%s/data", buffer);
+    snprintf(data_file, sizeof (data_file), "/net/tcp/%s/data", clone_num);
     data_fd = open(data_file, O_RDWR);
     if (data_fd < 0)
         die("data: open");
