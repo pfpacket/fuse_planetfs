@@ -4,83 +4,62 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include <fcntl.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+#include <fcntl.h>
 
-enum constants {
-    buffer_size = 1024
-};
-
-inline int max(int a, int b)
-{
-    return a > b ? a : b;
-}
+enum { buffer_size = 1024 };
+#define max(a, b) ((a) > (b) ? (a) : (b))
 
 void die(int exit_code, const char *msg)
 {
-    if (msg)
-        fprintf(stderr, "FATAL ERROR: %s\n", msg);
+    fprintf(stderr, "Fatal error: %s\n", msg);
     exit(exit_code);
 }
 
-inline void display_usage(FILE *fout, const char *exec)
-{
-    fprintf(fout, "Usage: %s [OPTIONS] NET_PATH\n", exec);
-}
-
-void read_and_write(int in, int out)
+int write_once(int in, int out)
 {
     char buf[buffer_size];
-    int backup_flag = fcntl(in, F_GETFL);
-    fcntl(in, F_SETFL, backup_flag | O_NONBLOCK);
-    for (;;) {
-        int ret = read(in, buf, sizeof buf);
-        if (ret <= 0)
-            break;
+    int ret = read(in, buf, sizeof buf);
+    if (ret > 0)
         write(out, buf, ret);
-    }
-    fcntl(in, F_SETFL, backup_flag);
+    return ret;
 }
 
-int read_write_until_eof(int fd)
+void netcat(int fd)
 {
-    int ret = 0;
     fd_set rfds, backup_fds;
     FD_ZERO(&backup_fds);
     FD_SET(fd, &backup_fds);
     FD_SET(STDIN_FILENO, &backup_fds);
     for (;;) {
         rfds = backup_fds;
-        int res = select(max(STDIN_FILENO, fd) + 1, &rfds, NULL, NULL, NULL);
-        if (res == -1) {
+        if (select(max(STDIN_FILENO, fd) + 1, &rfds, NULL, NULL, NULL) < 0) {
             if (errno == EINTR)
                 continue;
             die(EXIT_FAILURE, strerror(errno));
         }
         if (FD_ISSET(fd, &rfds))
-            read_and_write(fd, STDOUT_FILENO);
+            if (!write_once(fd, STDOUT_FILENO))
+                break;
         if (FD_ISSET(STDIN_FILENO, &rfds))
-            read_and_write(STDIN_FILENO, fd);
+            if (!write_once(STDIN_FILENO, fd))
+                break;
     }
-    return ret;
 }
 
 int main(int argc, char **argv)
 {
     int fd;
-    if (argc <= 1) {
-        display_usage(stderr, argv[0]);
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s [OPTIONS] NET_PATH\n", argv[0]);
         die(EXIT_FAILURE, "Too few arguments");
     }
     fd = open(argv[1], O_RDWR);
     if (fd == -1)
         die(EXIT_FAILURE, strerror(errno));
-    printf("Successfully connected to %s:80\n", argv[1]);
-    return read_write_until_eof(fd);
+    netcat(fd);
+    close(fd);
+    return 0;
 }
