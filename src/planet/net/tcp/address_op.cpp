@@ -12,17 +12,17 @@ namespace tcp {
     //
     // local_op - /tcp/*/local
     //
-    void local_op::update_address(int sock, shared_ptr<fs_entry> file)
+    int local_op::update_address(int sock, shared_ptr<fs_entry> file)
     {
         struct sockaddr_storage peer{};
         socklen_t len = sizeof (peer);
         if (getsockname(sock, (sockaddr *)&peer, &len) < 0)
-            throw_system_error(errno, str(format("getpeername: fd=%1%") % sock));
+            throw_system_error(errno, str(format("getsockname: fd=%1%") % sock));
         std::string hostname, servname;
         get_name_info((sockaddr *)&peer, len, hostname, servname);
         auto local_addr = str(format("%1%!%2%\n") % hostname % servname);
         file_cast(file)->data().clear();
-        this->write(file, local_addr.c_str(), local_addr.length(), 0);
+        return default_file_op::write(file, local_addr.c_str(), local_addr.length(), 0);
     }
 
     int local_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
@@ -30,16 +30,27 @@ namespace tcp {
         int ret = 0;
         ::syslog(LOG_INFO, "%s: %s", __PRETTY_FUNCTION__, path.parent_path().string().c_str());
         if (auto sock = detail::fdtable.find_from_path(path.string()))
-            update_address(*sock, file_ent);
+            sock_ = *sock;
         else
             ret = -ENOTCONN;
         return ret;
     }
 
+    int local_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
+    {
+        this->update_address(*sock_, file_ent);
+        return default_file_op::read(file_ent, buf, size, offset);
+    }
+
+    int local_op::write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset)
+    {
+        return -EPERM;
+    }
+
     //
     // remote_op - /tcp/*/remote
     //
-    void remote_op::update_address(int sock, shared_ptr<fs_entry> file)
+    int remote_op::update_address(int sock, shared_ptr<fs_entry> file)
     {
         struct sockaddr_storage peer{};
         socklen_t len = sizeof (peer);
@@ -49,7 +60,7 @@ namespace tcp {
         get_name_info((sockaddr *)&peer, len, hostname, servname);
         auto local_addr = str(format("%1%!%2%\n") % hostname % servname);
         file_cast(file)->data().clear();
-        this->write(file, local_addr.c_str(), local_addr.length(), 0);
+        return default_file_op::write(file, local_addr.c_str(), local_addr.length(), 0);
     }
 
     int remote_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
@@ -57,10 +68,21 @@ namespace tcp {
         int ret = 0;
         ::syslog(LOG_INFO, "%s: %s", __PRETTY_FUNCTION__, path.parent_path().string().c_str());
         if (auto sock = detail::fdtable.find_from_path(path.string()))
-            update_address(*sock, file_ent);
+            sock_ = sock;
         else
             ret = -ENOTCONN;
         return ret;
+    }
+
+    int remote_op::read(shared_ptr<fs_entry> file_ent, char *buf, size_t size, off_t offset)
+    {
+        this->update_address(*sock_, file_ent);
+        return default_file_op::read(file_ent, buf, size, offset);
+    }
+
+    int remote_op::write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset)
+    {
+        return -EPERM;
     }
 
 

@@ -17,6 +17,7 @@ namespace tcp {
     //
     class local_op : public default_file_op {
     private:
+        optional<int> sock_;
         shared_ptr<core_file_system> fs_root_;
 
     public:
@@ -29,11 +30,11 @@ namespace tcp {
         {
         }
 
-        void update_address(int, shared_ptr<fs_entry>);
+        int update_address(int, shared_ptr<fs_entry>);
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-        // int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset) override;
-        // int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset) override;
+        int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset) override;
+        int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset) override;
     };
 
     class local_type : public file_ops_type {
@@ -59,6 +60,7 @@ namespace tcp {
     //
     class remote_op : public default_file_op {
     private:
+        optional<int> sock_;
         shared_ptr<core_file_system> fs_root_;
 
     public:
@@ -71,11 +73,11 @@ namespace tcp {
         {
         }
 
-        void update_address(int, shared_ptr<fs_entry>);
+        int update_address(int, shared_ptr<fs_entry>);
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-        // int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset) override;
-        // int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset) override;
+        int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset) override;
+        int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset) override;
     };
 
     class remote_type : public file_ops_type {
