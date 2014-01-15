@@ -4,7 +4,7 @@
 #include <planet/filesystem.hpp>
 
 #define LOG_EXCEPTION_MSG(e) \
-    ::syslog(LOG_ERR, "%s: %s", __func__, (e).what());
+    BOOST_LOG_TRIVIAL(error) << __func__ << ": " << (e).what();
 
 // Core filesystem object
 extern planet::filesystem fs;

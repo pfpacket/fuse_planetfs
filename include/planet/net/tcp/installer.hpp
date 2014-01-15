@@ -45,7 +45,7 @@ namespace tcp {
         int uninstall(shared_ptr<core_file_system> fs_root) override
         {
             try {
-                syslog_fmt(LOG_NOTICE, format("tcp.installer: recursive uninstallation for TCP dependencies"));
+                BOOST_LOG_TRIVIAL(trace) << "tcp.installer: recursive uninstallation for TCP dependencies";
                 fs_root->uninstall_ops(server_type::type_name);
                 fs_root->uninstall_ops(client_type::type_name);
                 fs_root->uninstall_ops(session_dir_type::type_name);

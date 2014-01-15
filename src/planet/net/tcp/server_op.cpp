@@ -6,7 +6,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <syslog.h>
 
 namespace planet {
 namespace net {
@@ -78,9 +77,9 @@ namespace tcp {
         auto pos        = filename.find_first_of(host_port_delimiter);
         auto host       = filename.substr(0, pos);
         int port        = atoi(filename.substr(pos + 1).c_str());
-        syslog(LOG_INFO, "server_type::mknod: establishing server host=%s, port=%d", host.c_str(), port);
+        BOOST_LOG_TRIVIAL(info) << "server_type::mknod: establishing server host=" << host << " port=" << port;
         int serverfd    = establish_server(host, port);
-        syslog(LOG_NOTICE, "server_type::mknod: established server %s:%d fd=%d opened", host.c_str(), port, serverfd);
+        BOOST_LOG_TRIVIAL(info) << "server_type::mknod: established server " << host << ":" << port << " fd=" << serverfd;
         detail::fdtable.insert(path.string(), serverfd);
         return 0;
     }

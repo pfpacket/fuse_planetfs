@@ -1,14 +1,15 @@
 #
 # Makefile
 #
+BOOST_ROOT := /usr
 CXX        := g++
 #CXXFLAGS  := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
 CXXFLAGS   := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
-              -std=c++0x -O2 -g $(shell pkg-config fuse --cflags) -D_FORTIFY_SOURCE=2
-LDFLAGS    := -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all -fstack-check 
-BOOST_ROOT := /usr
+              -std=c++0x -g $(shell pkg-config fuse --cflags) -DBOOST_LOG_DYN_LINK #-D_FORTIFY_SOURCE=2
+LDFLAGS    := -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all #-fstack-check
 INCLUDES   := -I $(BOOST_ROOT)/include -I ./include
-LIBS       := -L $(BOOST_ROOT)/lib -lboost_system -lboost_filesystem -lfuse -lltdl -lpthread
+LIBS       := -L $(BOOST_ROOT)/lib -lfuse -lltdl -lpthread \
+              -lboost_system -lboost_filesystem -lboost_log -lboost_log_setup -lboost_thread
 TARGET     := mount.planetfs
 OBJS       := src/planet/net/common.o \
               src/planet/net/dns/resolver_op.o \

@@ -39,7 +39,7 @@ namespace planet {
             // Destroy ops_db_ first because ops_db_ has a reference to root_
             ops_db_->clear();
             ops_db_.reset();
-            ::syslog(LOG_NOTICE, "filesystem: dtor: core_file_system: use_count=%ld", root_.use_count());
+            BOOST_LOG_TRIVIAL(debug) << "filesystem: dtor: core_file_system: use_count=" << root_.use_count();
         }
 
         shared_ptr<core_file_system> root()

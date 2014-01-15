@@ -67,12 +67,6 @@ namespace planet {
 
     extern void fill_st_inode(st_inode& inode);
 
-    template<typename FmtType>
-    void syslog_fmt(int priority, FmtType const& fmt)
-    {
-        ::syslog(priority, "%s", fmt.str().c_str());
-    }
-
     class raii_wrapper {
     private:
         typedef std::function<void (void)> functor_t;

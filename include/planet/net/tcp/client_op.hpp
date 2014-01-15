@@ -52,9 +52,9 @@ namespace tcp {
             auto pos        = filename.find_first_of(host_port_delimiter);
             auto host       = filename.substr(0, pos);
             auto port       = filename.substr(pos + 1);
-            syslog(LOG_INFO, "client_op::mknod: connecting to host=%s, port=%s", host.c_str(), port.c_str());
+            BOOST_LOG_TRIVIAL(info) << "client_op::mknod: connecting to host=" << host << ", port=" << port;
             int sock = sock_connect_to(host, port);
-            syslog(LOG_NOTICE, "client_op::mknod: connection established %s!%s fd=%d opened", host.c_str(), port.c_str(), sock);
+            BOOST_LOG_TRIVIAL(info) << "client_op::mknod: connection established " << host << "!" << port << " fd=" << sock;
             detail::fdtable.insert(path.string(), sock);
             return 0;
         }

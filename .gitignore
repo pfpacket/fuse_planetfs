@@ -13,8 +13,11 @@ example/tcp_client_example
 example/tcp_server_example
 example/http_client_example
 example/new_http_client
+example/netcat
+example/pkt_rcv_select
 valgrind.log
 *.d
 *.log
 coredump
 core.*
+logs/

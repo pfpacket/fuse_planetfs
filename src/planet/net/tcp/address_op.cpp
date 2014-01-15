@@ -30,7 +30,6 @@ namespace tcp {
     int local_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         int ret = 0;
-        ::syslog(LOG_INFO, "%s: %s", __PRETTY_FUNCTION__, path.parent_path().string().c_str());
         if (auto sock = detail::fdtable.find_from_path(path.string()))
             sock_ = *sock;
         else
@@ -70,7 +69,6 @@ namespace tcp {
     int remote_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         int ret = 0;
-        ::syslog(LOG_INFO, "%s: %s", __PRETTY_FUNCTION__, path.parent_path().string().c_str());
         if (auto sock = detail::fdtable.find_from_path(path.string()))
             sock_ = sock;
         else

@@ -47,8 +47,7 @@ namespace eth {
         if (path.parent_path() == "/ip")
             socket_type = SOCK_DGRAM;
         fd_ = do_raw_open(socket_type, protocol, path.filename().string());
-        ::syslog(LOG_NOTICE, "%s: opened fd=%d ifname=%s"
-            , __PRETTY_FUNCTION__, fd_, path.filename().string().c_str());
+        BOOST_LOG_TRIVIAL(info) << "raw_op::open: opened fd=" << fd_ << " ifname=" << path.filename();
         return 0;
     }
 

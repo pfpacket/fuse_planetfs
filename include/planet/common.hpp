@@ -20,10 +20,14 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive.hpp>
-#include <syslog.h>
 #include <thread>
 #include <atomic>
 #include <mutex>
+
+// logging
+#include <boost/log/trivial.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
 
 // namespace for planetfs
 namespace planet {
