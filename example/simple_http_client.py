@@ -11,7 +11,7 @@ def simple_http_client(hostname, path):
     resolved = dns.read().decode().splitlines()
 
     tcp_clone = open("/net/tcp/clone", "rb", buffering=0)
-    clone_num = tcp_clone.read().decode()
+    clone_num = tcp_clone.read().decode().splitlines()[0]
 
     tcp_ctl = open("/net/tcp/" + clone_num + "/ctl", "wb", buffering=0)
     tcp_ctl.write("connect {0}!80".format(resolved[0]).encode())

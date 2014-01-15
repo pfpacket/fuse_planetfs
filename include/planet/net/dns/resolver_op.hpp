@@ -39,7 +39,8 @@ namespace dns {
     class resolver_type : public file_ops_type {
     private:
     public:
-        resolver_type() : file_ops_type("planet.net.dns.resolver")
+        static const string_type type_name;
+        resolver_type() : file_ops_type(type_name)
         {
         }
 

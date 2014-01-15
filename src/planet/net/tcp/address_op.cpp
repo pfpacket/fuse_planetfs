@@ -24,7 +24,7 @@ namespace tcp {
         get_name_info((sockaddr *)&peer, len, hostname, servname);
         auto local_addr = str(format("%1%!%2%\n") % hostname % servname);
         file_cast(file)->data().clear();
-        return default_file_op::write(file, local_addr.c_str(), local_addr.length(), 0);
+        return default_file_op::write(file, local_addr.data(), local_addr.length(), 0);
     }
 
     int local_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
@@ -63,7 +63,7 @@ namespace tcp {
         get_name_info((sockaddr *)&peer, len, hostname, servname);
         auto local_addr = str(format("%1%!%2%\n") % hostname % servname);
         file_cast(file)->data().clear();
-        return default_file_op::write(file, local_addr.c_str(), local_addr.length(), 0);
+        return default_file_op::write(file, local_addr.data(), local_addr.length(), 0);
     }
 
     int remote_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)

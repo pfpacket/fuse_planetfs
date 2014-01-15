@@ -12,7 +12,7 @@ namespace net {
     namespace detail {
         optional<fd_table::mapped_type> fd_table::find(const fd_table::key_type& k) const
         {
-            BOOST_LOG_TRIVIAL(info) << "fdtable.find(): finding KEY=" << k.c_str();
+            BOOST_LOG_TRIVIAL(info) << "fdtable.find(): finding KEY=" << k;
             auto it = table_.find(k);
             if (it == table_.end())
                 return boost::none;
@@ -34,7 +34,7 @@ namespace net {
         {
             if (auto fd = find(k))
                 ::close(*fd);
-            BOOST_LOG_TRIVIAL(info) << "fdtable.erase(): unregisteting KEY=" << k.c_str();
+            BOOST_LOG_TRIVIAL(info) << "fdtable.erase(): unregisteting KEY=" << k;
             return table_.erase(k);
         }
 
@@ -45,7 +45,7 @@ namespace net {
 
         fd_table::return_type fd_table::insert(fd_table::key_type const& k, fd_table::mapped_type fd)
         {
-            BOOST_LOG_TRIVIAL(info) << "fdtable.insert(): registeting KEY=" << k.c_str() << " VALUE" << fd;
+            BOOST_LOG_TRIVIAL(info) << "fdtable.insert(): registeting KEY=" << k << " VALUE" << fd;
             auto old_fd = this->find(k);
             if (old_fd)
                 this->erase(k);

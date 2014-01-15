@@ -12,6 +12,8 @@ namespace net {
 namespace dns {
 
 
+    const string_type resolver_type::type_name = "planet.net.dns.resolver";
+
     int resolver_op::forward_lookup(std::string const& host, int family, std::vector<std::string>& store)
     {
         struct addrinfo hints{}, *res;
