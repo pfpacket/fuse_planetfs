@@ -63,8 +63,7 @@ namespace planet {
             auto fentry =
                 parent_dir->add_entry<file_entry>(path.filename().string(), ops_name, new_inode);
             try {
-                ::syslog(LOG_NOTICE, "mknod: Creating \'%s\' type=%s",
-                    path.string().data(), ops_name.data());
+                BOOST_LOG_TRIVIAL(info) << "mknod: Creating \'" << path << "\' type=" << ops_name;
                 ops_db_.lock()->
                     get_ops(ops_name)->mknod(fentry, path, mode, device);
             } catch (...) {
@@ -106,8 +105,7 @@ namespace planet {
             new_inode.mode = mode | S_IFDIR;
             auto dir_entry = parent_dir->add_entry<dentry>(path.filename().string(), ops_name, new_inode);
             try {
-                ::syslog(LOG_NOTICE, "mkdir: Creating \'%s\' type=%s",
-                    path.string().data(), ops_name.data());
+                BOOST_LOG_TRIVIAL(info) << "mkdir: Creating \'" << path << "\' type=" << ops_name;
                 ops_db_.lock()->
                     get_ops(ops_name)->mknod(dir_entry, path, mode, 0);
             } catch (...) {
@@ -273,19 +271,19 @@ namespace planet {
         });
 
         if (ph) {
-            //syslog_fmt(LOG_NOTICE, format("%s: handle=%d adding new handle") % __func__ % handle);
+            BOOST_LOG_TRIVIAL(trace) << __func__ << ": handle=" << handle << " adding new handle";
             poller_.register_new(handle, ph);
         }
 
         *reventsp |= poller_.get_status(handle);
-        //syslog_fmt(LOG_NOTICE, format("%1%: handle=%2% polled=%3%") % __func__ % handle % *reventsp);
+        BOOST_LOG_TRIVIAL(trace) << __func__ << ": handle=" << handle << " polled=" << *reventsp;
         return 0;
 
     }
 
     void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)
     {
-        ::syslog(LOG_NOTICE, "Installing ops: %s", ops->name().c_str());
+        BOOST_LOG_TRIVIAL(info) << "Installing ops: " << ops->name().c_str();
         raii_wrapper raii([this, ops] {
             if (std::uncaught_exception())
                 this->ops_db_.lock()->unregister_ops(ops->name());
@@ -298,7 +296,7 @@ namespace planet {
 
     void core_file_system::uninstall_ops(string_type const& name)
     {
-        ::syslog(LOG_NOTICE, "Uninstalling ops: %s", name.c_str());
+        BOOST_LOG_TRIVIAL(info) << "Uninstalling ops: " << name;
         raii_wrapper finalize([this, &name]() {
             ops_db_.lock()->unregister_ops(name);
         });
@@ -318,7 +316,7 @@ namespace planet {
 
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
-        ::syslog(LOG_NOTICE, "Uninstalling module: %s", mod_name.c_str());
+        BOOST_LOG_TRIVIAL(info) << "Uninstalling module: " << mod_name;
         this->uninstall_ops(mod_name);
     }
 

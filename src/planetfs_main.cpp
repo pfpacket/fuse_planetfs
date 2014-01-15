@@ -9,10 +9,49 @@
 #include <planet/net/eth/installer.hpp>
 #include <planet/module_loader/module_loader.hpp>
 #include <planetfs_operations.hpp>
-#include <syslog.h>
 #include <signal.h>
 
+#include <boost/log/sinks.hpp>
+#include <boost/log/support/date_time.hpp>
+#include <boost/utility/empty_deleter.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+
 #define PLANETFS_NAME "fuse_planetfs"
+namespace logging   = boost::log;
+namespace expr      = boost::log::expressions;
+namespace sinks     = boost::log::sinks;
+namespace keywords  = boost::log::keywords;
+
+void planetfs_initialize_log(std::string const& exec)
+{
+    logging::add_file_log(
+        keywords::auto_flush    = true,
+        keywords::open_mode     = std::ios::app,
+        //keywords::target        = "log",
+        keywords::file_name     = "logs/" + exec + "_%Y%m%d.log",
+        keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
+        keywords::max_size      = 10LL * 1024 * 1024 * 1024,
+        keywords::format        = expr::format("%1%\t[%2%]\t%3%")
+            % expr::format_date_time<boost::posix_time::ptime>("TimeStamp", "%Y-%m-%d %H:%M:%S")
+            % logging::trivial::severity % expr::message
+    );
+    logging::add_common_attributes();
+}
+
+void planetfs_log_init_logo()
+{
+    BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
+    BOOST_LOG_TRIVIAL(info) << "|     Starting fuse_planetfs      |";
+    BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
+}
+
+void planetfs_log_fin_logo()
+{
+    BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
+    BOOST_LOG_TRIVIAL(info) << "|     Finishing fuse_planetfs     |";
+    BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
+}
 
 // Install certain file operations
 void planetfs_install_file_operations()
@@ -57,9 +96,9 @@ static struct fuse_operations planetfs_ops{};
 int main(int argc, char **argv)
 {
     int exit_code = EXIT_FAILURE;
+    planetfs_initialize_log(PLANETFS_NAME);
     try {
-        openlog(PLANETFS_NAME, LOG_CONS | LOG_PID, LOG_USER);
-        ::syslog(LOG_INFO, "%s daemon started", PLANETFS_NAME);
+        planetfs_log_init_logo();
 
         // Initialize filesystem
         planetfs_install_file_operations();
@@ -87,10 +126,11 @@ int main(int argc, char **argv)
         exit_code = ::fuse_main(argc, argv, &planetfs_ops, nullptr);
 
     } catch (std::exception& e) {
-        ::syslog(LOG_ERR, "fatal error: %s", e.what());
+        BOOST_LOG_TRIVIAL(error) << "fatal error: " << e.what();
     } catch (...) {
-        ::syslog(LOG_ERR, "unknown fatal error");
+        BOOST_LOG_TRIVIAL(fatal) << "unknown fatal error";
     }
-    ::syslog(LOG_INFO, "%s daemon finished", PLANETFS_NAME);
+    planetfs_log_fin_logo();
+    logging::core::get()->remove_all_sinks();
     return exit_code;
 }

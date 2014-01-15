@@ -1,7 +1,6 @@
 
 #include <planet/common.hpp>
 #include <planet/fs_core.hpp>
-#include <syslog.h>
 
 #define MODULE_NAME "mod_dummy"
 

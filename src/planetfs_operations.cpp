@@ -7,7 +7,6 @@
 #include <planet/handle.hpp>
 #include <planet/filesystem.hpp>
 #include <planetfs_operations.hpp>
-#include <syslog.h>
 
 // Core filesystem object
 planet::filesystem fs(S_IRWXU);
@@ -15,7 +14,8 @@ planet::filesystem fs(S_IRWXU);
 
 int planet_getattr(char const *path, struct stat *stbuf)
 {
-    ::syslog(LOG_INFO, "%s: path=%s stbuf=%p", __func__, path, stbuf);
+    BOOST_LOG_TRIVIAL(trace)
+        << __func__ << ": path=" << path << " stbuf=" << stbuf;
     int ret = 0;
     try {
         std::memset(stbuf, 0, sizeof (struct stat));
@@ -32,7 +32,8 @@ int planet_getattr(char const *path, struct stat *stbuf)
 
 int planet_mknod(char const *path, mode_t mode, dev_t device)
 {
-    ::syslog(LOG_INFO, "%s: path=%s mode=%o %lld", __func__, path, mode, device);
+    BOOST_LOG_TRIVIAL(trace)
+        << __func__ << ": path=" << path << " mode=" << mode << " dev=" << device;
     int ret = 0;
     try {
         ret = fs.root()->mknod(path, mode, device);
@@ -48,7 +49,7 @@ int planet_mknod(char const *path, mode_t mode, dev_t device)
 
 int planet_unlink(char const *path)
 {
-    ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path;
     int ret = 0;
     try {
         ret = fs.root()->unlink(path);
@@ -64,7 +65,7 @@ int planet_unlink(char const *path)
 
 int planet_mkdir(char const *path, mode_t mode)
 {
-    ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path, mode);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path << "mode=" << mode;
     int ret = 0;
     try {
         ret = fs.root()->mkdir(path, 0755);
@@ -80,7 +81,7 @@ int planet_mkdir(char const *path, mode_t mode)
 
 int planet_rmdir(char const *path)
 {
-    ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path;
     int ret = 0;
     try {
         ret = fs.root()->rmdir(path);
@@ -96,7 +97,7 @@ int planet_rmdir(char const *path)
 
 int planet_chmod(char const *path, mode_t mode)
 {
-    ::syslog(LOG_INFO, "%s: path=%s mode=%o", __func__, path, mode);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path << " mode=" << mode;
     int ret = 0;
     try {
         ret = fs.root()->chmod(path, mode);
@@ -112,8 +113,7 @@ int planet_chmod(char const *path, mode_t mode)
 
 int planet_chown(char const *path, uid_t uid, gid_t gid)
 {
-    planet::syslog_fmt(LOG_INFO, planet::format
-        ("%1%: path=%2% uid=%3% gid=%4%") % __func__ % path % uid % gid);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path << " uid=" << uid << " gid=" << gid;
     int ret = 0;
     try {
         ret = fs.root()->chown(path, uid, gid);
@@ -129,7 +129,7 @@ int planet_chown(char const *path, uid_t uid, gid_t gid)
 
 int planet_truncate(char const *path, off_t offset)
 {
-    ::syslog(LOG_INFO, "%s: path=%s offset=%lld", __func__, path, offset);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path << " offset=" << offset;
     int ret = 0;
     try {
         ret = fs.root()->truncate(path, offset);
@@ -145,7 +145,7 @@ int planet_truncate(char const *path, off_t offset)
 
 int planet_utimens(char const* path, struct timespec const tv[2])
 {
-    ::syslog(LOG_INFO, "%s: path=%s", __func__, path);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path;
     int ret = 0;
     try {
         ret = fs.root()->utimens(path, tv);
@@ -161,12 +161,12 @@ int planet_utimens(char const* path, struct timespec const tv[2])
 
 int planet_open(char const *path, struct fuse_file_info *fi)
 {
-    ::syslog(LOG_INFO, "%s: path=%s fi=%p", __func__, path, fi);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path << " fi=" << fi;
     int ret = 0;
     try {
         planet::handle_t ph = fs.root()->open(path);
         planet::set_handle_to(*fi, ph);
-        ::syslog(LOG_INFO, "%s: handle=%d", __func__, ph);
+        BOOST_LOG_TRIVIAL(debug) << __func__ << ": handle=" << ph;
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();
@@ -179,13 +179,14 @@ int planet_open(char const *path, struct fuse_file_info *fi)
 
 int planet_read(char const *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
+    BOOST_LOG_TRIVIAL(trace)
+        << __func__ << ": path=" << path
+        << " size=" << size << " offset=" << offset << " fi=" << fi;
     int bytes_received;
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
-        ::syslog(LOG_INFO,
-            "%s: handle=%d path=%s buf=%p size=%d offset=%llu", __func__, ph, path, buf, size, offset);
         bytes_received = fs.root()->read(ph, buf, size, offset);
-        ::syslog(LOG_INFO, "%s: handle=%d bytes_received=%d", __func__, ph, bytes_received);
+        BOOST_LOG_TRIVIAL(debug) << __func__ << ": handle=" << ph << " bytes_received=" << bytes_received;
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         bytes_received = -e.code().value();
@@ -198,13 +199,14 @@ int planet_read(char const *path, char *buf, size_t size, off_t offset, struct f
 
 int planet_write(char const *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
+    BOOST_LOG_TRIVIAL(trace)
+        << __func__ << ": path=" << path
+        << " size=" << size << " offset=" << offset << " fi=" << fi;
     int bytes_transferred;
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
-        ::syslog(LOG_INFO,
-            "%s: handle=%d path=%s buf=%p size=%d offset=%llu", __func__, ph, path, buf, size, offset);
         bytes_transferred = fs.root()->write(ph, buf, size, offset);
-        ::syslog(LOG_INFO, "%s: handle=%d bytes_transferred=%d", __func__, ph, bytes_transferred);
+        BOOST_LOG_TRIVIAL(debug) << __func__ << ": handle=" << ph << " bytes_transferred=" << bytes_transferred;
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         bytes_transferred = -e.code().value();
@@ -217,7 +219,7 @@ int planet_write(char const *path, const char *buf, size_t size, off_t offset, s
 
 int planet_readdir(char const *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
 {
-    ::syslog(LOG_INFO, "%s: path=%s buf=%p offset=%llu", __func__, path, buf, offset);
+    BOOST_LOG_TRIVIAL(trace) << __func__ << " path=" << path << " offset=" << offset;
     int ret = 0;
     try {
         filler(buf, ".", nullptr, 0);
@@ -237,10 +239,11 @@ int planet_readdir(char const *path, void *buf, fuse_fill_dir_t filler, off_t of
 
 int planet_release(char const *path, struct fuse_file_info *fi)
 {
+    BOOST_LOG_TRIVIAL(trace) << __func__ << " path=" << path << " fi=" << fi;
     int ret = 0;
     try {
         planet::handle_t ph = planet::get_handle_from(*fi);
-        ::syslog(LOG_INFO, "%s: handle=%d path=%s fi=%p", __func__, ph, path, fi);
+        BOOST_LOG_TRIVIAL(debug) << __func__ << " handle=" << ph << " path=" << path << " fi=" << fi;
         ret = fs.root()->close(ph);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
@@ -255,8 +258,6 @@ int planet_release(char const *path, struct fuse_file_info *fi)
 int planet_poll(const char *path, struct fuse_file_info *fi, struct fuse_pollhandle *ph, unsigned *reventsp)
 {
     int ret = 0;
-    //planet::syslog_fmt(LOG_NOTICE, planet::format(
-    //    "%s: handle=%d, fi=%p ph=%p reventsp=%p") % __func__ % planet::get_handle_from(*fi) % fi % ph % reventsp);
     try {
         ret = fs.root()->poll(path, fi, ph, reventsp);
     } catch (std::system_error& e) {

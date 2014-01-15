@@ -1,7 +1,6 @@
 
 #include <planet/common.hpp>
 #include <planet/net/dns/resolver_op.hpp>
-#include <syslog.h>
 
 #define MODULE_NAME "mod_net_dns"
 

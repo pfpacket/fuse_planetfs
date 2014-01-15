@@ -56,10 +56,11 @@ namespace tcp {
             auto&& args = parser.get_filtered_args(reg_ipv4_addr_port);
             if (args.empty())
                 return -ENOTSUP;
-            syslog_fmt(LOG_NOTICE, format("%s: connecting to %s!%s") % __func__ % args[0][1] % args[0][2]);
+
+            BOOST_LOG_TRIVIAL(info) << __func__ << ": connecting to " << args[0][1] << "!" << args[0][2];
             int new_sock = sock_connect_to(args[0][1], args[0][2]);
             detail::fdtable.insert(lexical_cast<string_type>(current_fd_), new_sock);
-            syslog_fmt(LOG_NOTICE, format("%s: connected to %s!%s") % __func__ % args[0][1] % args[0][2]);
+            BOOST_LOG_TRIVIAL(info) << __func__ << ": connected to " << args[0][1] << "!" << args[0][2];
         } else if (parser.get_command() == "hangup") {
             detail::fdtable.erase(lexical_cast<string_type>(current_fd_));
         } else if (parser.get_command() == "keepalive") {
