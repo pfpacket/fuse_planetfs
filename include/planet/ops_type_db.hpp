@@ -7,6 +7,7 @@
 #include <planet/fs_entry.hpp>
 #include <planet/fs_ops_type.hpp>
 #include <tuple>
+#include <boost/container/stable_vector.hpp>
 
 namespace planet {
 
@@ -24,7 +25,7 @@ namespace planet {
 
         typedef std::tuple<string_type, priority> info_type;
 
-        ops_type_db(shared_ptr<core_file_system> fs_root);
+        ops_type_db();
 
         ~ops_type_db();
 
@@ -44,7 +45,7 @@ namespace planet {
 
     private:
         typedef std::tuple<shared_ptr<fs_ops_type>, priority> ops_info_t;
-        typedef std::vector<ops_info_t> ops_info_db;
+        typedef boost::container::stable_vector<ops_info_t> ops_info_db;
         enum info_index {
             ops = 0, prio
         };

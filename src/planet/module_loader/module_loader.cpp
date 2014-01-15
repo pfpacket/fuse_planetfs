@@ -86,6 +86,7 @@ namespace planet {
 
     int module_loader::install(shared_ptr<core_file_system> fs_root)
     {
+        BOOST_LOG_TRIVIAL(info) << "module_loader: installed";
         fs_root->mknod(module_loader::file_path, 0666);
         return 0;
     }

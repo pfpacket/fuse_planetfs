@@ -12,7 +12,7 @@ namespace net {
     namespace detail {
         optional<fd_table::mapped_type> fd_table::find(const fd_table::key_type& k) const
         {
-            ::syslog(LOG_NOTICE, "fdtable.find(): finding KEY=%s", k.c_str());
+            BOOST_LOG_TRIVIAL(info) << "fdtable.find(): finding KEY=" << k.c_str();
             auto it = table_.find(k);
             if (it == table_.end())
                 return boost::none;
@@ -34,7 +34,7 @@ namespace net {
         {
             if (auto fd = find(k))
                 ::close(*fd);
-            ::syslog(LOG_NOTICE, "fdtable.erase(): unregisteting KEY=%s", k.c_str());
+            BOOST_LOG_TRIVIAL(info) << "fdtable.erase(): unregisteting KEY=" << k.c_str();
             return table_.erase(k);
         }
 
@@ -45,7 +45,7 @@ namespace net {
 
         fd_table::return_type fd_table::insert(fd_table::key_type const& k, fd_table::mapped_type fd)
         {
-            ::syslog(LOG_NOTICE, "fdtable.insert(): registeting KEY=%s VALUE=%d", k.c_str(), fd);
+            BOOST_LOG_TRIVIAL(info) << "fdtable.insert(): registeting KEY=" << k.c_str() << " VALUE" << fd;
             auto old_fd = this->find(k);
             if (old_fd)
                 this->erase(k);
@@ -62,7 +62,7 @@ namespace net {
             xpv::smatch m;
             if (!xpv::regex_match(path, m, path_reg::dir_num) || m.size() < 2)
                 throw std::runtime_error("fd_table::dir_number(): failed to parse directory number: " + path);
-            syslog(LOG_NOTICE, "fdtable.dir_number(): path=%s,m[1]=%s", path.c_str(), m[1].str().c_str());
+            BOOST_LOG_TRIVIAL(info) << "fdtable.dir_number(): path=" << path << " m[1]=" << m[1];
             return m[1];
         }
 

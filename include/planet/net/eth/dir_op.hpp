@@ -15,7 +15,8 @@ namespace eth {
     private:
         shared_ptr<core_file_system> fs_root_;
     public:
-        dir_type() : dir_ops_type("planet.net.eth.dir")
+        static const string_type type_name;
+        dir_type() : dir_ops_type(type_name)
         {
         }
     

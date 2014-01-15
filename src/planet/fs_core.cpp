@@ -63,8 +63,7 @@ namespace planet {
             auto fentry =
                 parent_dir->add_entry<file_entry>(path.filename().string(), ops_name, new_inode);
             try {
-                ::syslog(LOG_NOTICE, "mknod: Creating \'%s\' type=%s",
-                    path.string().data(), ops_name.data());
+                BOOST_LOG_TRIVIAL(info) << "mknod: Creating \'" << path << "\' type=" << ops_name;
                 ops_db_.lock()->
                     get_ops(ops_name)->mknod(fentry, path, mode, device);
             } catch (...) {
@@ -106,8 +105,7 @@ namespace planet {
             new_inode.mode = mode | S_IFDIR;
             auto dir_entry = parent_dir->add_entry<dentry>(path.filename().string(), ops_name, new_inode);
             try {
-                ::syslog(LOG_NOTICE, "mkdir: Creating \'%s\' type=%s",
-                    path.string().data(), ops_name.data());
+                BOOST_LOG_TRIVIAL(info) << "mkdir: Creating \'" << path << "\' type=" << ops_name;
                 ops_db_.lock()->
                     get_ops(ops_name)->mknod(dir_entry, path, mode, 0);
             } catch (...) {
@@ -160,6 +158,34 @@ namespace planet {
         return ret;
     }
 
+    int core_file_system::truncate(path_type const& path, off_t offset)
+    {
+        int ret = 0;
+        if (auto entry = this->get_entry_of(path))
+            planet::file_cast(entry)->data().resize(offset);
+        else
+            ret = -ENOENT;
+        return ret;
+    }
+
+    int core_file_system::utimens(path_type const& path, struct timespec const tv[2])
+    {
+        int ret = 0;
+        namespace ch = std::chrono;
+        if (auto entry = this->get_entry_of(path)) {
+            ch::nanoseconds nano_access(tv[0].tv_nsec), nano_mod(tv[1].tv_nsec);
+            ch::seconds sec_access(tv[0].tv_sec), sec_mod(tv[1].tv_sec);
+            planet::st_inode new_inode = entry->inode();
+            new_inode.atime = decltype(new_inode.atime)
+                (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_access + sec_access));
+            new_inode.mtime = decltype(new_inode.atime)
+                (ch::duration_cast<decltype(new_inode.atime)::duration>(nano_mod + sec_mod));
+            entry->inode(new_inode);
+        } else
+            ret = -ENOENT;
+        return ret;
+    }
+
     std::vector<std::string> core_file_system::readdir(path_type const& path) const
     {
         std::vector<std::string> store;
@@ -201,7 +227,7 @@ namespace planet {
         int ret = std::get<0>(op_tuple)->read(
             std::get<1>(op_tuple), buf, size, offset
         );
-        update_last_modified_time(std::get<1>(op_tuple));
+        update_last_access_time(std::get<1>(op_tuple));
         return ret;
     }
 
@@ -211,6 +237,7 @@ namespace planet {
         int ret = std::get<0>(op_tuple)->write(
             std::get<1>(op_tuple), buf, size, offset
         );
+        update_last_access_time(std::get<1>(op_tuple));
         update_last_modified_time(std::get<1>(op_tuple));
         return ret;
     }
@@ -244,47 +271,53 @@ namespace planet {
         });
 
         if (ph) {
-            //syslog_fmt(LOG_NOTICE, format("%s: handle=%d adding new handle") % __func__ % handle);
+            BOOST_LOG_TRIVIAL(trace) << __func__ << ": handle=" << handle << " adding new handle";
             poller_.register_new(handle, ph);
         }
 
         *reventsp |= poller_.get_status(handle);
-        //syslog_fmt(LOG_NOTICE, format("%1%: handle=%2% polled=%3%") % __func__ % handle % *reventsp);
+        BOOST_LOG_TRIVIAL(trace) << __func__ << ": handle=" << handle << " polled=" << *reventsp;
         return 0;
 
     }
 
     void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)
     {
-        ::syslog(LOG_NOTICE, "Installing ops: %s", ops->name().c_str());
+        BOOST_LOG_TRIVIAL(info) << "Installing ops: " << ops->name().c_str();
+        raii_wrapper raii([this, ops] {
+            if (std::uncaught_exception())
+                this->ops_db_.lock()->unregister_ops(ops->name());
+        });
         ops_db_.lock()->register_ops(p, ops);
+        int ret = ops->install(this->shared_from_this());
+        if (ret < 0)
+            throw_system_error(-ret, ops->name() + ": registering ops failed");
     }
 
     void core_file_system::uninstall_ops(string_type const& name)
     {
-        ::syslog(LOG_NOTICE, "Uninstalling ops: %s", name.c_str());
-        ops_db_.lock()->unregister_ops(name);
+        BOOST_LOG_TRIVIAL(info) << "Uninstalling ops: " << name;
+        raii_wrapper finalize([this, &name]() {
+            ops_db_.lock()->unregister_ops(name);
+        });
+        ops_db_.lock()->get_ops(name)->uninstall(this->shared_from_this());
     }
 
     void core_file_system::install_module(priority p, string_type const& mod_name)
     {
-        ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
-        ops_db_.lock()->register_ops(p, make_shared<module_ops_type>(mod_name));
+        this->install_ops(p, make_shared<module_ops_type>(mod_name));
     }
 
     void core_file_system::install_module(
         priority p, string_type const& mod_name, std::vector<string_type> const& paths)
     {
-        ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
-        ops_db_.lock()->register_ops(
-            p, make_shared<module_ops_type>(mod_name, paths)
-        );
+        this->install_ops(p, make_shared<module_ops_type>(mod_name, paths));
     }
 
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
-        ::syslog(LOG_NOTICE, "Uninstalling module: %s", mod_name.c_str());
-        ops_db_.lock()->unregister_ops(mod_name);
+        BOOST_LOG_TRIVIAL(info) << "Uninstalling module: " << mod_name;
+        this->uninstall_ops(mod_name);
     }
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const
@@ -304,6 +337,13 @@ namespace planet {
         auto dir_entry = root->search_entries(p.substr(1, pos - 1));
         return (!dir_entry || dir_entry->type() != file_type::directory) ? detail::shared_null_ptr
             : get_entry_of(directory_cast(dir_entry), "/" + p.substr(pos + 1));
+    }
+
+    void core_file_system::uninstal_all()
+    {
+        auto db = ops_db_.lock();
+        for (auto&& info : db->info())
+            db->get_ops(std::get<0>(info))->uninstall(this->shared_from_this());
     }
 
     ops_type_db& core_file_system::get_ops_db()

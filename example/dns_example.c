@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         if (size <= 0)  // read error or EOF
             break;
         /* Display it */
-        printf("%s\n", buffer);
+        write(STDOUT_FILENO, buffer, size);
     }
 
     close(fd);

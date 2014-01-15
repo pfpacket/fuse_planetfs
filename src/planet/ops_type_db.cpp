@@ -7,8 +7,7 @@ namespace planet {
     typedef ops_type_db::priority priority;
     typedef ops_type_db::info_type info_type;
 
-    ops_type_db::ops_type_db(shared_ptr<core_file_system> fs_root)
-        :   fs_root_(fs_root)
+    ops_type_db::ops_type_db()
     {
     }
 
@@ -31,7 +30,6 @@ namespace planet {
                             > std::get<info_index::prio>(r);
                 }
             );
-            ops->install(fs_root_);
         } catch (...) {
             this->remove_ops(ops->name());
             throw;
@@ -40,9 +38,6 @@ namespace planet {
 
     void ops_type_db::unregister_ops(string_type const& ops_name)
     {
-        for (auto&& i : ops_types_)
-            if (std::get<info_index::ops>(i)->name() == ops_name)
-                std::get<info_index::ops>(i)->uninstall(this->fs_root_);
         this->remove_ops(ops_name);
     }
 
@@ -85,8 +80,6 @@ namespace planet {
 
     void ops_type_db::clear()
     {
-        for (auto&& i : ops_types_)
-            std::get<info_index::ops>(i)->uninstall(fs_root_);
         ops_types_.clear();
     }
 

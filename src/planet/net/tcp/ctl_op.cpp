@@ -11,6 +11,8 @@ namespace net {
 namespace tcp {
 
 
+    const string_type ctl_type::type_name = "planet.net.tcp.ctl";
+
     int ctl_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         xpv::smatch m;
@@ -23,12 +25,11 @@ namespace tcp {
     {
         int ret = 0;
         if (!fd_number_already_read_) {
-            std::string dir_number = str(format("%1%") % current_fd_);
-            if (dir_number.length() >= size)
+            std::string dir_number = str(format("%1%\n") % current_fd_);
+            if (dir_number.length() > size)
                 return -ENOBUFS;
             std::copy(dir_number.begin(), dir_number.end(), buf);
-            buf[dir_number.length()] = '\0';
-            ret = dir_number.length() + 1;
+            ret = dir_number.length();
             fd_number_already_read_ = true;
         }
         return ret;
@@ -55,10 +56,11 @@ namespace tcp {
             auto&& args = parser.get_filtered_args(reg_ipv4_addr_port);
             if (args.empty())
                 return -ENOTSUP;
-            syslog_fmt(LOG_NOTICE, format("%s: connecting to %s!%s") % __func__ % args[0][1] % args[0][2]);
+
+            BOOST_LOG_TRIVIAL(info) << __func__ << ": connecting to " << args[0][1] << "!" << args[0][2];
             int new_sock = sock_connect_to(args[0][1], args[0][2]);
             detail::fdtable.insert(lexical_cast<string_type>(current_fd_), new_sock);
-            syslog_fmt(LOG_NOTICE, format("%s: connected to %s!%s") % __func__ % args[0][1] % args[0][2]);
+            BOOST_LOG_TRIVIAL(info) << __func__ << ": connected to " << args[0][1] << "!" << args[0][2];
         } else if (parser.get_command() == "hangup") {
             detail::fdtable.erase(lexical_cast<string_type>(current_fd_));
         } else if (parser.get_command() == "keepalive") {

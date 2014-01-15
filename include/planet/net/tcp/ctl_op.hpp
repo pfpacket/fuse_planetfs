@@ -39,7 +39,8 @@ namespace tcp {
 
     class ctl_type : public file_ops_type {
     public:
-        ctl_type() : file_ops_type("planet.net.tcp.ctl")
+        static const string_type type_name;
+        ctl_type() : file_ops_type(type_name)
         {
         }
 

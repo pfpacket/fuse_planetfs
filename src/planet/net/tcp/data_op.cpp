@@ -2,12 +2,13 @@
 #include <planet/common.hpp>
 #include <planet/net/tcp/data_op.hpp>
 #include <planet/utils.hpp>
-#include <syslog.h>
 
 namespace planet {
 namespace net {
 namespace tcp {
 
+
+    const string_type data_type::type_name = "planet.net.tcp.data";
 
     int data_op::open(shared_ptr<fs_entry> fs_ent, path_type const& path)
     {

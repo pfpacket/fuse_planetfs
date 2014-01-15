@@ -13,6 +13,7 @@
 #include <planet/net/tcp/client_op.hpp>
 #include <planet/net/tcp/server_op.hpp>
 #include <planet/fs_core.hpp>
+#include <planet/utils.hpp>
 
 namespace planet {
 namespace net {
@@ -21,11 +22,12 @@ namespace tcp {
 
     class installer : public fs_ops_type {
     public:
-        installer() : fs_ops_type("planet.net.tcp.installer")
+        static const string_type type_name;
+        installer() : fs_ops_type(type_name)
         {
         }
 
-        int install(shared_ptr<core_file_system> fs_root)
+        int install(shared_ptr<core_file_system> fs_root) override
         {
             typedef planet::core_file_system::priority priority;
             fs_root->install_ops<dir_type>(priority::normal);
@@ -40,22 +42,21 @@ namespace tcp {
             return 0;
         }
 
-        int uninstaller(shared_ptr<core_file_system> fs_root)
+        int uninstall(shared_ptr<core_file_system> fs_root) override
         {
-            //try {
-            //    if (fs_root_) {
-            //        fs_root->uninstall_ops<server_type>();
-            //        fs_root->uninstall_ops<client_type>();
-            //        fs_root->uninstall_ops<session_dir_type>();
-            //        fs_root->uninstall_ops<local_type>();
-            //        fs_root->uninstall_ops<remote_type>();
-            //        fs_root->uninstall_ops<data_type>();
-            //        fs_root->uninstall_ops<ctl_type>();
-            //        fs_root->uninstall_ops<clone_type>();
-            //        fs_root->uninstall_ops<dir_type>();
-            //    }
-            //} catch (...) {
-            //}
+            try {
+                BOOST_LOG_TRIVIAL(trace) << "tcp.installer: recursive uninstallation for TCP dependencies";
+                fs_root->uninstall_ops(server_type::type_name);
+                fs_root->uninstall_ops(client_type::type_name);
+                fs_root->uninstall_ops(session_dir_type::type_name);
+                fs_root->uninstall_ops(local_type::type_name);
+                fs_root->uninstall_ops(remote_type::type_name);
+                fs_root->uninstall_ops(data_type::type_name);
+                fs_root->uninstall_ops(ctl_type::type_name);
+                fs_root->uninstall_ops(clone_type::type_name);
+                fs_root->uninstall_ops(dir_type::type_name);
+            } catch (...) {
+            }
             return 0;
         }
 
@@ -64,6 +65,7 @@ namespace tcp {
             return false;
         }
     };
+    const string_type installer::type_name = "planet.net.tcp.installer";
 
 
 }   // namespace tcp

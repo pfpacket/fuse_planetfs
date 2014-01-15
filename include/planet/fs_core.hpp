@@ -36,6 +36,10 @@ namespace planet {
 
         int chown(path_type const& path, uid_t uid, gid_t gid);
 
+        int truncate(path_type const&, off_t);
+
+        int utimens(path_type const&, struct timespec const [2]);
+
         std::vector<std::string> readdir(path_type const& path) const;
 
         handle_t open(path_type const& path);
@@ -68,6 +72,8 @@ namespace planet {
         void install_module(priority, string_type const&, std::vector<string_type> const&);
 
         void uninstall_module(string_type const&);
+
+        void uninstal_all();
 
         ops_type_db& get_ops_db();
         ops_type_db const& get_ops_db() const;

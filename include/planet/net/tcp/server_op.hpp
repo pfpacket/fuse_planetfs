@@ -40,7 +40,8 @@ namespace tcp {
     private:
         static int establish_server(std::string const& host, int port);
     public:
-        server_type() : file_ops_type("planet.net.tcp.server")
+        static const string_type type_name;
+        server_type() : file_ops_type(type_name)
         {
         }
 

@@ -1,7 +1,6 @@
 
 #include <planet/common.hpp>
 #include <netdb.h>
-#include <syslog.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <planet/utils.hpp>
@@ -45,7 +44,7 @@ namespace dns {
         if (line.length() + 1 > size)
             return -ENAMETOOLONG;
         std::copy_n(line.begin(), line.length(), buf);
-        buf[line.length()] = '\0';
+        buf[line.length()] = '\n';
         resolved_names_.erase(resolved_names_.begin());
         return line.length() + 1;
     }
@@ -60,7 +59,8 @@ namespace dns {
         auto&& args = parser.get_args();
         if (args.empty() || args.size() >= 2)
             return -ENOTSUP;
-        syslog_fmt(LOG_INFO, format("resolver_op: command=%s / hostname=%s") % parser.get_command() % args[0][0]);
+        BOOST_LOG_TRIVIAL(info) << "resolver_op: command="
+            << parser.get_command() << " / hostname=" << args[0][0];
         resolved_names_.clear();
         forward_lookup(args[0][0], families.at(parser.get_command()), resolved_names_);
         return size;

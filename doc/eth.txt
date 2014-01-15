@@ -1,0 +1,23 @@
+#
+# eth.txt
+#
+This documents describes how ethernet services work.
+
+Install:
+  Ethernet services will be pre-installed statically.
+ Once the services are installed, all network interfaces will be
+  appeared in /net/eth/ (e.g. /net/eth/eth0, /net/eth/wlan0)
+
+Uses:
+  You can simply read and write the files to receive and send
+ ethernet packets.
+  If you want to see hex dumps of incoming packets, run the following:
+   $ hexdump -C /net/eth/eth0
+  And if you want to send a ethernet packet:
+   $ cat eth_frame.bin > /net/eth/eth0
+
+See also:
+ src/planet/net/eth/raw_op.cpp
+ src/planet/net/eth/dir_op.cpp
+ example/packet_recv_example.c
+ example/pkt_rcv_select.c

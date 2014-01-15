@@ -1,0 +1,32 @@
+#
+# dns.txt
+#
+This documents describes how DNS services work.
+
+Install:
+ Run the command below
+  $ echo "load mod_net_dns" > /net/modules
+ And to uninstall it
+  $ echo "unload mod_net_dns" > /net/modules
+
+ DNS services may be pre-installed statically.
+
+Uses:
+  Currently you cannot request DNS services to resolve host names
+ by using basic commands like cat, echo.
+  In point of view of system calls (and as a file), you just
+ write requests to resolve names and read to get the results.
+  Below shows the request format to write:
+
+ Request format:
+  [command] [hostname]
+
+ [command] takes followings:
+  resolve       - resolve a hostname to IPv4 and IPv6 (if available)
+  resolve_inet  - resolve a hostname to IPv4 only
+  resolve_inet6 - resolve a hostname to IPv6 only
+ [hostname] takes the target host name.
+
+See also:
+ src/planet/net/dns/resolver_op.cpp
+ example/dns_example.c

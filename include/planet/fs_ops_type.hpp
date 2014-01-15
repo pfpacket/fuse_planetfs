@@ -88,6 +88,16 @@ namespace planet {
             return make_shared<op_type>(fs_root);
         }
 
+        int mknod(shared_ptr<fs_entry>, path_type const&, mode_t, dev_t) override
+        {
+            return 0;
+        }
+
+        int rmnod(shared_ptr<fs_entry>, path_type const&) override
+        {
+            return 0;
+        }
+
         bool match_path(path_type const&, file_type type) override
         {
             return type == file_type::regular_file;

@@ -17,6 +17,7 @@ namespace tcp {
     //
     class local_op : public default_file_op {
     private:
+        optional<int> sock_;
         shared_ptr<core_file_system> fs_root_;
 
     public:
@@ -29,16 +30,17 @@ namespace tcp {
         {
         }
 
-        void update_address(int, shared_ptr<fs_entry>);
+        int update_address(int, shared_ptr<fs_entry>);
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-        // int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset) override;
-        // int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset) override;
+        int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset) override;
+        int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset) override;
     };
 
     class local_type : public file_ops_type {
     public:
-        local_type() : file_ops_type("planet.net.tcp.local")
+        static const string_type type_name;
+        local_type() : file_ops_type(type_name)
         {
         }
 
@@ -59,6 +61,7 @@ namespace tcp {
     //
     class remote_op : public default_file_op {
     private:
+        optional<int> sock_;
         shared_ptr<core_file_system> fs_root_;
 
     public:
@@ -71,16 +74,17 @@ namespace tcp {
         {
         }
 
-        void update_address(int, shared_ptr<fs_entry>);
+        int update_address(int, shared_ptr<fs_entry>);
 
         int open(shared_ptr<fs_entry> file_ent, path_type const& path) override;
-        // int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset) override;
-        // int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset) override;
+        int read(shared_ptr<fs_entry>, char *buf, size_t size, off_t offset) override;
+        int write(shared_ptr<fs_entry>, char const *buf, size_t size, off_t offset) override;
     };
 
     class remote_type : public file_ops_type {
     public:
-        remote_type() : file_ops_type("planet.net.tcp.remote")
+        static const string_type type_name;
+        remote_type() : file_ops_type(type_name)
         {
         }
 
@@ -96,9 +100,9 @@ namespace tcp {
         }
     };
 
+
 }   // namespace tcp
 }   // namespace net
 }   // namespace planet
-
 
 #endif  // PLANET_TCP_ADDRESS_OP_HPP

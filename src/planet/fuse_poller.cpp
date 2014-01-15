@@ -70,17 +70,17 @@ namespace planet {
 
     void fuse_poller::polling(shared_ptr<core_file_system> fs_root) noexcept
     {
-        syslog_fmt(LOG_NOTICE, format("fuse_poller: polling: begin"));
+        BOOST_LOG_TRIVIAL(trace) << "fuse_poller: polling: begin";
         while (!poll_end_.load()) {
             try {
                 this->poll_handles(fs_root);
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             } catch (std::exception& e) {
-                syslog_fmt(LOG_ERR, format("poller: polling: Exception: %s") % e.what());
+                BOOST_LOG_TRIVIAL(error) << "poller: polling: Exception: " << e.what();
             } catch (...) {
             }
         }
-        syslog_fmt(LOG_NOTICE, format("fuse_poller: polling: end"));
+        BOOST_LOG_TRIVIAL(trace) << "fuse_poller: polling: end";
     }
 
     void fuse_poller::poll_handles(shared_ptr<core_file_system> fs_root)

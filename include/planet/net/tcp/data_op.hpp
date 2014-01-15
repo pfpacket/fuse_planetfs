@@ -35,7 +35,8 @@ namespace tcp {
 
     class data_type : public file_ops_type {
     public:
-        data_type() : file_ops_type("planet.net.tcp.data")
+        static const string_type type_name;
+        data_type() : file_ops_type(type_name)
         {
         }
 
