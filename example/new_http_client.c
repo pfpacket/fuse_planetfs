@@ -28,10 +28,11 @@ int main(int argc, char **argv)
     clone_fd = open("/net/tcp/clone", O_RDWR);
     if (clone_fd < 0)
         die("clone: open");
-    if (read(clone_fd, clone_num, sizeof (clone_num)) < 0)
+    if ((size = read(clone_fd, clone_num, sizeof (clone_num))) < 0)
         die("clone: read");
     if (write(clone_fd, ctl_request, strlen(ctl_request)) < 0)
         die("clone: write");
+    clone_num[size - 1] = '\0';
 
     snprintf(data_file, sizeof (data_file), "/net/tcp/%s/data", clone_num);
     data_fd = open(data_file, O_RDWR);
