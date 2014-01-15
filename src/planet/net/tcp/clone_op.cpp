@@ -30,6 +30,8 @@ namespace tcp {
     //
     // clone_op
     //
+    const string_type clone_type::type_name = "planet.net.tcp.clone";
+
     int clone_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         auto session_dir_path = str(format("/tcp/%1%") % current_fd_);

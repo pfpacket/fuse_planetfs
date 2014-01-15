@@ -54,6 +54,8 @@ namespace tcp {
     //
     // server_type
     //
+    const string_type server_type::type_name = "planet.net.tcp.server";
+
     int server_type::establish_server(std::string const& host, int port)
     {
         int fd = ::socket(AF_INET, SOCK_STREAM, 0);

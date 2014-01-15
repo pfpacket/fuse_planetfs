@@ -14,6 +14,8 @@ namespace net {
 namespace tcp {
 
 
+    const string_type client_type::type_name = "planet.net.tcp.client";
+
     int client_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         if (auto fd = detail::fdtable.find(path.string()))

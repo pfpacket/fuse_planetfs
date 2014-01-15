@@ -39,7 +39,8 @@ namespace tcp {
 
     class local_type : public file_ops_type {
     public:
-        local_type() : file_ops_type("planet.net.tcp.local")
+        static const string_type type_name;
+        local_type() : file_ops_type(type_name)
         {
         }
 
@@ -82,7 +83,8 @@ namespace tcp {
 
     class remote_type : public file_ops_type {
     public:
-        remote_type() : file_ops_type("planet.net.tcp.remote")
+        static const string_type type_name;
+        remote_type() : file_ops_type(type_name)
         {
         }
 
@@ -98,9 +100,9 @@ namespace tcp {
         }
     };
 
+
 }   // namespace tcp
 }   // namespace net
 }   // namespace planet
-
 
 #endif  // PLANET_TCP_ADDRESS_OP_HPP

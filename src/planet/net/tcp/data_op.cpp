@@ -9,6 +9,8 @@ namespace net {
 namespace tcp {
 
 
+    const string_type data_type::type_name = "planet.net.tcp.data";
+
     int data_op::open(shared_ptr<fs_entry> fs_ent, path_type const& path)
     {
         int ret = 0;

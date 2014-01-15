@@ -11,6 +11,8 @@ namespace net {
 namespace tcp {
 
 
+    const string_type ctl_type::type_name = "planet.net.tcp.ctl";
+
     int ctl_op::open(shared_ptr<fs_entry> file_ent, path_type const& path)
     {
         xpv::smatch m;

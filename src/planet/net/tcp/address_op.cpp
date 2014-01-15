@@ -12,6 +12,8 @@ namespace tcp {
     //
     // local_op - /tcp/*/local
     //
+    const string_type local_type::type_name = "planet.net.tcp.local";
+
     int local_op::update_address(int sock, shared_ptr<fs_entry> file)
     {
         struct sockaddr_storage peer{};
@@ -50,6 +52,8 @@ namespace tcp {
     //
     // remote_op - /tcp/*/remote
     //
+    const string_type remote_type::type_name = "planet.net.tcp.remote";
+
     int remote_op::update_address(int sock, shared_ptr<fs_entry> file)
     {
         struct sockaddr_storage peer{};

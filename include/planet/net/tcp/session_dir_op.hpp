@@ -17,7 +17,8 @@ namespace tcp {
         shared_ptr<core_file_system> fs_root_;
     
     public:
-        session_dir_type() : fs_ops_type("planet.net.tcp.session_dir")
+        static const string_type type_name;
+        session_dir_type() : fs_ops_type(type_name)
         {
         }
     

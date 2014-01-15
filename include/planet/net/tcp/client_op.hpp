@@ -36,7 +36,8 @@ namespace tcp {
 
     class client_type : public file_ops_type {
     public:
-        client_type() : file_ops_type("planet.net.tcp.client")
+        static const string_type type_name;
+        client_type() : file_ops_type(type_name)
         {
         }
 

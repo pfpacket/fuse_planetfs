@@ -9,6 +9,8 @@ namespace net {
 namespace tcp {
 
 
+    const string_type dir_type::type_name = "planet.net.tcp.dir";
+
     shared_ptr<entry_op> dir_type::create_op(shared_ptr<core_file_system>)
     {
         return planet::detail::shared_null_ptr;

@@ -8,6 +8,8 @@ namespace net {
 namespace tcp {
 
 
+    const string_type session_dir_type::type_name = "planet.net.tcp.session_dir";
+
     shared_ptr<entry_op> session_dir_type::create_op(shared_ptr<core_file_system> fs_root)
     {
         return planet::detail::shared_null_ptr;

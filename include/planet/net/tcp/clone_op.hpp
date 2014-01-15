@@ -21,7 +21,6 @@ namespace tcp {
         bool target_ctl_is_connected(string_type const&);
 
     public:
-
         //clone_op() = default;
         clone_op(shared_ptr<core_file_system> root, int current)
             : fs_root_(root), current_fd_(current)
@@ -44,8 +43,9 @@ namespace tcp {
     private:
         int current_fd_;
     public:
+        static const string_type type_name;
         clone_type(int start_fd = 0)
-            : file_ops_type("planet.net.tcp.clone"), current_fd_(start_fd)
+            : file_ops_type(type_name), current_fd_(start_fd)
         {
         }
 
