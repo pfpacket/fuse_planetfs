@@ -101,6 +101,8 @@ namespace eth {
     //
     // raw_type
     //
+    const string_type raw_type::type_name = "planet.net.eth.raw";
+
     shared_ptr<entry_op> raw_type::create_op(shared_ptr<core_file_system> fs_root)
     {
         return make_shared<raw_op>(fs_root);

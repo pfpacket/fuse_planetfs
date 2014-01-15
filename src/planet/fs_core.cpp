@@ -286,34 +286,40 @@ namespace planet {
     void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)
     {
         ::syslog(LOG_NOTICE, "Installing ops: %s", ops->name().c_str());
+        raii_wrapper raii([this, ops] {
+            if (std::uncaught_exception())
+                this->ops_db_.lock()->unregister_ops(ops->name());
+        });
         ops_db_.lock()->register_ops(p, ops);
+        int ret = ops->install(this->shared_from_this());
+        if (ret < 0)
+            throw_system_error(-ret, ops->name() + ": registering ops failed");
     }
 
     void core_file_system::uninstall_ops(string_type const& name)
     {
         ::syslog(LOG_NOTICE, "Uninstalling ops: %s", name.c_str());
-        ops_db_.lock()->unregister_ops(name);
+        raii_wrapper finalize([this, &name]() {
+            ops_db_.lock()->unregister_ops(name);
+        });
+        ops_db_.lock()->get_ops(name)->uninstall(this->shared_from_this());
     }
 
     void core_file_system::install_module(priority p, string_type const& mod_name)
     {
-        ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
-        ops_db_.lock()->register_ops(p, make_shared<module_ops_type>(mod_name));
+        this->install_ops(p, make_shared<module_ops_type>(mod_name));
     }
 
     void core_file_system::install_module(
         priority p, string_type const& mod_name, std::vector<string_type> const& paths)
     {
-        ::syslog(LOG_NOTICE, "Installing module: %s", mod_name.c_str());
-        ops_db_.lock()->register_ops(
-            p, make_shared<module_ops_type>(mod_name, paths)
-        );
+        this->install_ops(p, make_shared<module_ops_type>(mod_name, paths));
     }
 
     void core_file_system::uninstall_module(string_type const& mod_name)
     {
         ::syslog(LOG_NOTICE, "Uninstalling module: %s", mod_name.c_str());
-        ops_db_.lock()->unregister_ops(mod_name);
+        this->uninstall_ops(mod_name);
     }
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const
@@ -333,6 +339,13 @@ namespace planet {
         auto dir_entry = root->search_entries(p.substr(1, pos - 1));
         return (!dir_entry || dir_entry->type() != file_type::directory) ? detail::shared_null_ptr
             : get_entry_of(directory_cast(dir_entry), "/" + p.substr(pos + 1));
+    }
+
+    void core_file_system::uninstal_all()
+    {
+        auto db = ops_db_.lock();
+        for (auto&& info : db->info())
+            db->get_ops(std::get<0>(info))->uninstall(this->shared_from_this());
     }
 
     ops_type_db& core_file_system::get_ops_db()

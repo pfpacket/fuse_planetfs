@@ -18,7 +18,7 @@ namespace planet {
         filesystem(mode_t root_mode)
         {
             root_   = shared_ptr<core_file_system>(new core_file_system());
-            ops_db_ = make_shared<ops_type_db>(root_);
+            ops_db_ = make_shared<ops_type_db>();
 
             // This is not circular reference of shared_ptr
             root_->ops_db_ = ops_db_;    // root_.ops_db_ is a weak_ptr
@@ -35,6 +35,7 @@ namespace planet {
 
         ~filesystem()
         {
+            root_->uninstal_all();
             // Destroy ops_db_ first because ops_db_ has a reference to root_
             ops_db_->clear();
             ops_db_.reset();

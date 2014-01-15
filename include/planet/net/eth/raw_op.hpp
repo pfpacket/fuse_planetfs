@@ -37,7 +37,8 @@ namespace eth {
     class raw_type : public file_ops_type {
     private:
     public:
-        raw_type() : file_ops_type("planet.net.eth.raw")
+        static const string_type type_name;
+        raw_type() : file_ops_type(type_name)
         {
         }
 

@@ -27,6 +27,13 @@ namespace eth {
             return 0;
         }
 
+        int uninstall(shared_ptr<core_file_system> fs_root) override
+        {
+            fs_root->uninstall_ops(dir_type::type_name);
+            fs_root->uninstall_ops(raw_type::type_name);
+            return 0;
+        }
+
         bool match_path(path_type const&, file_type) override
         {
             return false;

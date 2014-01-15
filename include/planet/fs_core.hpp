@@ -73,6 +73,8 @@ namespace planet {
 
         void uninstall_module(string_type const&);
 
+        void uninstal_all();
+
         ops_type_db& get_ops_db();
         ops_type_db const& get_ops_db() const;
 
