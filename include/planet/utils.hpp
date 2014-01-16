@@ -40,7 +40,7 @@ namespace planet {
     }
 
     template<typename T, typename ...Types>
-    std::unique_ptr<T> make_unique_ptr(Types&& ...args)
+    std::unique_ptr<T> make_unique(Types&& ...args)
     {
         return std::unique_ptr<T>(new T(std::forward<Types>(args)...));
     }

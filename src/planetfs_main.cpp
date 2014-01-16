@@ -60,35 +60,28 @@ void planetfs_install_file_operations()
 
     // dynamic module loading
     // TODO: FIX BUGS HERE: Maybe mod_net_dns causes this bug
-    //fs.root()->install_module(priority::normal, "mod_net_dns");
+    //fs->root()->install_module(priority::normal, "mod_net_dns");
 
     // THERE SEEMS TO BE NO BUGS HERE
-    fs.root()->install_module(priority::normal, "mod_dummy");
+    fs->root()->install_module(priority::normal, "mod_dummy");
 
     // static module loading
-    fs.root()->install_ops<planet::net::dns::installer>(priority::low);
-    fs.root()->install_ops<planet::net::eth::installer>(priority::low);
-    fs.root()->install_ops<planet::net::tcp::installer>(priority::low);
-    fs.root()->install_ops<planet::module_loader>(priority::normal);
+    fs->root()->install_ops<planet::net::dns::installer>(priority::low);
+    fs->root()->install_ops<planet::net::eth::installer>(priority::low);
+    fs->root()->install_ops<planet::net::tcp::installer>(priority::low);
+    fs->root()->install_ops<planet::module_loader>(priority::normal);
 
     // Uninstall operation
-    //fs.root()->uninstall_ops("planet.net.dns.installer");
+    //fs->root()->uninstall_ops("planet.net.dns.installer");
 }
 
 // Create initial filesystem structure
 void planetfs_create_initial_fs_structure()
 {
-    fs.root()->mkdir("/ip",    S_IRWXU);
-    fs.root()->mkdir("/tcp",   S_IRWXU);
-    fs.root()->mkdir("/eth",   S_IRWXU);
-    fs.root()->mknod("/dns",   S_IRUSR | S_IWUSR, 0);
-}
-
-void planetfs_print_installed_operations()
-{
-    std::cout << "Installed operations:" << std::endl;
-    for (auto&& info : fs.root()->get_ops_db().info())
-        std::cout << '\t' << std::get<0>(info) << " / priority=" << std::get<1>(info) << std::endl;
+    fs->root()->mkdir("/ip",    S_IRWXU);
+    fs->root()->mkdir("/tcp",   S_IRWXU);
+    fs->root()->mkdir("/eth",   S_IRWXU);
+    fs->root()->mknod("/dns",   S_IRUSR | S_IWUSR, 0);
 }
 
 static struct fuse_operations planetfs_ops{};
@@ -101,9 +94,9 @@ int main(int argc, char **argv)
         planetfs_log_init_logo();
 
         // Initialize filesystem
+        fs = planet::make_unique<planet::filesystem>(S_IRWXU);
         planetfs_install_file_operations();
         planetfs_create_initial_fs_structure();
-        //planetfs_print_installed_operations();
 
         // Set system call functions
         planetfs_ops.getattr    =   planet_getattr;
@@ -127,9 +120,12 @@ int main(int argc, char **argv)
 
     } catch (std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "fatal error: " << e.what();
+        exit_code = EXIT_FAILURE;
     } catch (...) {
         BOOST_LOG_TRIVIAL(fatal) << "unknown fatal error";
+        exit_code = EXIT_FAILURE;
     }
+    fs.reset();
     planetfs_log_fin_logo();
     logging::core::get()->remove_all_sinks();
     return exit_code;

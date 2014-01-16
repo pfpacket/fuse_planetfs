@@ -7,7 +7,7 @@
     BOOST_LOG_TRIVIAL(error) << __func__ << ": " << (e).what();
 
 // Core filesystem object
-extern planet::filesystem fs;
+extern std::unique_ptr<planet::filesystem> fs;
 
 
 extern int planet_getattr(char const *, struct stat *);
