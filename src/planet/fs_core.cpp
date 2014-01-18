@@ -80,7 +80,16 @@ namespace planet {
         int ret = 0;
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             auto fentry = file_cast(parent_dir->search_entries(path.filename().string()));
-            ret = ops_db_.lock()->get_ops(fentry->ops_name())->rmnod(fentry, path);
+            try {
+                ret = ops_db_.lock()->get_ops(fentry->ops_name())->rmnod(fentry, path);
+            } catch (no_such_ops_type& e) {
+                // if no operations found, just unlink a file
+                // Possible case: mknod a file, FILE with operation OPS
+                //                uninstall the operation, OPS
+                //                try to unlink FILE
+                BOOST_LOG_TRIVIAL(warning) << __func__ << ": no such operation to unlink: "
+                    << e.get_ops_name() << ": just unlink";
+            }
             if (ret < 0 && !force)
                 return ret;
             parent_dir->remove_entry(path.filename().string());

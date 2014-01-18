@@ -65,7 +65,7 @@ int planet_unlink(char const *path)
 
 int planet_mkdir(char const *path, mode_t mode)
 {
-    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path << "mode=" << mode;
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << path << " mode=" << mode;
     int ret = 0;
     try {
         ret = fs->root()->mkdir(path, 0755);

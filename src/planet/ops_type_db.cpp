@@ -1,6 +1,7 @@
 
 #include <planet/common.hpp>
 #include <planet/ops_type_db.hpp>
+#include <planet/exception.hpp>
 
 namespace planet {
 
@@ -48,7 +49,7 @@ namespace planet {
                 return std::get<info_index::ops>(info)->match_path(path, ft);
             });
         if (it == ops_types_.end())
-            throw std::runtime_error("No matching operaion type found for " + path.string());
+            throw no_such_ops_type("No matching operaion type found", path.string());
         return std::get<info_index::ops>(*it)->name();
     }
 
@@ -56,7 +57,7 @@ namespace planet {
     {
         auto it = this->get_info_by_name(name);
         if (it == ops_types_.end())
-            throw std::runtime_error("get_ops: No such ops: " + name);
+            throw no_such_ops_type(name);
         return std::get<info_index::ops>(*it);
     }
 
