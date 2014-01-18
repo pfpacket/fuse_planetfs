@@ -37,8 +37,10 @@ namespace planet {
 
     void fill_st_inode(st_inode& inode)
     {
-        inode.uid = ::fuse_get_context()->uid;
-        inode.gid = ::fuse_get_context()->gid;
+        //inode.uid = ::fuse_get_context()->uid;
+        //inode.gid = ::fuse_get_context()->gid;
+        inode.uid = ::getuid();
+        inode.gid = ::getgid();
     }
 
     //
