@@ -93,8 +93,15 @@ int main(int argc, char **argv)
     try {
         planetfs_log_init_logo();
 
+        struct {
+            void operator()()
+            {
+                fs.reset();
+            }
+        } fs_deleter;
         // Initialize filesystem
         fs = planet::make_unique<planet::filesystem>(S_IRWXU);
+        planet::raii_wrapper fs_finalizer(fs_deleter);
         planetfs_install_file_operations();
         planetfs_create_initial_fs_structure();
 
@@ -119,13 +126,12 @@ int main(int argc, char **argv)
         exit_code = ::fuse_main(argc, argv, &planetfs_ops, nullptr);
 
     } catch (std::exception& e) {
-        BOOST_LOG_TRIVIAL(error) << "fatal error: " << e.what();
+        BOOST_LOG_TRIVIAL(fatal) << "fatal error: " << e.what();
         exit_code = EXIT_FAILURE;
     } catch (...) {
         BOOST_LOG_TRIVIAL(fatal) << "unknown fatal error";
         exit_code = EXIT_FAILURE;
     }
-    fs.reset();
     planetfs_log_fin_logo();
     logging::core::get()->remove_all_sinks();
     return exit_code;
