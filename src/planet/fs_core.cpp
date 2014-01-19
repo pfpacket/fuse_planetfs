@@ -63,7 +63,7 @@ namespace planet {
             auto fentry =
                 parent_dir->add_entry<file_entry>(path.filename().string(), ops_name, new_inode);
             try {
-                BOOST_LOG_TRIVIAL(info) << "mknod: Creating \'" << path << "\' type=" << ops_name;
+                BOOST_LOG_TRIVIAL(info) << "mknod: Creating " << path << " type=" << ops_name;
                 ops_db_.lock()->
                     get_ops(ops_name)->mknod(fentry, path, mode, device);
             } catch (...) {
@@ -80,7 +80,16 @@ namespace planet {
         int ret = 0;
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             auto fentry = file_cast(parent_dir->search_entries(path.filename().string()));
-            ret = ops_db_.lock()->get_ops(fentry->ops_name())->rmnod(fentry, path);
+            try {
+                ret = ops_db_.lock()->get_ops(fentry->ops_name())->rmnod(fentry, path);
+            } catch (no_such_ops_type& e) {
+                // if no operations found, just unlink a file
+                // Possible case: mknod a file, FILE with operation OPS
+                //                uninstall the operation, OPS
+                //                try to unlink FILE
+                BOOST_LOG_TRIVIAL(warning) << __func__ << ": no such operation to unlink: "
+                    << e.get_ops_name() << ": just unlink";
+            }
             if (ret < 0 && !force)
                 return ret;
             parent_dir->remove_entry(path.filename().string());
@@ -105,7 +114,7 @@ namespace planet {
             new_inode.mode = mode | S_IFDIR;
             auto dir_entry = parent_dir->add_entry<dentry>(path.filename().string(), ops_name, new_inode);
             try {
-                BOOST_LOG_TRIVIAL(info) << "mkdir: Creating \'" << path << "\' type=" << ops_name;
+                BOOST_LOG_TRIVIAL(info) << "mkdir: Creating " << path << " type=" << ops_name;
                 ops_db_.lock()->
                     get_ops(ops_name)->mknod(dir_entry, path, mode, 0);
             } catch (...) {
@@ -283,7 +292,7 @@ namespace planet {
 
     void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)
     {
-        BOOST_LOG_TRIVIAL(info) << "Installing ops: " << ops->name().c_str();
+        BOOST_LOG_TRIVIAL(info) << "Installing ops: " << ops->name();
         raii_wrapper raii([this, ops] {
             if (std::uncaught_exception())
                 this->ops_db_.lock()->unregister_ops(ops->name());

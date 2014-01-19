@@ -10,20 +10,21 @@
 #endif
 
 #include <fuse.h>
+
 #include <memory>
 #include <functional>
 #include <typeindex>
 #include <type_traits>
 #include <system_error>
+#include <thread>
+#include <atomic>
+#include <mutex>
+
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/xpressive/xpressive.hpp>
-#include <thread>
-#include <atomic>
-#include <mutex>
-
 // logging
 #include <boost/log/trivial.hpp>
 #include <boost/log/core.hpp>
@@ -120,10 +121,6 @@ namespace planet {
 
     namespace detail {
 
-        // Index numbers and error messages
-        enum errmsg_number {pe_file_cast = 0, pe_dir_cast, pe_end};
-        extern char const * const errmsg[];
-
         // generic null pointer of shared_ptr
         class generic_shared_null_ptr_t {
         public:
@@ -141,12 +138,13 @@ namespace planet {
 
     }   // namespace detail
 
-    char const *get_errmsg(detail::errmsg_number num) noexcept;
-
     [[noreturn]] extern void throw_system_error(int);
 
     [[noreturn]] extern void throw_system_error(int, std::string const&);
 
+
 }   // namespace planet
+
+#include <planet/exception.hpp>
 
 #endif  // PLANET_COMMON_HPP

@@ -7,6 +7,8 @@ TARGETS    = dns_example \
 			 packet_recv_example \
 			 netcat \
 			 pkt_rcv_select
+LIBS       =
+LDFLAGS    =
 
 all: $(TARGETS)
 

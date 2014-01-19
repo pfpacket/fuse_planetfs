@@ -13,10 +13,11 @@ namespace dns {
 
     class installer final : public file_ops_type {
     public:
-        installer() : file_ops_type("planet.net.dns.installer")
+        static const string_type type_name;
+        installer() : file_ops_type(type_name)
         {
         }
-    
+
         virtual int install(shared_ptr<core_file_system> fs_root)
         {
             typedef planet::core_file_system::priority priority;
@@ -26,7 +27,7 @@ namespace dns {
 
         int uninstall(shared_ptr<core_file_system> fs_root)
         {
-            fs_root->uninstall_ops("planet.net.dns.resolver");
+            fs_root->uninstall_ops(resolver_type::type_name);
             return 0;
         }
     
@@ -35,6 +36,7 @@ namespace dns {
             return false;
         }
     };
+    const string_type installer::type_name = "planet.net.dns.installer";
 
 
 }   // namespace dns

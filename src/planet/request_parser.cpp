@@ -56,7 +56,8 @@ namespace planet {
                 [&arg_reg, &args_store](it_type::value_type const& v){
                     xpv::smatch m;
                     match_type matches;
-                    if (xpv::regex_match(v.str(), m, arg_reg)) {
+                    auto v_str = v.str();
+                    if (xpv::regex_match(v_str, m, arg_reg)) {
                         for (auto&& match : m)
                             matches.push_back(match);
                         args_store.push_back(matches);

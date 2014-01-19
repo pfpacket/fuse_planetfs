@@ -44,7 +44,7 @@ namespace tcp {
     int data_op::poll(pollmask_t& pollmask)
     {
         // rfds, wfds, efds
-        static std::vector<fd_set> fdsets(3);
+        std::vector<fd_set> fdsets(3);
         for (auto&& fdset : fdsets) {
             FD_ZERO(&fdset);
             FD_SET(socket_, &fdset);

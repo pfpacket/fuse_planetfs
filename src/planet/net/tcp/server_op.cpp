@@ -76,7 +76,7 @@ namespace tcp {
         auto filename   = path.filename().string();
         auto pos        = filename.find_first_of(host_port_delimiter);
         auto host       = filename.substr(0, pos);
-        int port        = atoi(filename.substr(pos + 1).c_str());
+        int port        = std::stoi(filename.substr(pos + 1));
         BOOST_LOG_TRIVIAL(info) << "server_type::mknod: establishing server host=" << host << " port=" << port;
         int serverfd    = establish_server(host, port);
         BOOST_LOG_TRIVIAL(info) << "server_type::mknod: established server " << host << ":" << port << " fd=" << serverfd;
