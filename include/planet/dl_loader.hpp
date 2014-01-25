@@ -4,6 +4,16 @@
 #include <planet/common.hpp>
 #include <ltdl.h>
 
+// See also:
+// http://stackoverflow.com/questions/14543801/iso-c-forbids-casting-between-pointer-to-function-and-pointer-to-object
+// http://agram66.blogspot.jp/2011/10/dlsym-posix-c-gimme-break.html
+// http://stackoverflow.com/questions/3941793/what-is-guaranteed-about-the-size-of-a-function-pointer/3941867#3941867
+static_assert(sizeof(void *) == sizeof(void (*)()),
+    "ISO C++ forbids casting between pointer-to-function and pointer-to-object"
+    " and the following is not guaranteed on your system, "
+    "which means using dlsym() to load functions is not safe anymore: "
+    "sizeof(void *) == sizeof(void (*)()");
+
 namespace planet {
 
 
