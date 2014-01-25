@@ -10,6 +10,7 @@
 #include <planet/module_loader/module_loader.hpp>
 #include <planetfs_operations.hpp>
 #include <signal.h>
+#include <syslog.h>
 
 #include <boost/log/sinks.hpp>
 #include <boost/log/support/date_time.hpp>
@@ -23,13 +24,16 @@ namespace expr      = boost::log::expressions;
 namespace sinks     = boost::log::sinks;
 namespace keywords  = boost::log::keywords;
 
-void planetfs_initialize_log(std::string const& exec)
+void planetfs_initialize_log()
 {
+    // Emergency logging
+    // The use of closelog() is optional (man 3 syslog)
+    ::openlog(PLANETFS_NAME, LOG_CONS | LOG_PID, LOG_USER);
     logging::add_file_log(
         keywords::auto_flush    = true,
         keywords::open_mode     = std::ios::app,
         //keywords::target        = "log",
-        keywords::file_name     = "logs/" + exec + "_%Y%m%d.log",
+        keywords::file_name     = "logs/" PLANETFS_NAME "_%Y%m%d.log",
         keywords::time_based_rotation = sinks::file::rotation_at_time_point(0, 0, 0),
         keywords::max_size      = 10LL * 1024 * 1024 * 1024,
         keywords::format        = expr::format("%1%\t[%2%]\t%3%")
@@ -39,14 +43,14 @@ void planetfs_initialize_log(std::string const& exec)
     logging::add_common_attributes();
 }
 
-void planetfs_log_init_logo()
+void planetfs_log_init_msg()
 {
     BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
     BOOST_LOG_TRIVIAL(info) << "|     Starting fuse_planetfs      |";
     BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
 }
 
-void planetfs_log_fin_logo()
+void planetfs_log_fin_msg()
 {
     BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
     BOOST_LOG_TRIVIAL(info) << "|     Finishing fuse_planetfs     |";
@@ -59,10 +63,7 @@ void planetfs_install_file_operations()
     typedef planet::core_file_system::priority priority;
 
     // dynamic module loading
-    // TODO: FIX BUGS HERE: Maybe mod_net_dns causes this bug
     //fs->root()->install_module(priority::normal, "mod_net_dns");
-
-    // THERE SEEMS TO BE NO BUGS HERE
     fs->root()->install_module(priority::normal, "mod_dummy");
 
     // static module loading
@@ -89,17 +90,23 @@ static struct fuse_operations planetfs_ops{};
 int main(int argc, char **argv)
 {
     int exit_code = EXIT_FAILURE;
-    planetfs_initialize_log(PLANETFS_NAME);
     try {
-        planetfs_log_init_logo();
-
         struct {
             void operator()()
             {
-                fs.reset();
+                try {
+                    fs.reset();
+                    planetfs_log_fin_msg();
+                    logging::core::get()->remove_all_sinks();
+                } catch (std::exception& e) {
+                    ::syslog(LOG_WARNING, e.what());
+                }
             }
         } fs_deleter;
+
         // Initialize filesystem
+        planetfs_initialize_log();
+        planetfs_log_init_msg();
         fs = planet::make_unique<planet::filesystem>(S_IRWXU);
         planet::raii_wrapper fs_finalizer(fs_deleter);
         planetfs_install_file_operations();
@@ -126,13 +133,11 @@ int main(int argc, char **argv)
         exit_code = ::fuse_main(argc, argv, &planetfs_ops, nullptr);
 
     } catch (std::exception& e) {
-        BOOST_LOG_TRIVIAL(fatal) << "fatal error: " << e.what();
+        ::syslog(LOG_CRIT, "FATAL ERROR: %s", e.what());
         exit_code = EXIT_FAILURE;
     } catch (...) {
-        BOOST_LOG_TRIVIAL(fatal) << "unknown fatal error";
+        ::syslog(LOG_CRIT, "UNKNOWN FATAL ERROR");
         exit_code = EXIT_FAILURE;
     }
-    planetfs_log_fin_logo();
-    logging::core::get()->remove_all_sinks();
     return exit_code;
 }
