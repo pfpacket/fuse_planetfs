@@ -5,7 +5,7 @@ BOOST_ROOT := /usr
 CXX        := g++
 #CXXFLAGS  := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
 CXXFLAGS   := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
-              -std=c++0x -g $(shell pkg-config fuse --cflags) -DBOOST_LOG_DYN_LINK #-D_FORTIFY_SOURCE=2
+              -std=c++0x -pedantic-errors -g -O2 $(shell pkg-config fuse --cflags) -DBOOST_LOG_DYN_LINK #-D_FORTIFY_SOURCE=2
 LDFLAGS    := -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all #-fstack-check
 INCLUDES   := -I $(BOOST_ROOT)/include -I ./include
 LIBS       := -L $(BOOST_ROOT)/lib -lfuse -lltdl -lpthread \
@@ -19,6 +19,7 @@ OBJS       := src/planet/net/common.o \
               src/planet/net/tcp/ctl_op.o \
               src/planet/net/tcp/data_op.o \
               src/planet/net/tcp/address_op.o \
+              src/planet/net/tcp/listen_op.o \
               src/planet/net/tcp/session_dir_op.o \
               src/planet/net/tcp/client_op.o \
               src/planet/net/tcp/server_op.o \
@@ -97,6 +98,8 @@ test: examples
 	./example/new_get_google_page.sh
 	@echo "[*] Starting test: new_http_client"
 	./example/new_http_client
+	@echo "[*] Starting test: simple_http_client.py"
+	./example/simple_http_client.py www.google.com
 
 clean:
 	rm -f $(TARGET) $(OBJS)
