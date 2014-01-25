@@ -8,6 +8,7 @@
 #include <planet/net/tcp/clone_op.hpp>
 #include <planet/net/tcp/ctl_op.hpp>
 #include <planet/net/tcp/data_op.hpp>
+#include <planet/net/tcp/listen_op.hpp>
 #include <planet/net/tcp/address_op.hpp>
 #include <planet/net/tcp/session_dir_op.hpp>
 #include <planet/net/tcp/client_op.hpp>
@@ -36,6 +37,7 @@ namespace tcp {
             fs_root->install_ops<data_type>(priority::normal);
             fs_root->install_ops<remote_type>(priority::normal);
             fs_root->install_ops<local_type>(priority::normal);
+            fs_root->install_ops<listen_type>(priority::normal);
             fs_root->install_ops<session_dir_type>(priority::normal);
             fs_root->install_ops<client_type>(priority::normal);
             fs_root->install_ops<server_type>(priority::normal);
@@ -49,6 +51,7 @@ namespace tcp {
                 fs_root->uninstall_ops(server_type::type_name);
                 fs_root->uninstall_ops(client_type::type_name);
                 fs_root->uninstall_ops(session_dir_type::type_name);
+                fs_root->uninstall_ops(listen_type::type_name);
                 fs_root->uninstall_ops(local_type::type_name);
                 fs_root->uninstall_ops(remote_type::type_name);
                 fs_root->uninstall_ops(data_type::type_name);

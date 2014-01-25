@@ -30,6 +30,7 @@ namespace tcp {
         extern xpv::sregex data;
         extern xpv::sregex local;
         extern xpv::sregex remote;
+        extern xpv::sregex listen;
         extern xpv::sregex session_dir;
     }   // namespace path_reg
 

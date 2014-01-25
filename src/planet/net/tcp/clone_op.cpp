@@ -63,12 +63,11 @@ namespace tcp {
     // clone_type
     //
     bool clone_type::target_ctl_is_connected(string_type const& ctl_path,
-            shared_ptr<core_file_system> fs_root)
+            string_type const& request, shared_ptr<core_file_system> fs_root)
     {
-        const char *request = "is_connected";
         auto handle = fs_root->open(ctl_path);
         raii_wrapper raii([&fs_root,handle](){ fs_root->close(handle); });
-        int ret = fs_root->write(handle, request, strlen(request), 0);
+        int ret = fs_root->write(handle, request.c_str(), request.length(), 0);
         return ret != -ENOTCONN;
     }
 
@@ -79,13 +78,14 @@ namespace tcp {
         if (!fs_root->get_entry_of(next_ctl_path))
             return std::make_shared<clone_op>(fs_root, current_fd_);
         // Else, we confirm current ctl file is connected-state
-        bool is_connected = target_ctl_is_connected(next_ctl_path, fs_root);
-        raii_wrapper finalizer([is_connected, this]()
+        bool is_connected = target_ctl_is_connected(next_ctl_path, "is_connected", fs_root);
+        bool is_announced = target_ctl_is_connected(next_ctl_path, "is_announced", fs_root);
+        raii_wrapper finalizer([is_connected, is_announced, this]()
                 {
-                    if (is_connected && std::uncaught_exception())
-                        --current_fd_;
+                    if ((is_connected || is_announced) && std::uncaught_exception())
+                        --(this->current_fd_);
                 });
-        current_fd_ = is_connected ? current_fd_ + 1 : current_fd_;
+        current_fd_ = (is_connected || is_announced) ? current_fd_ + 1 : current_fd_;
         return std::make_shared<clone_op>(fs_root, current_fd_);
     }
 

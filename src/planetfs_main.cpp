@@ -99,7 +99,7 @@ int main(int argc, char **argv)
                     planetfs_log_fin_msg();
                     logging::core::get()->remove_all_sinks();
                 } catch (std::exception& e) {
-                    ::syslog(LOG_WARNING, e.what());
+                    ::syslog(LOG_WARNING, "Finalizing: %s", e.what());
                 }
             }
         } fs_deleter;
