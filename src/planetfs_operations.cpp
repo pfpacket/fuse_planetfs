@@ -1,12 +1,7 @@
-#define FUSE_USE_VERSION 26
-#define _FILE_OFFSET_BITS 64
 
-#include <fuse.h>
-#include <planet/common.hpp>
+#include <planetfs_operations.hpp>
 #include <planet/utils.hpp>
 #include <planet/handle.hpp>
-#include <planet/filesystem.hpp>
-#include <planetfs_operations.hpp>
 
 #define LOG_EXCEPTION_MSG(e) \
     BOOST_LOG_TRIVIAL(error) << __func__ << ": " << (e).what();

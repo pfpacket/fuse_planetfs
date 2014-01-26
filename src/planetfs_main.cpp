@@ -131,10 +131,8 @@ int main(int argc, char **argv)
 
     } catch (std::exception& e) {
         ::syslog(LOG_CRIT, "FATAL ERROR: %s", e.what());
-        exit_code = EXIT_FAILURE;
     } catch (...) {
         ::syslog(LOG_CRIT, "UNKNOWN FATAL ERROR");
-        exit_code = EXIT_FAILURE;
     }
     return exit_code;
 }
