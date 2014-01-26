@@ -1,14 +1,11 @@
-#define FUSE_USE_VERSION 26
-#define _FILE_OFFSET_BITS 64
 
-#include <fuse.h>
 #include <iostream>
 #include <cstdlib>
+#include <planetfs_operations.hpp>
 #include <planet/net/dns/installer.hpp>
 #include <planet/net/tcp/installer.hpp>
 #include <planet/net/eth/installer.hpp>
 #include <planet/module_loader/module_loader.hpp>
-#include <planetfs_operations.hpp>
 #include <signal.h>
 #include <syslog.h>
 
@@ -130,7 +127,7 @@ int main(int argc, char **argv)
         planetfs_ops.poll       =   planet_poll;
 
         // Start the userspace filesystem
-        exit_code = ::fuse_main(argc, argv, &planetfs_ops, nullptr);
+        exit_code = fs->start_main(argc, argv, planetfs_ops, nullptr);
 
     } catch (std::exception& e) {
         ::syslog(LOG_CRIT, "FATAL ERROR: %s", e.what());

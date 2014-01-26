@@ -306,7 +306,7 @@ namespace planet {
     void core_file_system::uninstall_ops(string_type const& name)
     {
         BOOST_LOG_TRIVIAL(info) << "Uninstalling ops: " << name;
-        raii_wrapper finalize([this, &name]() {
+        raii_wrapper finalize([this, name]() {
             ops_db_.lock()->unregister_ops(name);
         });
         ops_db_.lock()->get_ops(name)->uninstall(this->shared_from_this());

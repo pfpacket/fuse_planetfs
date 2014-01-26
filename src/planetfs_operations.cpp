@@ -8,7 +8,9 @@
 #include <planet/filesystem.hpp>
 #include <planetfs_operations.hpp>
 
-// Core filesystem object
+#define LOG_EXCEPTION_MSG(e) \
+    BOOST_LOG_TRIVIAL(error) << __func__ << ": " << (e).what();
+
 std::unique_ptr<planet::filesystem> fs;
 
 

@@ -1,6 +1,14 @@
 #ifndef PLANET_FILESYSTEM_HPP
 #define PLANET_FILESYSTEM_HPP
 
+#ifndef FUSE_USE_VERSION
+#   define FUSE_USE_VERSION 26
+#endif
+#ifndef _FILE_OFFSET_BITS
+#   define _FILE_OFFSET_BITS 64
+#endif
+
+#include <fuse.h>
 #include <planet/common.hpp>
 #include <planet/fs_core.hpp>
 
@@ -40,6 +48,12 @@ namespace planet {
             ops_db_->clear();
             ops_db_.reset();
             BOOST_LOG_TRIVIAL(debug) << "filesystem: dtor: core_file_system: use_count=" << root_.use_count();
+        }
+
+        static int start_main(
+            int argc, char **argv, fuse_operations const& ops, void *data)
+        {
+            return ::fuse_main(argc, argv, &ops, data);
         }
 
         shared_ptr<core_file_system> root()
