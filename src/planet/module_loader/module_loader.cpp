@@ -52,7 +52,7 @@ namespace planet {
     {
         int ret = size;
         request_parser parser;
-        if (parser.parse(string_type(buf, size))) {
+        if (parser.parse(string_type(buf, size))) try {
             typedef core_file_system::priority priority;
             if (parser.get_command() == "load")
                 for (auto&& mod_name : parser.get_args())
@@ -60,6 +60,9 @@ namespace planet {
             else if (parser.get_command() == "unload")
                 for (auto&& mod_name : parser.get_args())
                     fs_root_->uninstall_module(mod_name[0]);
+        } catch (no_such_ops_type& e) {
+                BOOST_LOG_TRIVIAL(error) << "module_loader: " << e.what();
+                throw_system_error(EINVAL);
         } else
             ret = -ENOTSUP;
         return ret;
