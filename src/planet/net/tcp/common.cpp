@@ -12,6 +12,7 @@ namespace tcp {
         xpv::sregex data        = xpv::sregex::compile(R"(/tcp/(\d+)/data)");
         xpv::sregex local       = xpv::sregex::compile(R"(/tcp/(\d+)/local)");
         xpv::sregex remote      = xpv::sregex::compile(R"(/tcp/(\d+)/remote)");
+        xpv::sregex listen      = xpv::sregex::compile(R"(/tcp/(\d+)/listen)");
         xpv::sregex session_dir = xpv::sregex::compile(R"(/tcp/(\d+))");
     }   // namespace path_reg
 

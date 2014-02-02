@@ -306,7 +306,7 @@ namespace planet {
     void core_file_system::uninstall_ops(string_type const& name)
     {
         BOOST_LOG_TRIVIAL(info) << "Uninstalling ops: " << name;
-        raii_wrapper finalize([this, &name]() {
+        raii_wrapper finalize([this, name]() {
             ops_db_.lock()->unregister_ops(name);
         });
         ops_db_.lock()->get_ops(name)->uninstall(this->shared_from_this());
@@ -351,8 +351,13 @@ namespace planet {
     void core_file_system::uninstal_all()
     {
         auto db = ops_db_.lock();
-        for (auto&& info : db->info())
-            db->get_ops(std::get<0>(info))->uninstall(this->shared_from_this());
+        for (auto&& info : db->info()) {
+            try {
+                db->get_ops(std::get<0>(info))->uninstall(this->shared_from_this());
+            } catch (std::exception& e) {
+                BOOST_LOG_TRIVIAL(warning) << __func__ << ": " << e.what();
+            }
+        }
     }
 
     ops_type_db& core_file_system::get_ops_db()

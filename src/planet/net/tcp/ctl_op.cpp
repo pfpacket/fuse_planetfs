@@ -38,6 +38,27 @@ namespace tcp {
     static xpv::sregex const reg_ipv4_addr_port =
         (xpv::s1=(xpv::repeat<3>(xpv::repeat<1,3>(xpv::_d) >> '.') >> xpv::repeat<1,3>(xpv::_d)))
             >> '!' >> (xpv::s2=xpv::repeat<1,6>(xpv::_d)) >> *xpv::as_xpr('\n');
+    static xpv::sregex const reg_announce =
+        (xpv::s1=xpv::as_xpr('*')) >> '!' >> (xpv::s2=xpv::repeat<1,6>(xpv::_d)) >> *xpv::as_xpr('\n');
+
+    static int setup_tcp_server(std::string port)
+    {
+        int server_sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (server_sock < 0)
+            throw_system_error(errno, "setup_tcp_server: server_sock(2)");
+        sockaddr_in addr;
+        std::memset(&addr, 0, sizeof (addr));
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        addr.sin_port = htons(std::stoi(port));
+        int ret = ::bind(server_sock, (sockaddr *)&addr, sizeof (addr));
+        if (ret < 0)
+            throw_system_error(errno, "setup_tcp_server: bind(2)");
+        ret = ::listen(server_sock, 5);
+        if (ret < 0)
+            throw_system_error(errno, "setup_tcp_server: listen(2)");
+        return server_sock;
+    }
 
     int ctl_op::interpret_request(string_type const& request)
     {
@@ -50,6 +71,9 @@ namespace tcp {
         if (parser.get_command() == "is_connected") {
             if (!socket || !sock_is_connected(*socket))
                 ret = -ENOTCONN;
+        } else if (parser.get_command() == "is_announced") {
+            if (!socket || !(sock_get_tcp_info(*socket).tcpi_state == TCP_LISTEN))
+                ret = -ENOTCONN;
         } else if (parser.get_command() == "connect") {
             if (socket && sock_is_connected(*socket))
                 return -EISCONN;
@@ -61,6 +85,15 @@ namespace tcp {
             int new_sock = sock_connect_to(args[0][1], args[0][2]);
             detail::fdtable.insert(lexical_cast<string_type>(current_fd_), new_sock);
             BOOST_LOG_TRIVIAL(info) << __func__ << ": connected to " << args[0][1] << "!" << args[0][2];
+        } else if (parser.get_command() == "announce") {
+            auto&& args = parser.get_filtered_args(reg_announce);
+            if (args.empty())
+                return -ENOTSUP;
+            BOOST_LOG_TRIVIAL(info) << __func__ << ": announcing " << args[0][1] << "!" << args[0][2];
+
+            int server_sock = setup_tcp_server(args[0][2]);
+
+            detail::fdtable.insert(lexical_cast<string_type>(current_fd_), server_sock);
         } else if (parser.get_command() == "hangup") {
             detail::fdtable.erase(lexical_cast<string_type>(current_fd_));
         } else if (parser.get_command() == "keepalive") {

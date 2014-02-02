@@ -3,9 +3,6 @@
 
 #include <planet/filesystem.hpp>
 
-#define LOG_EXCEPTION_MSG(e) \
-    BOOST_LOG_TRIVIAL(error) << __func__ << ": " << (e).what();
-
 // Core filesystem object
 extern std::unique_ptr<planet::filesystem> fs;
 

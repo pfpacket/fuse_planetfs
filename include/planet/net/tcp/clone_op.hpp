@@ -18,8 +18,6 @@ namespace tcp {
         int current_fd_;
         handle_t ctl_handle_;
 
-        bool target_ctl_is_connected(string_type const&);
-
     public:
         //clone_op() = default;
         clone_op(shared_ptr<core_file_system> root, int current)
@@ -50,7 +48,7 @@ namespace tcp {
         }
 
         static bool target_ctl_is_connected(string_type const& ctl_path,
-                shared_ptr<core_file_system> fs_root);
+            string_type const& request, shared_ptr<core_file_system> fs_root);
 
         shared_ptr<entry_op> create_op(shared_ptr<core_file_system> fs_root) override;
 
