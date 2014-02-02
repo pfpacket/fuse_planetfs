@@ -109,3 +109,7 @@ clean:
 	@$(MAKE) -C src/planet/net/dns/module/ clean
 	@$(MAKE) -C src/planet/dummy_mod/ clean
 	@find . -maxdepth 1 -type f -name "*.so" | xargs rm -f
+
+distclean: clean
+	rm -f *.log
+	rm -rf logs/
