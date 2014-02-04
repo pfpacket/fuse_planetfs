@@ -15,6 +15,7 @@ example/http_client_example
 example/new_http_client
 example/netcat
 example/pkt_rcv_select
+example/new_echo_server
 valgrind.log
 *.d
 *.log

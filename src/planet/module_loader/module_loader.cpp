@@ -51,8 +51,9 @@ namespace planet {
     int module_loader_op::write(shared_ptr<fs_entry> file_ent, char const *buf, size_t size, off_t offset)
     {
         int ret = size;
+        auto request = string_type(buf, size);
         request_parser parser;
-        if (parser.parse(string_type(buf, size))) try {
+        if (parser.parse(request)) try {
             typedef core_file_system::priority priority;
             if (parser.get_command() == "load")
                 for (auto&& mod_name : parser.get_args())
