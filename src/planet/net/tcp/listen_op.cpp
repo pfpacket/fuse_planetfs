@@ -12,7 +12,7 @@ namespace tcp {
     static int accept_new_connection(int server)
     {
         sockaddr_storage addr;
-        auto addr_len = sizeof (addr);
+        socklen_t addr_len = sizeof (addr);
         int new_socket = ::accept(server, (sockaddr *)&addr, &addr_len);
         if (new_socket < 0)
             throw_system_error(errno, "accept(sock=" + std::to_string(server) + ")");
