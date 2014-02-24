@@ -3,15 +3,15 @@
 #
 BOOST_ROOT := /usr
 CXX        := g++
-#CXXFLAGS  := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
-CXXFLAGS   := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
+#CXXFLAGS  += -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
+CXXFLAGS   += -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
               -std=c++0x -pedantic-errors -g -O2 $(shell pkg-config fuse --cflags) -DBOOST_LOG_DYN_LINK #-D_FORTIFY_SOURCE=2
-LDFLAGS    := -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all #-fstack-check
-INCLUDES   := -I $(BOOST_ROOT)/include -I ./include
-LIBS       := -L $(BOOST_ROOT)/lib -lfuse -lltdl -lpthread \
+LDFLAGS    += -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all #-fstack-check
+INCLUDES   += -I $(BOOST_ROOT)/include -I ./include
+LIBS       += -L $(BOOST_ROOT)/lib -lfuse -lltdl -lpthread \
               -lboost_system -lboost_filesystem -lboost_log -lboost_log_setup -lboost_thread
 TARGET     := mount.planetfs
-OBJS       := src/planet/net/common.o \
+OBJS       += src/planet/net/common.o \
               src/planet/net/dns/resolver_op.o \
               src/planet/net/tcp/common.o \
               src/planet/net/tcp/dir_op.o \
@@ -28,7 +28,7 @@ OBJS       := src/planet/net/common.o \
               src/planet/module_loader/module_loader.o \
               src/planetfs_operations.o \
               src/planetfs_main.o
-LIBPLANET_OBJS = \
+LIBPLANET_OBJS += \
               src/planet/common.o \
               src/planet/fs_core.o \
               src/planet/fs_entry.o \
@@ -39,12 +39,13 @@ LIBPLANET_OBJS = \
               src/planet/basic_operation.o \
               src/planet/request_parser.o \
               src/planet/module_ops_type.o
-
-DEPS       := $(OBJS:%.o=%.d) $(LIBPLANET_OBJS:%.o=%.d)
+DESTDIR     = /usr
+DEPS       += $(OBJS:%.o=%.d) $(LIBPLANET_OBJS:%.o=%.d)
 MNTDIR     := /net
-MNTOPT     := -o direct_io -o intr -o allow_other
-MNTDBGOPT  := $(MNTOPT) -d -f
-EXEC_ENV   := MALLOC_CHECK_=3 LD_LIBRARY_PATH=./
+MNTOPT     += -o direct_io -o intr -o allow_other
+MNTDBGOPT  += $(MNTOPT) -d -f
+#EXEC_ENV   += MALLOC_CHECK_=3 LD_LIBRARY_PATH=./
+EXEC_ENV   += LD_LIBRARY_PATH=./
 export
 
 all: prepare $(TARGET) modules
@@ -67,8 +68,8 @@ libplanet: $(LIBPLANET_OBJS)
 
 modules: libplanet
 	@echo "[*] Building dynamic modules ..."
-	@$(MAKE) -C src/planet/net/dns/module/
 	@$(MAKE) -C src/planet/dummy_mod/
+	@$(MAKE) -C src/planet/net/dns/module/
 	find src/ -type f -name "*.so" -exec cp {} . \;
 
 mount: all
@@ -101,13 +102,18 @@ test: examples
 	@echo "[*] Starting test: simple_http_client.py"
 	./example/simple_http_client.py www.google.com
 
+install: $(TARGET) modules
+	install -D -m755 "$(TARGET)" "$(DESTDIR)/bin/$(TARGET)"
+	install -D -m755 "mod_dummy.so" "$(DESTDIR)/lib/fuse_planetfs/mod_dummy.so"
+	install -D -m755 "mod_net_dns.so" "$(DESTDIR)/lib/fuse_planetfs/mod_net_dns.so"
+
 clean:
 	rm -f $(TARGET) $(OBJS)
 	find . -type f -name "*.o" | xargs rm -f
 	find src/ -type f -name "*.d" | xargs rm -f
 	@$(MAKE) -C example/ clean
-	@$(MAKE) -C src/planet/net/dns/module/ clean
 	@$(MAKE) -C src/planet/dummy_mod/ clean
+	@$(MAKE) -C src/planet/net/dns/module/ clean
 	@find . -maxdepth 1 -type f -name "*.so" | xargs rm -f
 
 distclean: clean
