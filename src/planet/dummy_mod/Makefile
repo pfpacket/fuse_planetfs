@@ -3,17 +3,14 @@
 #
 ROOT       = ../../..
 INCLUDES  += -I $(ROOT)/include
-LIBS      += -L ./ -lplanet
+LIBS      += -L $(ROOT) -lplanet
 OBJS       = mod_dummy.o
 TARGET     = mod_dummy.so
 
 all: $(TARGET)
 rebuild: clean all
 
-libplanet:
-	@ln -sf $(ROOT)/libplanet.so ./libplanet.so
-
-$(TARGET): libplanet $(OBJS)
+$(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -shared -fPIC -o $@ $(OBJS) $(LIBS)
 
 .cpp.o:
@@ -21,4 +18,4 @@ $(TARGET): libplanet $(OBJS)
 -include $(DEPS)
 
 clean:
-	rm -f $(TARGET) $(OBJS) ./libplanet.so
+	rm -f $(TARGET) $(OBJS)

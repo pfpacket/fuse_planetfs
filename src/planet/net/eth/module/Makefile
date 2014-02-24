@@ -4,10 +4,11 @@
 ROOT       = ../../../../..
 INCLUDES  += -I $(ROOT)/include
 LIBS      += -L $(ROOT) -lplanet
-OBJS       = mod_net_dns.o \
+OBJS       = mod_net_eth.o \
              $(ROOT)/src/planet/net/common.o \
-             $(ROOT)/src/planet/net/dns/resolver_op.o
-TARGET     = mod_net_dns.so
+             $(ROOT)/src/planet/net/eth/dir_op.o \
+             $(ROOT)/src/planet/net/eth/raw_op.o
+TARGET     = mod_net_eth.so
 
 all: $(TARGET)
 rebuild: clean all

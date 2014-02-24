@@ -56,7 +56,7 @@ rebuild: clean all
 
 $(TARGET): libplanet $(OBJS)
 	@echo "[*] Linking $(TARGET) ..."
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) libplanet.so $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS) -L./ -lplanet
 
 libplanet: $(LIBPLANET_OBJS)
 	@echo "[*] Linking libplanet ..."
@@ -70,6 +70,7 @@ modules: libplanet
 	@echo "[*] Building dynamic modules ..."
 	@$(MAKE) -C src/planet/dummy_mod/
 	@$(MAKE) -C src/planet/net/dns/module/
+	@$(MAKE) -C src/planet/net/eth/module/
 	find src/ -type f -name "*.so" -exec cp {} . \;
 
 mount: all
@@ -106,6 +107,7 @@ install: $(TARGET) modules
 	install -D -m755 "$(TARGET)" "$(DESTDIR)/bin/$(TARGET)"
 	install -D -m755 "mod_dummy.so" "$(DESTDIR)/lib/fuse_planetfs/mod_dummy.so"
 	install -D -m755 "mod_net_dns.so" "$(DESTDIR)/lib/fuse_planetfs/mod_net_dns.so"
+	install -D -m755 "mod_net_eth.so" "$(DESTDIR)/lib/fuse_planetfs/mod_net_eth.so"
 
 clean:
 	rm -f $(TARGET) $(OBJS)
@@ -114,6 +116,7 @@ clean:
 	@$(MAKE) -C example/ clean
 	@$(MAKE) -C src/planet/dummy_mod/ clean
 	@$(MAKE) -C src/planet/net/dns/module/ clean
+	@$(MAKE) -C src/planet/net/eth/module/ clean
 	@find . -maxdepth 1 -type f -name "*.so" | xargs rm -f
 
 distclean: clean
