@@ -1,0 +1,26 @@
+# Maintainer: Ryo Muanakata <afpacket@gmail.com>
+# Contributor: Ryo Muanakata <afpacket@gmail.com>
+pkgname=fuse_planetfs-git
+pkgver=20140224
+pkgrel=1
+pkgdesc="A filesystem for file abstraction of network, which is inspired by Plan 9"
+arch=('i686' 'x86_64')
+url="https://github.com/pfpacket/fuse_planetfs"
+license=('BSD')
+depends=('boost-libs')
+makedepends=('git' 'boost')
+source=("git://github.com/pfpacket/fuse_planetfs.git")
+md5sums=('SKIP')
+
+build() {
+  cd "${srcdir}/fuse_planetfs/"
+  git checkout develop
+  make
+}
+
+package() {
+  cd "${srcdir}/fuse_planetfs/"
+  make DESTDIR="$pkgdir/usr" install
+}
+
+# vim:set ts=2 sw=2 et:

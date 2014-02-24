@@ -12,7 +12,7 @@ namespace tcp {
     static int accept_new_connection(int server)
     {
         sockaddr_storage addr;
-        auto addr_len = sizeof (addr);
+        socklen_t addr_len = sizeof (addr);
         int new_socket = ::accept(server, (sockaddr *)&addr, &addr_len);
         if (new_socket < 0)
             throw_system_error(errno, "accept(sock=" + std::to_string(server) + ")");
@@ -26,7 +26,7 @@ namespace tcp {
         raii_wrapper close_clone([clone, fs_root] { fs_root->close(clone); });
         int bytes_read = fs_root->read(clone, buffer.data(), buffer.size(), 0);
         // (bytes_read - 1): /tcp/clone returns new number, containing '\n'
-        return std::string(buffer.data(), bytes_read - 1);
+        return std::string(buffer.data(), bytes_read);
     }
 
     //
@@ -63,9 +63,10 @@ namespace tcp {
         if (size < session_str.length())
             return -ENAMETOOLONG;
         BOOST_LOG_TRIVIAL(debug) << "listen_op::read: server=" << server_socket
-            << " new_socket=" << new_socket << " new_session=" << session_str;
+            << " new_socket=" << new_socket << " new_session="
+            << session_str.substr(0, session_str.size() - 1);
 
-        detail::fdtable.insert(session_str, new_socket);
+        detail::fdtable.insert(session_str.substr(0, session_str.size() - 1), new_socket);
         std::copy_n(session_str.data(), session_str.size(), buf);
         read_once_.store(true);
         return session_str.length();

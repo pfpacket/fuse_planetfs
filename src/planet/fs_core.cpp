@@ -131,7 +131,13 @@ namespace planet {
         int ret = 0;
         if (auto parent_dir = search_dir_entry(*this, path.parent_path())) {
             auto dir_entry = directory_cast(parent_dir->search_entries(path.filename().string()));
-            ret = ops_db_.lock()->get_ops(dir_entry->ops_name())->rmnod(dir_entry, path);
+            try {
+                ret = ops_db_.lock()->get_ops(dir_entry->ops_name())->rmnod(dir_entry, path);
+            } catch (no_such_ops_type& e) {
+                // if no operations found, just rmdir a directory
+                BOOST_LOG_TRIVIAL(warning) << __func__ << ": no such operation to rmdir: "
+                    << e.get_ops_name() << ": just rmdir";
+            }
             if (ret < 0 && !force)
                 return ret;
             parent_dir->remove_entry(path.filename().string());

@@ -6,7 +6,8 @@ TARGETS    = dns_example \
 			 tcp_server_example \
 			 packet_recv_example \
 			 netcat \
-			 pkt_rcv_select
+			 pkt_rcv_select \
+			 new_echo_server
 LIBS       =
 LDFLAGS    =
 
@@ -26,6 +27,8 @@ netcat: netcat.o
 	$(CC) $(LDFLAGS) -o $@ netcat.o $(LIBS)
 pkt_rcv_select: pkt_rcv_select.o
 	$(CC) $(LDFLAGS) -o $@ pkt_rcv_select.o $(LIBS)
+new_echo_server: new_echo_server.o
+	$(CC) $(LDFLAGS) -o $@ new_echo_server.o $(LIBS)
 
 clean:
 	rm -f $(TARGETS) *.o
