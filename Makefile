@@ -105,9 +105,10 @@ test: examples
 
 install: $(TARGET) modules
 	install -D -m755 "$(TARGET)" "$(DESTDIR)/bin/$(TARGET)"
-	install -D -m755 "mod_dummy.so" "$(DESTDIR)/lib/fuse_planetfs/mod_dummy.so"
-	install -D -m755 "mod_net_dns.so" "$(DESTDIR)/lib/fuse_planetfs/mod_net_dns.so"
-	install -D -m755 "mod_net_eth.so" "$(DESTDIR)/lib/fuse_planetfs/mod_net_eth.so"
+	install -D -m644 "libplanet.so" "$(DESTDIR)/lib/libplanet.so"
+	install -D -m644 "mod_dummy.so" "$(DESTDIR)/lib/fuse_planetfs/mod_dummy.so"
+	install -D -m644 "mod_net_dns.so" "$(DESTDIR)/lib/fuse_planetfs/mod_net_dns.so"
+	install -D -m644 "mod_net_eth.so" "$(DESTDIR)/lib/fuse_planetfs/mod_net_eth.so"
 
 clean:
 	rm -f $(TARGET) $(OBJS)
