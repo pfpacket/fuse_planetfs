@@ -16,15 +16,17 @@ namespace planet {
     }
 
     module_ops_type::module_ops_type(string_type const& module_name)
-        :   module_ops_type(module_name, {"./"})
+        :   module_ops_type(module_name, {})
     {
     }
 
     module_ops_type::module_ops_type(
-        string_type const& module_name, std::vector<string_type> const& paths
+        string_type const& module_name, std::vector<string_type> paths
     )
         :   fs_ops_type(module_name)
     {
+        paths.emplace_back("./");
+        paths.emplace_back("/usr/lib/fuse_planetfs/");
         loader_.add_searchdir(paths);
         loader_.load_module(module_name);
         load_all_functions();
