@@ -23,7 +23,6 @@ namespace tcp {
 
     int session_dir_type::mknod(shared_ptr<fs_entry>, path_type const& path, mode_t, dev_t)
     {
-        xpv::regex_match(path.string(), path_reg::session_dir);
         fs_root_->mknod(path.string() + "/data", S_IRUSR | S_IWUSR, 0);
         fs_root_->mknod(path.string() + "/ctl", S_IRUSR | S_IWUSR, 0);
         fs_root_->mknod(path.string() + "/local", S_IRUSR | S_IWUSR, 0);

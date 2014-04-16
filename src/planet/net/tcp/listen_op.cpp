@@ -25,7 +25,6 @@ namespace tcp {
         auto clone = fs_root->open("/tcp/clone");
         raii_wrapper close_clone([clone, fs_root] { fs_root->close(clone); });
         int bytes_read = fs_root->read(clone, buffer.data(), buffer.size(), 0);
-        // (bytes_read - 1): /tcp/clone returns new number, containing '\n'
         return std::string(buffer.data(), bytes_read);
     }
 

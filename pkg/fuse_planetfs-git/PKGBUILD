@@ -20,7 +20,7 @@ build() {
 
 package() {
   cd "${srcdir}/fuse_planetfs/"
-  make DESTDIR="$pkgdir/usr" install
+  make DESTDIR="${pkgdir}/usr" install
 }
 
 # vim:set ts=2 sw=2 et:
