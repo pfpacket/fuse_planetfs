@@ -5,7 +5,7 @@ BOOST_ROOT := /usr
 CXX        := g++
 #CXXFLAGS  += -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wreturn-type-c-linkage -std=c++0x -O2
 CXXFLAGS   += -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers \
-              -std=c++0x -pedantic-errors -g -O2 $(shell pkg-config fuse --cflags) -DBOOST_LOG_DYN_LINK #-D_FORTIFY_SOURCE=2
+              -std=c++0x -pedantic-errors -g -O2 -fPIC $(shell pkg-config fuse --cflags) -DBOOST_LOG_DYN_LINK #-D_FORTIFY_SOURCE=2
 LDFLAGS    += -rdynamic $(shell pkg-config fuse --libs) -fstack-protector-all #-fstack-check
 INCLUDES   += -I $(BOOST_ROOT)/include -I ./include
 LIBS       += -L $(BOOST_ROOT)/lib -lfuse -lltdl -lpthread \
