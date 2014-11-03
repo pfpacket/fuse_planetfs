@@ -41,11 +41,6 @@ namespace planet {
         {
             return -EPERM;
         }
-
-        virtual int poll(pollmask_t&)
-        {
-            return -EPERM;
-        }
     };
 
     //

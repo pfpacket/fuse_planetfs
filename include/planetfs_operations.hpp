@@ -6,22 +6,18 @@
 // Core filesystem object
 extern std::unique_ptr<planet::filesystem> fs;
 
-
-extern int planet_getattr(char const *, struct stat *);
-extern int planet_mknod(char const *, mode_t, dev_t);
-extern int planet_unlink(char const *);
-extern int planet_mkdir(char const *, mode_t);
-extern int planet_rmdir(char const *);
-extern int planet_chmod(char const *, mode_t);
-extern int planet_chown(char const *, uid_t, gid_t);
-extern int planet_truncate(char const *, off_t);
-extern int planet_utimens(char const *, struct timespec const [2]);
-extern int planet_open(char const *, struct fuse_file_info *);
-extern int planet_read(char const *, char *, size_t, off_t, struct fuse_file_info *);
-extern int planet_write(char const *, const char *, size_t, off_t, struct fuse_file_info *);
-extern int planet_readdir(char const *, void *, fuse_fill_dir_t, off_t, struct fuse_file_info *);
-extern int planet_release(char const *, struct fuse_file_info *);
-extern int planet_poll(const char *, struct fuse_file_info *, struct fuse_pollhandle *, unsigned *);
+extern void planet_attach(Ixp9Req*);
+extern void planet_clunk(Ixp9Req*);
+extern void planet_create(Ixp9Req*);
+extern void planet_flush(Ixp9Req*);
+extern void planet_open(Ixp9Req*);
+extern void planet_read(Ixp9Req*);
+extern void planet_remove(Ixp9Req*);
+extern void planet_stat(Ixp9Req*);
+extern void planet_walk(Ixp9Req*);
+extern void planet_write(Ixp9Req*);
+extern void planet_wstat(Ixp9Req*);
+extern void planet_freefid(IxpFid*);
 
 
 #endif  // PLANETFS_OPERATIONS_HPP

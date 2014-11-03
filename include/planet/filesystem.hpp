@@ -1,24 +1,29 @@
 #ifndef PLANET_FILESYSTEM_HPP
 #define PLANET_FILESYSTEM_HPP
 
-#ifndef FUSE_USE_VERSION
-#   define FUSE_USE_VERSION 26
-#endif
 #ifndef _FILE_OFFSET_BITS
 #   define _FILE_OFFSET_BITS 64
 #endif
 
-#include <fuse.h>
+extern "C" {
+#include <ixp.h>
+}
 #include <planet/common.hpp>
 #include <planet/fs_core.hpp>
 
 namespace planet {
 
+    struct ixp_context {
+        int fd;
+        IxpServer server;
+        IxpConn *conn;
+    };
 
     class filesystem {
     private:
         shared_ptr<ops_type_db>         ops_db_;
         shared_ptr<core_file_system>    root_;
+        ixp_context ctx_;
 
     public:
         typedef ops_type_db::priority priority;
@@ -50,10 +55,25 @@ namespace planet {
             BOOST_LOG_TRIVIAL(debug) << "filesystem: dtor: core_file_system: use_count=" << root_.use_count();
         }
 
-        static int start_main(
-            int argc, char **argv, fuse_operations const& ops, void *data)
+        void listen(int argc, char **argv, Ixp9Srv const& srv, void *data)
         {
-            return ::fuse_main(argc, argv, &ops, data);
+            ctx_.fd = ixp_announce(argv[1]);
+            if (ctx_.fd < 0)
+                throw std::runtime_error(std::string("announce: ") + ixp_errbuf());
+
+            ctx_.conn = ixp_listen(&ctx_.server, ctx_.fd, (void *)&srv, &ixp_serve9conn, nullptr);
+            if (!ctx_.conn)
+                throw std::runtime_error(std::string("listen: ") + ixp_errbuf());
+        }
+
+        int start_main()
+        {
+            return ixp_serverloop(&ctx_.server);
+        }
+
+        ixp_context& context()
+        {
+            return ctx_;
         }
 
         shared_ptr<core_file_system> root()

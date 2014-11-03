@@ -26,7 +26,7 @@ namespace planet {
         :   fs_ops_type(module_name)
     {
         paths.emplace_back("./");
-        paths.emplace_back("/usr/lib/fuse_planetfs/");
+        paths.emplace_back("/usr/lib/9pnetfs/");
         loader_.add_searchdir(paths);
         loader_.load_module(module_name);
         load_all_functions();

@@ -8,6 +8,19 @@
 
 std::unique_ptr<planet::filesystem> fs;
 
+void planet_attach(Ixp9Req*)
+void planet_clunk(Ixp9Req*)
+void planet_create(Ixp9Req*)
+void planet_flush(Ixp9Req*)
+void planet_open(Ixp9Req*)
+void planet_read(Ixp9Req*)
+void planet_remove(Ixp9Req*)
+void planet_stat(Ixp9Req*)
+void planet_walk(Ixp9Req*)
+void planet_write(Ixp9Req*)
+void planet_wstat(Ixp9Req*)
+void planet_freefid(IxpFid*)
+
 
 int planet_getattr(char const *path, struct stat *stbuf)
 {
@@ -242,21 +255,6 @@ int planet_release(char const *path, struct fuse_file_info *fi)
         planet::handle_t ph = planet::get_handle_from(*fi);
         BOOST_LOG_TRIVIAL(debug) << __func__ << " handle=" << ph << " path=" << path << " fi=" << fi;
         ret = fs->root()->close(ph);
-    } catch (std::system_error& e) {
-        LOG_EXCEPTION_MSG(e);
-        ret = -e.code().value();
-    } catch (std::exception& e) {
-        LOG_EXCEPTION_MSG(e);
-        ret = -EIO;
-    }
-    return ret;
-}
-
-int planet_poll(const char *path, struct fuse_file_info *fi, struct fuse_pollhandle *ph, unsigned *reventsp)
-{
-    int ret = 0;
-    try {
-        ret = fs->root()->poll(path, fi, ph, reventsp);
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = -e.code().value();

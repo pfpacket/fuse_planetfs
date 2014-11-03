@@ -11,11 +11,10 @@
 
 #include <boost/log/sinks.hpp>
 #include <boost/log/support/date_time.hpp>
-#include <boost/utility/empty_deleter.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 
-#define PLANETFS_NAME "fuse_planetfs"
+#define PLANETFS_NAME "9pnetfs"
 namespace logging   = boost::log;
 namespace expr      = boost::log::expressions;
 namespace sinks     = boost::log::sinks;
@@ -43,14 +42,14 @@ void planetfs_initialize_log()
 void planetfs_log_init_msg()
 {
     BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
-    BOOST_LOG_TRIVIAL(info) << "|     Starting fuse_planetfs      |";
+    BOOST_LOG_TRIVIAL(info) << "|         Starting 9pnetfs        |";
     BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
 }
 
 void planetfs_log_fin_msg()
 {
     BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
-    BOOST_LOG_TRIVIAL(info) << "|     Finishing fuse_planetfs     |";
+    BOOST_LOG_TRIVIAL(info) << "|         Finishing 9pnetfs       |";
     BOOST_LOG_TRIVIAL(info) << "+---------------------------------+";
 }
 
@@ -81,8 +80,6 @@ void planetfs_create_initial_fs_structure()
     fs->root()->mkdir("/eth",   S_IRWXU);
     fs->root()->mknod("/dns",   S_IRUSR | S_IWUSR, 0);
 }
-
-static struct fuse_operations planetfs_ops{};
 
 int main(int argc, char **argv)
 {
@@ -124,9 +121,8 @@ int main(int argc, char **argv)
         planetfs_ops.write      =   planet_write;
         planetfs_ops.readdir    =   planet_readdir;
         planetfs_ops.release    =   planet_release;
-        planetfs_ops.poll       =   planet_poll;
 
-        // Start the userspace filesystem
+        // Start filesystem main loop
         exit_code = fs->start_main(argc, argv, planetfs_ops, nullptr);
 
     } catch (std::exception& e) {

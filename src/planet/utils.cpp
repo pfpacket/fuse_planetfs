@@ -2,7 +2,6 @@
 #include <planet/common.hpp>
 #include <planet/utils.hpp>
 #include <planet/fs_core.hpp>
-#include <fuse.h>
 
 namespace planet {
 
@@ -37,8 +36,6 @@ namespace planet {
 
     void fill_st_inode(st_inode& inode)
     {
-        //inode.uid = ::fuse_get_context()->uid;
-        //inode.gid = ::fuse_get_context()->gid;
         inode.uid = ::getuid();
         inode.gid = ::getgid();
     }

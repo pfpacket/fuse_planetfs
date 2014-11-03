@@ -224,7 +224,7 @@ namespace planet {
                 fentry
             );
             try {
-                auto& op_tuple = open_handles_.get_op_entry(new_handle);
+                auto&& op_tuple = open_handles_.get_op_entry(new_handle);
                 int open_ret = std::get<0>(op_tuple)->open(std::get<1>(op_tuple), path);
                 if (open_ret < 0)
                     throw_system_error(-open_ret);
@@ -266,36 +266,9 @@ namespace planet {
             raii_wrapper raii([this,handle] {
                 this->open_handles_.unregister_op(handle);
             });
-            this->poller_.unregister(handle);
         });
         int ret = std::get<0>(op_tuple)->release(std::get<1>(op_tuple));
         return ret;
-    }
-
-    int core_file_system::poll(handle_t handle, pollmask_t& pollmask)
-    {
-        auto&& op_tuple = open_handles_.get_op_entry(handle);
-        return std::get<0>(op_tuple)->poll(pollmask);
-    }
-
-    int core_file_system::poll(
-        path_type const& path, struct fuse_file_info *fi, struct fuse_pollhandle *ph, unsigned *reventsp
-    )
-    {
-        auto handle = get_handle_from(*fi);
-        std::call_once(invoke_poller_once_, [this]() {
-            this->poller_.poll(this->shared_from_this());
-        });
-
-        if (ph) {
-            BOOST_LOG_TRIVIAL(trace) << __func__ << ": handle=" << handle << " adding new handle";
-            poller_.register_new(handle, ph);
-        }
-
-        *reventsp |= poller_.get_status(handle);
-        BOOST_LOG_TRIVIAL(trace) << __func__ << ": handle=" << handle << " polled=" << *reventsp;
-        return 0;
-
     }
 
     void core_file_system::install_ops(priority p, shared_ptr<fs_ops_type> ops)

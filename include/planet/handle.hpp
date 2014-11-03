@@ -10,8 +10,6 @@
 #include <cerrno>
 #include <planet/basic_operation.hpp>
 
-struct fuse_file_info;
-
 namespace planet {
 
 
@@ -65,8 +63,8 @@ namespace planet {
         }
     };
 
-    extern handle_t get_handle_from(struct fuse_file_info const& fi);
-    extern void set_handle_to(struct fuse_file_info& fi, handle_t ph);
+    //extern handle_t get_handle_from(struct fuse_file_info const& fi);
+    //extern void set_handle_to(struct fuse_file_info& fi, handle_t ph);
 
 
 }   // namespace planet

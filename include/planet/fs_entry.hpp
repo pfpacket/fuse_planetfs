@@ -2,10 +2,10 @@
 #define PLANET_FS_ENTRY_HPP
 
 #include <planet/common.hpp>
+#include <planet/handle.hpp>
 #include <vector>
 #include <chrono>
 #include <sys/stat.h>
-#include <planet/handle.hpp>
 
 namespace planet {
 

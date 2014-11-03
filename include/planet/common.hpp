@@ -1,15 +1,9 @@
 #ifndef PLANET_COMMON_HPP
 #define PLANET_COMMON_HPP
 
-#ifndef FUSE_USE_VERSION
-#   define FUSE_USE_VERSION 26
-#endif
-
 #ifndef _FILE_OFFSET_BITS
 #   define _FILE_OFFSET_BITS 64
 #endif
-
-#include <fuse.h>
 
 #include <memory>
 #include <functional>
@@ -48,9 +42,6 @@ namespace planet {
 
     // entry path type (better string class)
     typedef boost::filesystem::path path_type;
-
-    // FUSE poll mask type
-    typedef unsigned pollmask_t;
 
     // Operation index code (deprecated)
     class op_type_code {
