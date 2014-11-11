@@ -35,6 +35,7 @@ namespace planet {
             stbuf.st_mode   = fs_ent->inode().mode;
             stbuf.st_uid    = fs_ent->inode().uid;
             stbuf.st_gid    = fs_ent->inode().gid;
+            stbuf.st_ino    = fs_ent->inode().ino;
             stbuf.st_nlink  = fs_ent.use_count() - 1;
             stbuf.st_size   = fs_ent->size();
             stbuf.st_atime  = st_inode::to_time_t(fs_ent->inode().atime);
@@ -312,14 +313,18 @@ namespace planet {
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(path_type const& path) const
     {
-        return (path == "/" ? root : get_entry_of(root, path));
+        std::string p = path.string();
+        if (p != "/" && p.back() == '/')
+            p.pop_back();
+        return (p == "/" ? root : get_entry_of(root, p));
     }
 
     shared_ptr<fs_entry> core_file_system::get_entry_of(shared_ptr<dentry> root, path_type const& path)
     {
         if (path.empty() || path.is_relative() || !root)
             throw std::runtime_error{"detect null parent dir or relative path"};
-        string_type p = path.string();
+
+        auto p = path.string();
         auto pos = p.find_first_of('/', 1);
         if (pos == std::string::npos)
             return root->search_entries(p.substr(1));

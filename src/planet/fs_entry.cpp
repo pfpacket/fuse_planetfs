@@ -37,6 +37,10 @@ namespace planet {
         return ctime;
     }
 
+    std::random_device st_inode::seed_gen{};
+    std::mt19937 st_inode::engine{seed_gen()};
+    std::uniform_int_distribution<> st_inode::dist{};
+
 
     //
     // file_entry

@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <algorithm>
 #include <stdexcept>
 #include <syslog.h>
 #include <planet/filesystem.hpp>
@@ -30,9 +31,12 @@ public:
     bool first = true;
 
 private:
-    planet_fid(std::string const& p)
-        :   path(p), entry(fs->root()->get_entry_of(p))
+    planet_fid(std::string p)
     {
+        if (p != "/" && p.back() == '/')
+            p.pop_back();
+        path = std::move(p);
+        entry = fs->root()->get_entry_of(path);
     }
 };
 
@@ -40,6 +44,14 @@ static void
 throw_system_error(int err)
 {
     throw std::system_error(err, std::system_category());
+}
+
+struct stat getattr(std::string const& path)
+{
+    struct stat stbuf;
+    std::memset(&stbuf, 0, sizeof (struct stat));
+    fs->root()->getattr(path, stbuf);
+    return stbuf;
 }
 
 static void
@@ -78,8 +90,8 @@ planet_attach(Ixp9Req *r)
 
     int ret = 0;
     try {
+        r->fid->qid.path = getattr("/").st_ino;
         r->fid->qid.type = P9_QTDIR;
-        r->fid->qid.path = (uintptr_t)r->fid;
         r->fid->aux = planet_fid::create("/");
         r->ofcall.rattach.qid = r->fid->qid;
     } catch (std::system_error& e) {
@@ -98,7 +110,18 @@ planet_clunk(Ixp9Req *r)
     auto *fid = (planet_fid *)r->fid->aux;
     BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << fid->path;
 
-    ixp_respond(r, nullptr);
+    int ret = 0;
+    try {
+        if (fid->handle >= 0)
+            fs->root()->close(fid->handle);
+    } catch (std::system_error& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = e.code().value();
+    } catch (std::exception& e) {
+        LOG_EXCEPTION_MSG(e);
+        ret = EIO;
+    }
+    ixp_respond(r, ret ? strerrno(ret).c_str() : nullptr);
 }
 
 static void
@@ -107,7 +130,27 @@ planet_create(Ixp9Req *r)
     int ret = 0;
     try {
         auto *fid = (planet_fid *)r->fid->aux;
-        BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << fid->path;
+
+        assert(fid->entry->type() == planet::file_type::directory);
+
+        std::string path = fid->path
+            + (fid->path == "/" ? "" : "/")
+            + r->ifcall.tcreate.name;
+
+        if (r->ifcall.tcreate.perm & P9_DMDIR) {
+            BOOST_LOG_TRIVIAL(trace) << __func__ << ": mkdir: fid=" << fid->path << " path=" << path;
+            fs->root()->mkdir(path, r->ifcall.tcreate.perm);
+        } else {
+            BOOST_LOG_TRIVIAL(trace) << __func__ << ": mknod: fid=" << fid->path << " path=" << path;
+            fs->root()->mknod(path, r->ifcall.tcreate.perm);
+            fid->handle = fs->root()->open(path);
+        }
+
+        fid->entry = fs->root()->get_entry_of(path);
+        auto stbuf = getattr(path);
+        r->fid->qid.path = stbuf.st_ino;
+        r->fid->qid.type = stbuf.st_mode & S_IFMT;
+
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = e.code().value();
@@ -137,6 +180,10 @@ planet_open(Ixp9Req *r)
             fid->handle = fs->root()->open(fid->path);
         }
 
+        struct stat stbuf = getattr(fid->path);
+        r->fid->qid.path = stbuf.st_ino;
+        r->fid->qid.type = stbuf.st_mode & S_IFMT;
+
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = e.code().value();
@@ -158,9 +205,13 @@ planet_read_dir(Ixp9Req *r)
 
     int count = 0;
     for (auto const& entry_name : fs->root()->readdir(fid->path)) {
-        struct stat stbuf;
-        std::memset(&stbuf, 0, sizeof (struct stat));
-        fs->root()->getattr(fid->path + entry_name, stbuf);
+        if (!fid->first)
+            break;
+
+        std::string path = fid->path
+            + (fid->path == "/" ? "" : "/")
+            + entry_name;
+        auto stbuf = getattr(path);
 
         IxpStat s;
         stat_posix_to_9p(&s, entry_name, &stbuf);
@@ -229,6 +280,12 @@ planet_remove(Ixp9Req *r)
     try {
         auto *fid = (planet_fid *)r->fid->aux;
         BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << fid->path;
+
+        if (fid->entry->type() == planet::file_type::directory)
+            fs->root()->rmdir(fid->path, true);
+        else
+            fs->root()->unlink(fid->path, true);
+
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = e.code().value();
@@ -247,11 +304,8 @@ planet_stat(Ixp9Req *r)
         auto *fid = (planet_fid *)r->fid->aux;
         BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << fid->path;
 
-        struct stat stbuf;
-        std::memset(&stbuf, 0, sizeof (struct stat));
-        fs->root()->getattr(fid->path, stbuf);
-
         IxpStat s;
+        struct stat stbuf = getattr(fid->path);
         stat_posix_to_9p(&s, fid->entry->name(), &stbuf);
 
         // Pack the stat to the binary
@@ -279,23 +333,29 @@ planet_walk(Ixp9Req *r)
 {
     int ret = 0;
     try {
-        int i = 0;
-        std::string path;
         auto *fid = (planet_fid *)r->fid->aux;
+        std::string path = (fid->path == "/" ? "" : fid->path);
+        BOOST_LOG_TRIVIAL(trace) << __func__ << ": fid=" << fid->path << " nwname=" << r->ifcall.twalk.nwname;
 
+        int i = 0;
         for (; i < r->ifcall.twalk.nwname; ++i) {
-            path += (s("/") + r->ifcall.twalk.wname[i]);
+            path += s("/") + r->ifcall.twalk.wname[i];
             BOOST_LOG_TRIVIAL(trace) << __func__ << ": i=" << i << " path=" << path;
 
             struct stat stbuf;
             std::memset(&stbuf, 0, sizeof (struct stat));
-            fs->root()->getattr(fid->path, stbuf);
+            try {
+                fs->root()->getattr(path, stbuf);
+            } catch (std::system_error& e) {
+                LOG_EXCEPTION_MSG(e);
+                break;
+            }
 
             r->ofcall.rwalk.wqid[i].type = stbuf.st_mode & S_IFMT;
             r->ofcall.rwalk.wqid[i].path = stbuf.st_ino;
         }
 
-        r->newfid->aux = i ?
+        r->newfid->aux = r->ifcall.twalk.nwname ?
             planet_fid::create(path) : planet_fid::create(*fid);
         r->ofcall.rwalk.nwqid = i;
 
@@ -315,7 +375,21 @@ planet_write(Ixp9Req *r)
     int ret = 0;
     try {
         auto *fid = (planet_fid *)r->fid->aux;
-        BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << fid->path;
+        //BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << fid->path;
+
+        if (fid->entry->type() != planet::file_type::directory) {
+            int count = fs->root()->write(fid->handle,
+                    r->ifcall.twrite.data,
+                    r->ifcall.twrite.count,
+                    r->ifcall.twrite.offset);
+            if (count < 0) {
+                ret = EPERM;
+            } else {
+                r->ofcall.rwrite.count = count;
+            }
+        } else {
+            ret = EISDIR;
+        }
     } catch (std::system_error& e) {
         LOG_EXCEPTION_MSG(e);
         ret = e.code().value();
@@ -329,6 +403,7 @@ planet_write(Ixp9Req *r)
 static void
 planet_wstat(Ixp9Req *r)
 {
+    syslog(LOG_NOTICE, "%s: called", "planet_wstat");
     int ret = 0;
     try {
         auto *fid = (planet_fid *)r->fid->aux;
@@ -340,6 +415,7 @@ planet_wstat(Ixp9Req *r)
         LOG_EXCEPTION_MSG(e);
         ret = EIO;
     }
+    BOOST_LOG_TRIVIAL(trace) << __func__ << ": ret=" << ret << " errstr=" << (ret ? strerrno(ret).c_str() : "none");
     ixp_respond(r, ret ? strerrno(ret).c_str() : nullptr);
 }
 
@@ -350,6 +426,27 @@ planet_freefid(IxpFid *f)
     BOOST_LOG_TRIVIAL(trace) << __func__ << ": path=" << fid->path;
 
     planet_fid::destroy(fid);
+}
+
+static void
+planetfs_create_initial_fs_structure()
+{
+    auto create_file =
+        [](std::string const& path, const char *buf, int len)
+        {
+            fs->root()->mknod(path, 0777);
+            auto handle = fs->root()->open(path);
+            fs->root()->write(handle, buf, len, 0);
+            fs->root()->close(handle);
+        };
+
+    std::string buf = "The dummy content you will see\n";
+    create_file("/file1", buf.data(), buf.length());
+
+    std::string buf2 = "\n\n\nhello";
+    create_file("/file2", buf2.data(), buf2.length());
+
+    fs->root()->mkdir("/dir1", 0777);
 }
 
 int main(int argc, char **argv)
@@ -363,12 +460,7 @@ int main(int argc, char **argv)
 
     try {
         fs = std::make_shared<planet::filesystem>(S_IRWXU);
-
-        const char *buf = "The dummy content you will see\n";
-        fs->root()->mknod("/service", 0666);
-        auto handle = fs->root()->open("/service");
-        fs->root()->write(handle, buf, strlen(buf), 0);
-        fs->root()->close(handle);
+        planetfs_create_initial_fs_structure();
 
         srv.attach  = planet_attach;
         srv.clunk   = planet_clunk;

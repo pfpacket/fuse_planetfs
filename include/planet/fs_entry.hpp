@@ -5,6 +5,7 @@
 #include <planet/handle.hpp>
 #include <vector>
 #include <chrono>
+#include <random>
 #include <sys/stat.h>
 
 namespace planet {
@@ -21,6 +22,7 @@ namespace planet {
             atime = std::chrono::system_clock::now(),
             mtime = std::chrono::system_clock::now(),
             ctime = std::chrono::system_clock::now();
+        ino_t ino = dist(engine);
 
         decltype(atime)& last_access_time();
         decltype(atime) const& last_access_time() const;
@@ -36,6 +38,11 @@ namespace planet {
         {
             return Clock::to_time_t(t);
         }
+
+    private:
+        static std::random_device seed_gen;
+        static std::mt19937 engine;
+        static std::uniform_int_distribution<> dist;
     };
 
 
